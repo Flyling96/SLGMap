@@ -2,6 +2,9 @@
 
 public static class HexMetrics {
 
+    public const int chunkWidth = 6;
+    public const int chunkHeight = 6;
+
     public static Texture2D noiseSource;//噪声图片
 
     public const float cellPerturbStrength = 3f;//微扰程度
@@ -57,13 +60,8 @@ public static class HexMetrics {
 			blendFactor;
 	}
 
-    /// <summary>
-    /// 获取a到b之间的差值位置
-    /// </summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <param name="step"></param>
-    /// <returns></returns>
+
+    // 获取a到b之间的差值位置
 	public static Vector3 TerraceLerp (Vector3 a, Vector3 b, int step) {
 		float h = step * HexMetrics.horizontalTerraceStepSize;
 		a.x += (b.x - a.x) * h;

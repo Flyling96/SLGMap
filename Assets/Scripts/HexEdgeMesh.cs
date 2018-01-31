@@ -32,7 +32,7 @@ public class HexEdgeMesh : MonoBehaviour {
     {
         Clear();
 
-        Vector3 center = cell.transform.localPosition;
+        Vector3 center = cell.transform.position;
         Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
         Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
         v1.y += 2;
