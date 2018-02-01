@@ -185,7 +185,8 @@ public class HexGrid : MonoBehaviour {
 		cell.uiRect = label.rectTransform;
         cell.isStepDirection = new bool[]{false,false,false,false,false,false};
         cell.Elevation = 0;
-        CellToChunk(x, z, cells[i]);
+        CellToChunk(x, z, cell);
+       
 
     }
 
@@ -199,5 +200,6 @@ public class HexGrid : MonoBehaviour {
         int cellOfChunkX = x - x / width * width;
         int cellOfChunkZ = z - z / height * height;
         tmpChunk.AddCell(cellOfChunkZ * width + cellOfChunkX, cell);
+        cell.SetParentChunk(tmpChunk);
     }
 }

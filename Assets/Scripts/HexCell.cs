@@ -22,7 +22,7 @@ public class HexCell : MonoBehaviour {
 			Vector3 uiPosition = uiRect.localPosition;
 			uiPosition.z = -position.y;
 			uiRect.localPosition = uiPosition;
-		}
+        }
 	}
 
     public Vector3 Position
@@ -64,4 +64,26 @@ public class HexCell : MonoBehaviour {
         );
 	}
 
+    public HexGridChunk chunkParent;
+    //反向获取所在块
+    public void SetParentChunk(HexGridChunk chunk)
+    {
+        chunkParent = chunk;
+    }
+
+    public void Refresh()
+    {
+        if (chunkParent)
+        {
+            chunkParent.Refresh();
+            for (int i = 0; i < neighbors.Length; i++)
+            {
+                HexCell neighbor = neighbors[i];
+                if (neighbor != null && neighbor.chunkParent != chunkParent)
+                {
+                    neighbor.chunkParent.Refresh();
+                }
+            }
+        }
+    }
 }
