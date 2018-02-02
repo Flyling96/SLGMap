@@ -119,7 +119,7 @@ public class HexMapEditor : MonoBehaviour {
             }
         }
     }
-
+    
 	void HandleInput () {
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
