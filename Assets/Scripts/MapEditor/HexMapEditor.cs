@@ -10,13 +10,15 @@ public class HexMapEditor : MonoBehaviour {
 
     public HexEdgeMesh hexEdgeMesh;
 
-    int activeElevation;
+    int elevation;
+    int brushRange;
 
-	Color activeColor;
+	Color cellColor;
 
     public Toggle isStepEditorToggle;
     public Toggle isSlopeEditorToggle;
     public Toggle isStepWholeEditorToggle;
+
 
 
     bool IsEditorStep()
@@ -34,17 +36,23 @@ public class HexMapEditor : MonoBehaviour {
         return isStepWholeEditorToggle.isOn;
     }
 
+
 	public void SelectColor (int index) {
-		activeColor = colors[index];
+		cellColor = colors[index];
 	}
 
-	public void SetElevation (float elevation) {
-		activeElevation = (int)elevation;
+	public void SetElevation (float sliderValue) {
+		elevation = (int)sliderValue;
 	}
+
+    public void SetBrushRange(int brushIndex)
+    {
+        brushRange = brushIndex;
+    }
 
 	void Awake () {
 		SelectColor(0);
-
+        brushRange = 1;
     }
 
 	void Update () {
@@ -190,8 +198,8 @@ public class HexMapEditor : MonoBehaviour {
         }
         else
         {
-            cell.color = activeColor;
-            cell.Elevation = activeElevation;
+            cell.color = cellColor;
+            cell.Elevation = elevation;
         }
         cell.Refresh();
 
