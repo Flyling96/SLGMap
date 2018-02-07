@@ -31,6 +31,8 @@ public class HexEdgeMesh : MonoBehaviour {
     public void Triangulate(HexCell cell,HexCell neighbor, HexDirection direction,bool isStep,Color c)
     {
         Clear();
+        if (neighbor == null)
+            return;
 
         Vector3 center = cell.transform.position;
         Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点

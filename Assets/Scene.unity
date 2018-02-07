@@ -324,7 +324,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 3000
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -590,7 +590,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 473996484}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -447.33, y: 131.84, z: 0}
+  m_LocalPosition: {x: -322.83, y: 183.84, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 792880975}
@@ -1610,6 +1610,7 @@ MonoBehaviour:
   rotateSpeed: 3
   distanceSpeed: 60
   mainCamera: {fileID: 68505627}
+  hexGrid: {fileID: 1571186511}
 --- !u!4 &895073748
 Transform:
   m_ObjectHideFlags: 0
@@ -1768,20 +1769,20 @@ MonoBehaviour:
   m_FillRect: {fileID: 1933837768}
   m_HandleRect: {fileID: 914440117}
   m_Direction: 2
-  m_MinValue: 0
-  m_MaxValue: 6
+  m_MinValue: 1
+  m_MaxValue: 4
   m_WholeNumbers: 1
-  m_Value: 0
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2142000451}
-        m_MethodName: SetElevation
+        m_MethodName: SetBrushRange
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
+          m_IntArgument: 1
           m_FloatArgument: 0
           m_StringArgument: 
           m_BoolArgument: 0
@@ -2781,7 +2782,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1715340326}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -507.415, y: 259.5, z: 0}
+  m_LocalPosition: {x: -382.915, y: 311.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 2009148691}
@@ -2866,7 +2867,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1735349335}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -508.83, y: 58.199997, z: 0}
+  m_LocalPosition: {x: -384.33, y: 110.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 802440241}
@@ -2949,7 +2950,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1773662964}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -447.32996, y: 85.399994, z: 0}
+  m_LocalPosition: {x: -322.82996, y: 137.4, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1782389534}
@@ -4040,7 +4041,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2142000446}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 510, y: 259.5, z: 0}
+  m_LocalPosition: {x: 385.5, y: 311.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1715340327}

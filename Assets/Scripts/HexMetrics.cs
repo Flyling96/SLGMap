@@ -2,8 +2,8 @@
 
 public static class HexMetrics {
 
-    public const int chunkWidth = 6;
-    public const int chunkHeight = 6;
+    public const int chunkWidth = 5;
+    public const int chunkHeight = 5;
 
     public static Texture2D noiseSource;//噪声图片
 

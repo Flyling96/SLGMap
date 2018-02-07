@@ -58,8 +58,9 @@ public class HexGrid : MonoBehaviour {
 				CreateCell(k, j, i++);
 			}
 		}
+        Refresh();
 
-	}
+    }
 
     void OnEnable()
     {
@@ -68,16 +69,34 @@ public class HexGrid : MonoBehaviour {
 
     void Start () {
         //hexMesh.Triangulate(cells);
-        Refresh();
 
     }
 
 	public HexCell GetCell (Vector3 position) {
-		position = transform.InverseTransformPoint(position);
+		position = transform.InverseTransformPoint(position);//坐标转换
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * cellCountWidth + coordinates.Z / 2;
 		return cells[index];
 	}
+
+    public HexCell GetCell(HexCoordinates coordinates)
+    {
+        int z = coordinates.Z;
+        int x = coordinates.X + z / 2;
+        if (z < 0 || x < 0 || z > cellCountHeight || x > cellCountWidth)
+            return null;
+        return cells[x + z * cellCountWidth];
+
+    }
+
+    public HexGridChunk GetChunk(Vector3 position)
+    {
+        position = transform.InverseTransformPoint(position);//坐标转换
+        HexCoordinates coordinates = HexCoordinates.FromPosition(position);
+        int index = coordinates.X + coordinates.Z * cellCountWidth + coordinates.Z / 2;
+        return cells[index].chunkParent;
+    }
+
 
     public bool IsClickInEdge(HexCell cell,Vector3 position)
     {
@@ -184,9 +203,8 @@ public class HexGrid : MonoBehaviour {
 		label.text = cell.coordinates.ToStringOnSeparateLines();
 		cell.uiRect = label.rectTransform;
         cell.isStepDirection = new bool[]{false,false,false,false,false,false};
-        cell.Elevation = 0;
         CellToChunk(x, z, cell);
-       
+        cell.Elevation = 0;
 
     }
 

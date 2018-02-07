@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class HexMapEditor : MonoBehaviour {
 
@@ -37,102 +38,131 @@ public class HexMapEditor : MonoBehaviour {
     }
 
 
-	public void SelectColor (int index) {
+	public void SelectColor (int index)
+    {
 		cellColor = colors[index];
 	}
 
-	public void SetElevation (float sliderValue) {
+	public void SetElevation (float sliderValue)
+    {
 		elevation = (int)sliderValue;
 	}
 
-    public void SetBrushRange(int brushIndex)
+    public void SetBrushRange(float sliderValue)
     {
-        brushRange = brushIndex;
+        brushRange = (int)sliderValue;
     }
 
-	void Awake () {
+	void Awake ()
+    {
 		SelectColor(0);
         brushRange = 1;
     }
 
 	void Update () {
 
+
         if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
         {
             HandleInput();
         }
 
-        if (IsEditorStep() || IsEditorSlope())
-        {
-            HandleInputEdge();
-        }
-        else 
-        {
-            hexEdgeMesh.Clear();
-        }
-	}
+        RefreshHexEdgeMesh();
+    }
 
-    //编辑边
-    void HandleInputEdge()
+    //刷新提示Mesh
+    void RefreshHexEdgeMesh()
     {
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            EditMeshRefresh(hit.point, hexGrid.GetCell(hit.point));
-
+            if (IsEditorStep() || IsEditorSlope())
+            {
+                EditMeshRefresh(hit.point, hexGrid.GetCell(hit.point));
+            }
+            else
+            {
+                hexEdgeMesh.Triangulate(hexGrid.GetCell(hit.point), cellColor);
+            }
         }
     }
+
     //刷新编辑指引的mesh
     void EditMeshRefresh(Vector3 pos, HexCell cell)
     {
-        if (hexGrid.IsClickInEdge(cell, pos))
+        HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
+        if (IsEditorStep())
         {
-            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
-            if (IsEditorStep())
+            if (!IsWholeEditor())
             {
-                if (!IsWholeEditor())
+                if (cell.GetEdgeType(cell.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Slope)
                 {
-                    if (cell.GetEdgeType(cell.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Slope)
-                    {
-                        hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, true, new Color(0.18f, 1, 0.18f, 0.5f));
-                    }
-                    else
-                    {
-                        hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, true, new Color(1, 0.18f, 0.18f, 0.5f));
-                    }
+                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, true, new Color(0.18f, 1, 0.18f, 0.5f));
                 }
                 else
                 {
-                    hexEdgeMesh.Triangulate(cell, new Color(0.18f, 1, 0.18f, 0.5f));
+                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, true, new Color(1, 0.18f, 0.18f, 0.5f));
                 }
             }
-            else if (IsEditorSlope())
+            else
             {
-                if (!IsWholeEditor())
-                {
-                    if (cell.GetEdgeType(cell.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Step)
-                    {
-                        hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, false, new Color(0.18f,1,0.18f,0.5f));
-                    }
-                    else
-                    {
-                        hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, false, new Color(1, 0.18f, 0.18f, 0.5f));
-                    }
-                }
-                else
-                {
-                    hexEdgeMesh.Triangulate(cell, new Color(0.18f, 1, 0.18f, 0.5f));
-                }
+                hexEdgeMesh.Triangulate(cell, new Color(0.18f, 1, 0.18f, 0.5f));
             }
         }
+        else if (IsEditorSlope())
+        {
+            if (!IsWholeEditor())
+            {
+                if (cell.GetEdgeType(cell.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Step)
+                {
+                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, false, new Color(0.18f, 1, 0.18f, 0.5f));
+                }
+                else
+                {
+                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, false, new Color(1, 0.18f, 0.18f, 0.5f));
+                }
+            }
+            else
+            {
+                hexEdgeMesh.Triangulate(cell, new Color(0.18f, 1, 0.18f, 0.5f));
+            }
+        }
+
     }
-    
+
+    Dictionary<HexGridChunk, HexCell> refreshChunkDic = new Dictionary<HexGridChunk, HexCell>();
 	void HandleInput () {
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
-		if (Physics.Raycast(inputRay, out hit)) {
-			EditCell(hit.point,hexGrid.GetCell(hit.point));
+        HexCell centerCell = null;
+        int centerX = 0;
+        int centerZ = 0;
+
+        refreshChunkDic.Clear();
+        if (Physics.Raycast(inputRay, out hit)) {
+            centerCell = hexGrid.GetCell(hit.point);
+            centerX = centerCell.coordinates.X;
+            centerZ = centerCell.coordinates.Z;
+            for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
+            {
+                for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
+                {
+                    EditCell(hit.point, hexGrid.GetCell(new HexCoordinates(x, z)));
+                }
+            }
+
+            for(int l = 1,z = centerZ + 1; z<= centerZ + brushRange - 1;l++,z++)
+            {
+                for(int x = centerX - brushRange + 1; x<= centerX + brushRange - 1-l;x++)
+                {
+                    EditCell(hit.point, hexGrid.GetCell(new HexCoordinates(x, z)));
+                }
+            }
+            foreach(HexCell cell in refreshChunkDic.Values)
+            {
+                cell.Refresh();
+            }
 		}
 	}
 
@@ -186,10 +216,7 @@ public class HexMapEditor : MonoBehaviour {
             if (!IsWholeEditor())
             {
                 HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
-                if (hexGrid.IsClickInEdge(cell, pos))
-                {
-                    EditorEdge(cell, clickDir);
-                }
+                EditorEdge(cell, clickDir);
             }
             else
             {
@@ -198,10 +225,17 @@ public class HexMapEditor : MonoBehaviour {
         }
         else
         {
-            cell.color = cellColor;
-            cell.Elevation = elevation;
+            if (cell != null)
+            {
+                cell.color = cellColor;
+                cell.Elevation = elevation;
+            }
         }
-        cell.Refresh();
+        
+        if(cell != null&&!refreshChunkDic.ContainsKey(cell.chunkParent))
+        {
+            refreshChunkDic.Add(cell.chunkParent, cell);
+        }
 
     }
 

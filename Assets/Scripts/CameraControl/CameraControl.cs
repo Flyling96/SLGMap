@@ -19,6 +19,7 @@ public class CameraControl : MonoBehaviour
     //const float minDistance = -1;
 
     public Camera mainCamera = null;
+    public HexGrid hexGrid;
 
 
     void Start()
@@ -31,22 +32,44 @@ public class CameraControl : MonoBehaviour
 
         distance = 0;
     }
+    HexCell targetCell = null;//旋转的目标
 
     void Update()
     {
+        //if(Input.GetMouseButtonDown(1))
+        //{
+        //    Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //    RaycastHit hit;
+        //    if (Physics.Raycast(inputRay, out hit))
+        //    {
+        //        if (hexGrid.GetCell(hit.point) != null)
+        //        {
+        //            targetCell = hexGrid.GetCell(hit.point);
+        //        }
+        //    }
+        //}
         if (Input.GetMouseButton(1))
         {
-            rotateX += Input.GetAxis("Mouse X") * rotateSpeed;
+            //if (targetCell != null)
+            //{
+            //    transform.RotateAround(targetCell.transform.position, Input.GetAxis("Mouse X") * this.transform.up - Input.GetAxis("Mouse Y") * this.transform.right, 25 * rotateSpeed * Time.deltaTime);
+            //}
+            //else
+            //{
+                rotateX += Input.GetAxis("Mouse X") * rotateSpeed;
 
-            rotateY -= Input.GetAxis("Mouse Y") * rotateSpeed;
+                rotateY -= Input.GetAxis("Mouse Y") * rotateSpeed;
 
-            rotateX = ClampAngle(rotateX, -360, 360);
+                rotateX = ClampAngle(rotateX, -360, 360);
 
-            rotateY = ClampAngle(rotateY, -360, 360);
+                rotateY = ClampAngle(rotateY, -360, 360);
 
-            Quaternion rotation = Quaternion.Euler(rotateY, rotateX, 0);
+                Quaternion rotation = Quaternion.Euler(rotateY, rotateX, 0);
 
-            transform.rotation = rotation;
+                transform.rotation = rotation;
+            //}
+
+
         }
         else if(Input.GetAxis("Mouse ScrollWheel") != 0)
         {
