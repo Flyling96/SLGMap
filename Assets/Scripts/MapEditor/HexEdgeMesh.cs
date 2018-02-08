@@ -55,11 +55,44 @@ public class HexEdgeMesh : MonoBehaviour {
             AddQuadColor(c, c);
         }
 
+        InputMeshInfo();
+    }
+
+    public void TriangulateItem(HexCell cell, HexCell neighbor, HexDirection direction, bool isStep, Color c)
+    {
+        if (neighbor == null)
+            return;
+
+        Vector3 center = cell.transform.position;
+        Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
+        Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
+        v1.y += 2;
+        v2.y += 2;
+
+        Vector3 bridge = HexMetrics.GetBridge(direction);
+        Vector3 v3 = v1 + bridge;
+        Vector3 v4 = v2 + bridge;
+        v3.y = v4.y = neighbor.Elevation * HexMetrics.elevationStep + 2;
+
+        if (isStep)
+        {
+            TriangulateEdgeTerraces(v1, v2, cell, v3, v4, neighbor, c);
+        }
+        else
+        {
+            AddQuad(v1, v2, v3, v4);
+            AddQuadColor(c, c);
+        }
+    }
+
+    public void InputMeshInfo()
+    {
         hexEdgeMesh.vertices = vertices.ToArray();
         hexEdgeMesh.colors = colors.ToArray();
         hexEdgeMesh.triangles = triangles.ToArray();
         hexEdgeMesh.RecalculateNormals();
     }
+
 
 
     //绘制阶梯
@@ -96,6 +129,24 @@ public class HexEdgeMesh : MonoBehaviour {
         for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             Triangulate(d, cell,c);
+        }
+        hexEdgeMesh.vertices = vertices.ToArray();
+        hexEdgeMesh.colors = colors.ToArray();
+        hexEdgeMesh.triangles = triangles.ToArray();
+        hexEdgeMesh.RecalculateNormals();
+    }
+
+    //绘制多个内六边形
+    public void Triangulate(List<HexCell> cells, Color c)
+    {
+        Clear();
+        for (int i = 0; i < cells.Count; i++)
+        {
+            for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
+            {
+                if(cells[i]!=null)
+                Triangulate(d, cells[i], c);
+            }
         }
         hexEdgeMesh.vertices = vertices.ToArray();
         hexEdgeMesh.colors = colors.ToArray();

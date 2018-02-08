@@ -73,6 +73,10 @@ public class HexMapEditor : MonoBehaviour {
     //刷新提示Mesh
     void RefreshHexEdgeMesh()
     {
+        List<HexCell> cells = new List<HexCell>();
+        HexCell centerCell = null;
+        int centerX = 0;
+        int centerZ = 0;
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
@@ -83,7 +87,28 @@ public class HexMapEditor : MonoBehaviour {
             }
             else
             {
-                hexEdgeMesh.Triangulate(hexGrid.GetCell(hit.point), cellColor);
+                centerCell = hexGrid.GetCell(hit.point);
+                centerX = centerCell.coordinates.X;
+                centerZ = centerCell.coordinates.Z;
+                for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
+                {
+                    for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
+                    {
+                        if (hexGrid.GetCell(new HexCoordinates(x, z) )!= null)
+                        {
+                            cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                        }
+                    }
+                }
+
+                for (int l = 1, z = centerZ + 1; z <= centerZ + brushRange - 1; l++, z++)
+                {
+                    for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
+                    {
+                        cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                    }
+                }
+                hexEdgeMesh.Triangulate(cells, cellColor);
             }
         }
     }
@@ -91,41 +116,85 @@ public class HexMapEditor : MonoBehaviour {
     //刷新编辑指引的mesh
     void EditMeshRefresh(Vector3 pos, HexCell cell)
     {
+        List<HexCell> cells = new List<HexCell>();
+        HexCell cellChildren = null;
+        int centerX = cell.coordinates.X;
+        int centerZ = cell.coordinates.Z;
+        for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
+        {
+            for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
+            {
+                if (hexGrid.GetCell(new HexCoordinates(x, z)) != null)
+                {
+                    cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                }
+            }
+        }
+
+        for (int l = 1, z = centerZ + 1; z <= centerZ + brushRange - 1; l++, z++)
+        {
+            for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
+            {
+                cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+            }
+        }
+
         HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
         if (IsEditorStep())
         {
             if (!IsWholeEditor())
             {
-                if (cell.GetEdgeType(cell.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Slope)
+                hexEdgeMesh.Clear();
+                for (int i = 0; i < cells.Count; i++)
                 {
-                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, true, new Color(0.18f, 1, 0.18f, 0.5f));
+                    cellChildren = cells[i];
+                    if(cellChildren==null)
+                    {
+                        continue;
+                    }
+                    if (cellChildren.GetEdgeType(cellChildren.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Slope)
+                    {
+                        hexEdgeMesh.TriangulateItem(cellChildren, cellChildren.GetNeighbor(clickDir), clickDir, true, new Color(0.18f, 1, 0.18f, 0.5f));
+                    }
+                    else
+                    {
+                        hexEdgeMesh.TriangulateItem(cellChildren, cellChildren.GetNeighbor(clickDir), clickDir, true, new Color(1, 0.18f, 0.18f, 0.5f));
+                    }
                 }
-                else
-                {
-                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, true, new Color(1, 0.18f, 0.18f, 0.5f));
-                }
+                hexEdgeMesh.InputMeshInfo();
             }
             else
             {
-                hexEdgeMesh.Triangulate(cell, new Color(0.18f, 1, 0.18f, 0.5f));
+                hexEdgeMesh.Triangulate(cells, new Color(0.18f, 1, 0.18f, 0.5f));
             }
+
         }
         else if (IsEditorSlope())
         {
             if (!IsWholeEditor())
             {
-                if (cell.GetEdgeType(cell.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Step)
+                hexEdgeMesh.Clear();
+                for (int i = 0; i < cells.Count; i++)
                 {
-                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, false, new Color(0.18f, 1, 0.18f, 0.5f));
+                    cellChildren = cells[i];
+                    if (cellChildren == null)
+                    {
+                        continue;
+                    }
+                    if (cellChildren.GetEdgeType(cellChildren.isStepDirection[(int)clickDir], clickDir) == HexEdgeType.Step)
+                    {
+                        hexEdgeMesh.TriangulateItem(cellChildren, cellChildren.GetNeighbor(clickDir), clickDir, false, new Color(0.18f, 1, 0.18f, 0.5f));
+                    }
+                    else
+                    {
+                        hexEdgeMesh.TriangulateItem(cellChildren, cellChildren.GetNeighbor(clickDir), clickDir, false, new Color(1, 0.18f, 0.18f, 0.5f));
+                    }
                 }
-                else
-                {
-                    hexEdgeMesh.Triangulate(cell, cell.GetNeighbor(clickDir), clickDir, false, new Color(1, 0.18f, 0.18f, 0.5f));
-                }
+                hexEdgeMesh.InputMeshInfo();
             }
             else
             {
-                hexEdgeMesh.Triangulate(cell, new Color(0.18f, 1, 0.18f, 0.5f));
+                hexEdgeMesh.Triangulate(cells, new Color(0.18f, 1, 0.18f, 0.5f));
             }
         }
 
@@ -144,11 +213,13 @@ public class HexMapEditor : MonoBehaviour {
             centerCell = hexGrid.GetCell(hit.point);
             centerX = centerCell.coordinates.X;
             centerZ = centerCell.coordinates.Z;
+            Vector3 pos = hit.point;
+            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - centerCell.transform.position.x, pos.z - centerCell.transform.position.z));
             for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
             {
                 for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
                 {
-                    EditCell(hit.point, hexGrid.GetCell(new HexCoordinates(x, z)));
+                    EditCell(clickDir, hexGrid.GetCell(new HexCoordinates(x, z)));
                 }
             }
 
@@ -156,7 +227,7 @@ public class HexMapEditor : MonoBehaviour {
             {
                 for(int x = centerX - brushRange + 1; x<= centerX + brushRange - 1-l;x++)
                 {
-                    EditCell(hit.point, hexGrid.GetCell(new HexCoordinates(x, z)));
+                    EditCell(clickDir, hexGrid.GetCell(new HexCoordinates(x, z)));
                 }
             }
             foreach(HexCell cell in refreshChunkDic.Values)
@@ -192,7 +263,7 @@ public class HexMapEditor : MonoBehaviour {
             }
         }
     }
-    //对六边形的某个边进行编辑
+    //对六边形的某条边进行编辑
     void EditorEdge(HexCell cell,HexDirection clickDir)
     {
         if (IsEditorStep())
@@ -209,13 +280,12 @@ public class HexMapEditor : MonoBehaviour {
         }
     }
 
-	void EditCell (Vector3 pos,HexCell cell) {
+	void EditCell (HexDirection clickDir, HexCell cell) {
 
         if (IsEditorStep()|| IsEditorSlope())
         {
             if (!IsWholeEditor())
             {
-                HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
                 EditorEdge(cell, clickDir);
             }
             else

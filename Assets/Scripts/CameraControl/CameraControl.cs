@@ -36,7 +36,7 @@ public class CameraControl : MonoBehaviour
 
     void Update()
     {
-        //if(Input.GetMouseButtonDown(1))
+        //if (Input.GetMouseButtonDown(1))
         //{
         //    Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         //    RaycastHit hit;
@@ -52,7 +52,7 @@ public class CameraControl : MonoBehaviour
         {
             //if (targetCell != null)
             //{
-            //    transform.RotateAround(targetCell.transform.position, Input.GetAxis("Mouse X") * this.transform.up - Input.GetAxis("Mouse Y") * this.transform.right, 25 * rotateSpeed * Time.deltaTime);
+            //    transform.RotateAround(targetCell.transform.position, Input.GetAxis("Mouse X") * targetCell.transform.up - Input.GetAxis("Mouse Y") * targetCell.transform.right, 25 * rotateSpeed * Time.deltaTime);
             //}
             //else
             //{

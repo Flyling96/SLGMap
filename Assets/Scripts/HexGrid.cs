@@ -83,7 +83,7 @@ public class HexGrid : MonoBehaviour {
     {
         int z = coordinates.Z;
         int x = coordinates.X + z / 2;
-        if (z < 0 || x < 0 || z > cellCountHeight || x > cellCountWidth)
+        if (z < 0 || x < 0 || z >= cellCountHeight || x >= cellCountWidth)
             return null;
         return cells[x + z * cellCountWidth];
 

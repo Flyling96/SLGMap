@@ -400,7 +400,7 @@ public class HexMesh : MonoBehaviour {
 
 
     //对地图进行不规则处理
-    Vector3 Perturb(Vector3 position)
+    public Vector3 Perturb(Vector3 position)
     {
         Vector4 sample = HexMetrics.SampleNoise(position);
         position.x += (sample.x * 2f - 1f)* HexMetrics.cellPerturbStrength;
