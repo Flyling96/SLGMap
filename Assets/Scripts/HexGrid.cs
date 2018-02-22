@@ -28,10 +28,12 @@ public class HexGrid : MonoBehaviour {
     Canvas gridCanvas;
 	HexMesh hexMesh;
 
-	void Awake () {
+
+    void Start() {
+        HexMetrics.noiseSource = noiseSource;
         chunks = new HexGridChunk[chunkCountX * chunkCountZ];
-        width = HexMetrics.chunkWidth;
-        height = HexMetrics.chunkHeight;
+        width = HexMetrics.instance.chunkWidth;
+        height = HexMetrics.instance.chunkHeight;
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
         HexMetrics.noiseSource = noiseSource;
@@ -62,15 +64,7 @@ public class HexGrid : MonoBehaviour {
 
     }
 
-    void OnEnable()
-    {
-        HexMetrics.noiseSource = noiseSource;
-    }
 
-    void Start () {
-        //hexMesh.Triangulate(cells);
-
-    }
 
 	public HexCell GetCell (Vector3 position) {
 		position = transform.InverseTransformPoint(position);//坐标转换
@@ -100,7 +94,7 @@ public class HexGrid : MonoBehaviour {
 
     public bool IsClickInEdge(HexCell cell,Vector3 position)
     {
-        if(Vector2.Distance(new Vector2(cell.transform.position.x,cell.transform.position.z),new Vector2(position.x,position.z))>HexMetrics.innerRadius * HexMetrics.solidFactor)
+        if(Vector2.Distance(new Vector2(cell.transform.position.x,cell.transform.position.z),new Vector2(position.x,position.z))> HexMetrics.instance.innerRadius * HexMetrics.instance.solidFactor)
         {
             return true;
         }
@@ -165,9 +159,9 @@ public class HexGrid : MonoBehaviour {
 
 	void CreateCell (int x, int z, int i) {
 		Vector3 position;
-		position.x = (x + z * 0.5f - z / 2) * (HexMetrics.innerRadius * 2f);
+		position.x = (x + z * 0.5f - z / 2) * (HexMetrics.instance.innerRadius * 2f);
 		position.y = 0f;
-		position.z = z * (HexMetrics.outerRadius * 1.5f);
+		position.z = z * (HexMetrics.instance.outerRadius * 1.5f);
 
 
         HexCell cell = cells[i] = Instantiate(cellPrefab) as HexCell;

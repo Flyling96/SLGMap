@@ -11,14 +11,16 @@ public class HexMapEditor : MonoBehaviour {
 
     public HexEdgeMesh hexEdgeMesh;
 
-    int elevation;
-    int brushRange;
+    int elevation = 0;
+    int waterLevel = 0;
+    int brushRange = 0;
 
 	Color cellColor;
 
     public Toggle isStepEditorToggle;
     public Toggle isSlopeEditorToggle;
     public Toggle isStepWholeEditorToggle;
+
 
 
 
@@ -37,6 +39,17 @@ public class HexMapEditor : MonoBehaviour {
         return isStepWholeEditorToggle.isOn;
     }
 
+    bool isEditorElevation = false;
+    public void IsEditorElevation(bool value)
+    {
+        isEditorElevation = value;
+    }
+
+    bool isEditorWater = false;
+    public void IsEditorWater(bool value)
+    {
+        isEditorWater = value;
+    }
 
 	public void SelectColor (int index)
     {
@@ -48,12 +61,18 @@ public class HexMapEditor : MonoBehaviour {
 		elevation = (int)sliderValue;
 	}
 
+    public void SetWaterLevel(float sliderValue)
+    {
+        waterLevel = (int)sliderValue;
+    }
+
+
     public void SetBrushRange(float sliderValue)
     {
         brushRange = (int)sliderValue;
     }
 
-	void Awake ()
+	void OnEnable()
     {
 		SelectColor(0);
         brushRange = 1;
@@ -200,7 +219,7 @@ public class HexMapEditor : MonoBehaviour {
 
     }
 
-    Dictionary<HexGridChunk, HexCell> refreshChunkDic = new Dictionary<HexGridChunk, HexCell>();
+    List<HexGridChunk> refreshChunkList = new List<HexGridChunk>();
 	void HandleInput () {
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
@@ -208,9 +227,10 @@ public class HexMapEditor : MonoBehaviour {
         int centerX = 0;
         int centerZ = 0;
 
-        refreshChunkDic.Clear();
+        refreshChunkList.Clear();
         if (Physics.Raycast(inputRay, out hit)) {
             centerCell = hexGrid.GetCell(hit.point);
+            refreshChunkList.Add(centerCell.chunkParent);
             centerX = centerCell.coordinates.X;
             centerZ = centerCell.coordinates.Z;
             Vector3 pos = hit.point;
@@ -230,9 +250,16 @@ public class HexMapEditor : MonoBehaviour {
                     EditCell(clickDir, hexGrid.GetCell(new HexCoordinates(x, z)));
                 }
             }
-            foreach(HexCell cell in refreshChunkDic.Values)
+           for(int i=0;i< refreshChunkList.Count;i++)
             {
-                cell.Refresh();
+                if(isEditorWater)
+                {
+                    refreshChunkList[i].Refresh(MeshClass.waterMesh);
+                }
+                else 
+                {
+                    refreshChunkList[i].Refresh();
+                }
             }
 		}
 	}
@@ -282,6 +309,9 @@ public class HexMapEditor : MonoBehaviour {
 
 	void EditCell (HexDirection clickDir, HexCell cell) {
 
+        if (cell == null)
+            return;
+
         if (IsEditorStep()|| IsEditorSlope())
         {
             if (!IsWholeEditor())
@@ -295,16 +325,29 @@ public class HexMapEditor : MonoBehaviour {
         }
         else
         {
-            if (cell != null)
+            if (isEditorElevation)
             {
-                cell.color = cellColor;
                 cell.Elevation = elevation;
             }
+            if(isEditorWater)
+            {
+                cell.WaterLevel = waterLevel;
+            }
+            else
+            {
+                cell.color = cellColor;
+            }
         }
-        
-        if(cell != null&&!refreshChunkDic.ContainsKey(cell.chunkParent))
+        List<HexGridChunk> neigborChunk = cell.NeighorChunk();
+        if (neigborChunk.Count > 0)
         {
-            refreshChunkDic.Add(cell.chunkParent, cell);
+            for (int i = 0; i < neigborChunk.Count; i++)
+            {
+                if (!refreshChunkList.Contains(neigborChunk[i]))
+                {
+                    refreshChunkList.Add(neigborChunk[i]);
+                }
+        }
         }
 
     }

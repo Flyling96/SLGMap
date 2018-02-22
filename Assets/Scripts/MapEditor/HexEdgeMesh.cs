@@ -11,7 +11,7 @@ public class HexEdgeMesh : MonoBehaviour {
     List<int> triangles;
 
 
-    void Awake()
+    void OnEnable()
     {
         GetComponent<MeshFilter>().mesh = hexEdgeMesh = new Mesh();
         hexEdgeMesh.name = "Hex Edge Mesh";
@@ -35,15 +35,15 @@ public class HexEdgeMesh : MonoBehaviour {
             return;
 
         Vector3 center = cell.transform.position;
-        Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
-        Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
+        Vector3 v1 = center + HexMetrics.instance.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
+        Vector3 v2 = center + HexMetrics.instance.GetSecondSolidCorner(direction);
         v1.y += 2;
         v2.y += 2;
 
-        Vector3 bridge = HexMetrics.GetBridge(direction);
+        Vector3 bridge = HexMetrics.instance.GetBridge(direction);
         Vector3 v3 = v1 + bridge;
         Vector3 v4 = v2 + bridge;
-        v3.y = v4.y = neighbor.Elevation * HexMetrics.elevationStep+2;
+        v3.y = v4.y = neighbor.Elevation * HexMetrics.instance.elevationStep+2;
 
         if (isStep)
         {
@@ -64,15 +64,15 @@ public class HexEdgeMesh : MonoBehaviour {
             return;
 
         Vector3 center = cell.transform.position;
-        Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
-        Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
+        Vector3 v1 = center + HexMetrics.instance.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
+        Vector3 v2 = center + HexMetrics.instance.GetSecondSolidCorner(direction);
         v1.y += 2;
         v2.y += 2;
 
-        Vector3 bridge = HexMetrics.GetBridge(direction);
+        Vector3 bridge = HexMetrics.instance.GetBridge(direction);
         Vector3 v3 = v1 + bridge;
         Vector3 v4 = v2 + bridge;
-        v3.y = v4.y = neighbor.Elevation * HexMetrics.elevationStep + 2;
+        v3.y = v4.y = neighbor.Elevation * HexMetrics.instance.elevationStep + 2;
 
         if (isStep)
         {
@@ -101,19 +101,19 @@ public class HexEdgeMesh : MonoBehaviour {
     Vector3 endLeft, Vector3 endRight, HexCell endCell,Color c2
 )
     {
-        Vector3 v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, 1);
-        Vector3 v4 = HexMetrics.TerraceLerp(beginRight, endRight, 1);
+        Vector3 v3 = HexMetrics.instance.TerraceLerp(beginLeft, endLeft, 1);
+        Vector3 v4 = HexMetrics.instance.TerraceLerp(beginRight, endRight, 1);
 
         AddQuad(beginLeft, beginRight, v3, v4);
         AddQuadColor(c2, c2);
 
-        for (int i = 2; i < HexMetrics.terraceSteps; i++)
+        for (int i = 2; i < HexMetrics.instance.terraceSteps; i++)
         {
             Vector3 v1 = v3;
             Vector3 v2 = v4;
             Color c1 = c2;
-            v3 = HexMetrics.TerraceLerp(beginLeft, endLeft, i);
-            v4 = HexMetrics.TerraceLerp(beginRight, endRight, i);
+            v3 = HexMetrics.instance.TerraceLerp(beginLeft, endLeft, i);
+            v4 = HexMetrics.instance.TerraceLerp(beginRight, endRight, i);
             AddQuad(v1, v2, v3, v4);
             AddQuadColor(c1, c2);
         }
@@ -162,8 +162,8 @@ public class HexEdgeMesh : MonoBehaviour {
         //Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
 
         EdgeVertices e = new EdgeVertices(
-            center + HexMetrics.GetFirstSolidCorner(direction),
-            center + HexMetrics.GetSecondSolidCorner(direction)
+            center + HexMetrics.instance.GetFirstSolidCorner(direction),
+            center + HexMetrics.instance.GetSecondSolidCorner(direction)
         );
 
         TriangulateEdgeFan(center, e, c);

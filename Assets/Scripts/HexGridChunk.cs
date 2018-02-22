@@ -8,26 +8,49 @@ public class HexGridChunk : MonoBehaviour {
     int height = 6;
 
     public HexCell[] cells;
-    HexMesh hexMesh;
 
-    void Awake()
+    public HexMesh waterMesh,terrainMesh;
+
+    void OnEnable()
     {
-        width = HexMetrics.chunkWidth;
-        height = HexMetrics.chunkHeight;
+        width = HexMetrics.instance.chunkWidth;
+        height = HexMetrics.instance.chunkHeight;
         cells = new HexCell[width * height];
-        hexMesh = GetComponentInChildren<HexMesh>();
     }
 
 
     // Use this for initialization
-    void Start ()
+    void Start()
     {
-        hexMesh.Triangulate(cells);
+        terrainMesh.TrangulateByMeshClass(cells);
     }
+
+
 
     public void Refresh()
     {
-        hexMesh.Triangulate(cells);
+        waterMesh.TrangulateByMeshClass(cells);
+        terrainMesh.TrangulateByMeshClass(cells);
+    }
+
+    public void Refresh(MeshClass meshClass)
+    {
+        switch (meshClass)
+        {
+            case MeshClass.terrainMesh:
+                terrainMesh.TrangulateByMeshClass(cells);
+                break;
+
+            case MeshClass.waterMesh:
+                waterMesh.TrangulateByMeshClass(cells);
+                break;
+        }
+    }
+
+
+    public void Refresh(HexMesh refreshMesh)
+    {
+        Refresh(refreshMesh.meshClass);
     }
 
     public void AddCell(int i,HexCell cell)
