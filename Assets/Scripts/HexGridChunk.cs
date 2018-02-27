@@ -4,17 +4,20 @@ using UnityEngine;
 
 public class HexGridChunk : MonoBehaviour {
 
-    int width = 6;
-    int height = 6;
+    int width = 5;
+    int height = 5;
 
     public HexCell[] cells;
 
-    public HexMesh waterMesh,terrainMesh;
+    public HexMesh waterMesh,waterEdgeMesh,terrainMesh;
 
     void OnEnable()
     {
-        width = HexMetrics.instance.chunkWidth;
-        height = HexMetrics.instance.chunkHeight;
+        if (HexMetrics.instance != null)
+        {
+            width = HexMetrics.instance.chunkWidth;
+            height = HexMetrics.instance.chunkHeight;
+        }
         cells = new HexCell[width * height];
     }
 
@@ -30,6 +33,7 @@ public class HexGridChunk : MonoBehaviour {
     public void Refresh()
     {
         waterMesh.TrangulateByMeshClass(cells);
+        waterEdgeMesh.TrangulateByMeshClass(cells);
         terrainMesh.TrangulateByMeshClass(cells);
     }
 
@@ -43,6 +47,10 @@ public class HexGridChunk : MonoBehaviour {
 
             case MeshClass.waterMesh:
                 waterMesh.TrangulateByMeshClass(cells);
+                break;
+
+            case MeshClass.waterEdgeMesh:
+                waterEdgeMesh.TrangulateByMeshClass(cells);
                 break;
         }
     }

@@ -29,7 +29,7 @@
 		void surf (Input IN, inout SurfaceOutputStandard o) {
 			float waves = Waves(IN.worldPos.xz, _MainTex);
 
-			fixed4 c = saturate(_Color + waves);
+			fixed4 c = saturate(_Color + waves);//0,1之间取值
 			o.Albedo = c.rgb;
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;

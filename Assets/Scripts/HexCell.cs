@@ -132,23 +132,13 @@ public class HexCell : MonoBehaviour {
     {
         if (chunkParent == null)
             return;
-        switch (meshClass)
-        {
-            case MeshClass.terrainMesh:
-                refreshHexMesh = chunkParent.terrainMesh;
-                break;
-
-            case MeshClass.waterMesh:
-                refreshHexMesh = chunkParent.waterMesh;
-                break;
-        }
-        chunkParent.Refresh(refreshHexMesh);
+        chunkParent.Refresh(meshClass);
         for (int i = 0; i < neighbors.Length; i++)
         {
             HexCell neighbor = neighbors[i];
             if (neighbor != null && neighbor.chunkParent != chunkParent)
             {
-                neighbor.chunkParent.Refresh(refreshHexMesh);
+                neighbor.chunkParent.Refresh(meshClass);
             }
         }
     }

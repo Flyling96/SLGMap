@@ -255,6 +255,7 @@ public class HexMapEditor : MonoBehaviour {
                 if(isEditorWater)
                 {
                     refreshChunkList[i].Refresh(MeshClass.waterMesh);
+                    refreshChunkList[i].Refresh(MeshClass.waterEdgeMesh);
                 }
                 else 
                 {

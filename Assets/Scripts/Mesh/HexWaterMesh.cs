@@ -4,10 +4,9 @@ using UnityEngine;
 
 public class HexWaterMesh : HexMesh {
 
-
     private void Awake()
     {
-        meshClass = MeshClass.waterMesh;
+        meshClass = MeshClass.waterEdgeMesh;
     }
     private void Start()
     {
@@ -42,11 +41,20 @@ public class HexWaterMesh : HexMesh {
         Vector3 v1 = center + HexMetrics.instance.GetFirstSolidCorner(direction);
         Vector3 v2 = center + HexMetrics.instance.GetSecondSolidCorner(direction);
 
-        AddTriangle(center, v1, v2);
+
+        HexCell neighbor = cell.GetNeighbor(direction);
+        if (neighbor != null && !neighbor.isUnderWaterLevel)
+        {
+            TrangulateWaterNearEdge(direction, cell, neighbor, center);
+        }
+        else
+        {
+            AddTriangle(center, v1, v2);
+        }
+
 
         if (direction <= HexDirection.SE)
         {
-            HexCell neighbor = cell.GetNeighbor(direction);
             if (neighbor == null || !neighbor.isUnderWaterLevel)
             {
                 return;
@@ -61,5 +69,16 @@ public class HexWaterMesh : HexMesh {
                 AddTriangle(v2, v4, v2 + HexMetrics.instance.GetBridge(direction.Next()));
             }
         }
+    }
+
+    void TrangulateWaterNearEdge(HexDirection direction, HexCell cell, HexCell neighbor, Vector3 center)
+    {
+        EdgeVertices e1 = new EdgeVertices(
+            center + HexMetrics.instance.GetFirstSolidCorner(direction),
+            center + HexMetrics.instance.GetSecondSolidCorner(direction)
+        );
+        AddTriangle(center, e1.v1, e1.v2);
+        AddTriangle(center, e1.v2, e1.v3);
+        AddTriangle(center, e1.v3, e1.v4);
     }
 }

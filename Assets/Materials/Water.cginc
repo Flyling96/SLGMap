@@ -1,5 +1,5 @@
 ﻿float Foam (float shore, float2 worldXZ, sampler2D noiseTex) {
-	shore = sqrt(shore) * 0.9;
+	shore = sqrt(shore) * 0.6;
 
 	float2 noiseUV = worldXZ + _Time.y * 0.25;
 	float4 noise = tex2D(noiseTex, noiseUV * 0.015);
@@ -15,19 +15,6 @@
 	return max(foam1, foam2) * shore;
 }
 
-float River (float2 riverUV, sampler2D noiseTex) {
-	float2 uv = riverUV;
-	uv.x = uv.x * 0.0625 + _Time.y * 0.005;
-	uv.y -= _Time.y * 0.25;
-	float4 noise = tex2D(noiseTex, uv);
-
-	float2 uv2 = riverUV;
-	uv2.x = uv2.x * 0.0625 - _Time.y * 0.0052;
-	uv2.y -= _Time.y * 0.23;
-	float4 noise2 = tex2D(noiseTex, uv2);
-
-	return noise.r * noise2.w;
-}
 
 float Waves (float2 worldXZ, sampler2D noiseTex) {
 	float2 uv1 = worldXZ;
@@ -48,5 +35,5 @@ float Waves (float2 worldXZ, sampler2D noiseTex) {
 		lerp(noise1.z, noise1.w, blendWave) +
 		lerp(noise2.x, noise2.y, blendWave);
 	 noise1.z + noise2.x;
-	return smoothstep(0.75, 2, waves);
+	return smoothstep(1, 2, waves);
 }

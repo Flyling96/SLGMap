@@ -6,6 +6,7 @@ public enum MeshClass
 {
     terrainMesh,
     waterMesh,
+    waterEdgeMesh,
 }
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class HexMesh : MonoBehaviour {
@@ -15,6 +16,7 @@ public class HexMesh : MonoBehaviour {
     static List<Vector3> vertices = new List<Vector3>();
     static List<Color> colors = new List<Color>();
     static List<int> triangles = new List<int>();
+    static List<Vector2> uvs = new List<Vector2>();
 
     MeshCollider meshCollider;
 
@@ -45,6 +47,7 @@ public class HexMesh : MonoBehaviour {
         vertices.Clear();
         colors.Clear();
         triangles.Clear();
+        uvs.Clear();
     }
 
     public void Draw()
@@ -52,6 +55,7 @@ public class HexMesh : MonoBehaviour {
         hexMesh.vertices = vertices.ToArray();
         hexMesh.colors = colors.ToArray();
         hexMesh.triangles = triangles.ToArray();
+        hexMesh.SetUVs(0, uvs);
         hexMesh.RecalculateNormals();
         meshCollider.sharedMesh = hexMesh;
     }
@@ -461,6 +465,28 @@ public class HexMesh : MonoBehaviour {
         AddQuadColor(c1, c2);
         AddQuad(e1.v3, e1.v4, e2.v3, e2.v4);
         AddQuadColor(c1, c2);
+    }
+
+    //设置法线
+    public void AddTriangleUV(Vector2 uv1, Vector2 uv2, Vector3 uv3)
+    {
+        uvs.Add(uv1);
+        uvs.Add(uv2);
+        uvs.Add(uv3);
+    }
+    public void AddQuadUV(Vector2 uv1, Vector2 uv2, Vector3 uv3, Vector3 uv4)
+    {
+        uvs.Add(uv1);
+        uvs.Add(uv2);
+        uvs.Add(uv3);
+        uvs.Add(uv4);
+    }
+    public void AddQuadUV(float uMin, float uMax, float vMin, float vMax)
+    {
+        uvs.Add(new Vector2(uMin, vMin));
+        uvs.Add(new Vector2(uMax, vMin));
+        uvs.Add(new Vector2(uMin, vMax));
+        uvs.Add(new Vector2(uMax, vMax));
     }
 
 }
