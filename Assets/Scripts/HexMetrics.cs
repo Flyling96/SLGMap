@@ -1,11 +1,9 @@
 ﻿using UnityEngine;
 
-public class HexMetrics:MonoBehaviour
+public class HexMetrics: Singleton<HexMetrics>
 {
     public int chunkWidth = 5;
     public int chunkHeight = 5;
-
-    public static HexMetrics instance;//单例
 
     public static Texture2D noiseSource;//噪声图片
 
@@ -38,7 +36,6 @@ public class HexMetrics:MonoBehaviour
 
     private void Awake()
     {
-        instance = this;
         innerRadius = outerRadius * 0.866025404f;
         blendFactor = 1f - solidFactor;
         terraceSteps = terracesPerStep * 2 + 1;

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public enum MeshClass
 {
     terrainMesh,
+    roadMesh,
     waterMesh,
     waterEdgeMesh,
 }
@@ -116,7 +117,7 @@ public class HexMesh : MonoBehaviour {
     /// <param name="cell"></param>
     /// <param name="v1"></param>
     /// <param name="v2"></param>
-	void TriangulateConnection (
+	protected void TriangulateConnection (
 		HexDirection direction, HexCell cell, EdgeVertices e1
     ) {
 		HexCell neighbor = cell.GetNeighbor(direction);
@@ -450,6 +451,17 @@ public class HexMesh : MonoBehaviour {
         AddTriangle(center, edge.v2, edge.v3);
         AddTriangleColor(color);
         AddTriangle(center, edge.v3, edge.v4);
+        AddTriangleColor(color);
+    }
+
+    //规则的边内六边形三角化
+    protected void TriangulateEdgeUnPerturb(Vector3 center, EdgeVertices edge, Color color)
+    {
+        AddTriangleUnPerturb(center, edge.v1, edge.v2);
+        AddTriangleColor(color);
+        AddTriangleUnPerturb(center, edge.v2, edge.v3);
+        AddTriangleColor(color);
+        AddTriangleUnPerturb(center, edge.v3, edge.v4);
         AddTriangleColor(color);
     }
 

@@ -1,11 +1,42 @@
 ﻿using UnityEngine;
+using System.IO;
 using System.Collections.Generic;
+
 
 public class HexCell : MonoBehaviour {
 
+    //道路相关
+    [SerializeField]
+    public bool isRoad = false;
+    bool[] isThroughRoad = new bool[6];
+
+    public bool HasRoadThroughInDir(HexDirection direction)
+    {
+        return isThroughRoad[(int)direction];
+    }
+
+    public bool IsDrawPreviousRoadMesh(HexDirection direction)
+    {
+        if(isThroughRoad[(int)direction]==true&&isThroughRoad[(int)direction.Previous()]==false)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool IsDrawNextRoadMesh(HexDirection direction)
+    {
+        if (isThroughRoad[(int)direction] == true && isThroughRoad[(int)direction.Next()] == false)
+        {
+            return true;
+        }
+
+        return false;
+    }
 
     //水相关
-    int waterLevel;
+    int waterLevel = 0;
     public int WaterLevel
     {
         get
@@ -52,16 +83,22 @@ public class HexCell : MonoBehaviour {
 		}
 		set {
 			elevation = value;
-			Vector3 position = transform.localPosition;
-			position.y = value * HexMetrics.instance.elevationStep;
-            position.y +=(HexMetrics.instance.SampleNoise(position).y * 2f - 1f) *HexMetrics.elevationPerturbStrength;//对高度进行微扰;
-            transform.localPosition = position;
+            RefreshPosition(value);
 
-			Vector3 uiPosition = uiRect.localPosition;
-			uiPosition.z = -position.y;
-			uiRect.localPosition = uiPosition;
+            //Vector3 uiPosition = uiRect.localPosition;
+            //uiPosition.z = -position.y;
+            //uiRect.localPosition = uiPosition;
         }
 	}
+
+
+    void RefreshPosition(int value)
+    {
+        Vector3 position = transform.localPosition;
+        position.y = value * HexMetrics.instance.elevationStep;
+        position.y += (HexMetrics.instance.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;//对高度进行微扰;
+        transform.localPosition = position;
+    }
 
     public Vector3 Position
     {
@@ -71,13 +108,41 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    int elevation;
+    int elevation = 0;
 
     [SerializeField]
     public bool[] isStepDirection;
 
     [SerializeField]
 	HexCell[] neighbors;
+
+
+    
+    public void Save(BinaryWriter writer)
+    {
+        writer.Write((byte)elevation);
+        writer.Write((byte)waterLevel);
+        writer.Write((byte)(color.r*255));
+        writer.Write((byte)(color.g*255));
+        writer.Write((byte)(color.b*255));
+        writer.Write((byte)(color.a*255));
+        for (int i = 0; i < isStepDirection.Length; i++)
+        {
+            writer.Write(isStepDirection[i]);
+        }
+    }
+
+    public void Load(BinaryReader reader)
+    {
+        elevation = reader.ReadByte();
+        waterLevel = reader.ReadByte();
+        color = new Color(reader.ReadByte()/255.0f, reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f);
+        RefreshPosition(elevation);
+        for (int i = 0; i < isStepDirection.Length; i++)
+        {
+            isStepDirection[i] =  reader.ReadBoolean();
+        }
+    }
 
 	public HexCell GetNeighbor (HexDirection direction) {
 		return neighbors[(int)direction];

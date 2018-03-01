@@ -2,10 +2,13 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.IO;
+
 
 public class HexMapEditor : MonoBehaviour {
 
 	public Color[] colors;
+    public static GameObject uiRoot;
 
 	public HexGrid hexGrid;
 
@@ -74,7 +77,8 @@ public class HexMapEditor : MonoBehaviour {
 
 	void OnEnable()
     {
-		SelectColor(0);
+        uiRoot = this.gameObject;
+        SelectColor(0);
         brushRange = 1;
     }
 
@@ -351,6 +355,40 @@ public class HexMapEditor : MonoBehaviour {
         }
         }
 
+    }
+
+
+    public void ShowSave()
+    {
+        List<string> inputString = new List<string>();
+        inputString.Add("文件名");
+        UIManage.instance.ShowInputWnd(inputString,Save,null);
+    }
+
+    public void ShowLoad()
+    {
+        List<string> inputString = new List<string>();
+        inputString.Add("文件名");
+        UIManage.instance.ShowInputWnd(inputString, Load, null);
+    }
+
+    public void Save(Dictionary<string, InputField> inputDic)
+    {
+        using (BinaryWriter writer = new BinaryWriter(File.Open(Application.persistentDataPath + "/" +inputDic["文件名"].text, FileMode.Create)))
+        {
+            hexGrid.Save(writer);
+        }
+        UIManage.instance.HideInputWnd();
+    }
+
+    public void Load(Dictionary<string, InputField> inputDic)
+    {
+        using ( BinaryReader reader =new BinaryReader(File.Open(Application.persistentDataPath + "/"+inputDic["文件名"].text, FileMode.Open)))
+        {
+            hexGrid.Load(reader);
+        }
+        UIManage.instance.HideInputWnd();
+        hexGrid.Refresh();
     }
 
 

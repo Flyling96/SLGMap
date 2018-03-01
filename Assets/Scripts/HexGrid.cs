@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
+using System.Collections.Generic;
 
 public class HexGrid : MonoBehaviour {
 
@@ -30,6 +32,7 @@ public class HexGrid : MonoBehaviour {
 
 
     void Start() {
+
         HexMetrics.noiseSource = noiseSource;
         chunks = new HexGridChunk[chunkCountX * chunkCountZ];
         width = HexMetrics.instance.chunkWidth;
@@ -64,9 +67,24 @@ public class HexGrid : MonoBehaviour {
 
     }
 
+    public void Save(BinaryWriter writer)
+    {
+        for (int i = 0; i < cells.Length; i++)
+        {
+            cells[i].Save(writer);
+        }
+    }
+
+    public void Load(BinaryReader reader)
+    {
+        for (int i = 0; i < cells.Length; i++)
+        {
+            cells[i].Load(reader);
+        }
+    }
 
 
-	public HexCell GetCell (Vector3 position) {
+    public HexCell GetCell (Vector3 position) {
 		position = transform.InverseTransformPoint(position);//坐标转换
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * cellCountWidth + coordinates.Z / 2;
@@ -190,12 +208,13 @@ public class HexGrid : MonoBehaviour {
 			}
 		}
 
-		Text label = Instantiate<Text>(cellLabelPrefab);
-		label.rectTransform.SetParent(gridCanvas.transform, false);
-		label.rectTransform.anchoredPosition =
-			new Vector2(position.x, position.z);
-		label.text = cell.coordinates.ToStringOnSeparateLines();
-		cell.uiRect = label.rectTransform;
+		//Text label = Instantiate<Text>(cellLabelPrefab);
+		//label.rectTransform.SetParent(gridCanvas.transform, false);
+		//label.rectTransform.anchoredPosition =new Vector2(position.x, position.z);
+		//label.text = cell.coordinates.ToStringOnSeparateLines();
+		//cell.uiRect = label.rectTransform;
+
+
         cell.isStepDirection = new bool[]{false,false,false,false,false,false};
         CellToChunk(x, z, cell);
         cell.Elevation = 0;
