@@ -2,6 +2,7 @@
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 
 
@@ -362,14 +363,14 @@ public class HexMapEditor : MonoBehaviour {
     {
         List<string> inputString = new List<string>();
         inputString.Add("文件名");
-        UIManage.instance.ShowInputWnd(inputString,Save,null);
+        UIManage.instance.ShowInputWnd(inputString,Save,null,"保存地图");
     }
 
     public void ShowLoad()
     {
         List<string> inputString = new List<string>();
         inputString.Add("文件名");
-        UIManage.instance.ShowInputWnd(inputString, Load, null);
+        UIManage.instance.ShowInputWnd(inputString, Load, null,"加载地图");
     }
 
     public void Save(Dictionary<string, InputField> inputDic)
@@ -379,16 +380,54 @@ public class HexMapEditor : MonoBehaviour {
             hexGrid.Save(writer);
         }
         UIManage.instance.HideInputWnd();
+        StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"].text));
+    }
+
+    IEnumerator WaitSave(string path)
+    {
+        bool isBreak = false;
+        int count = 0;
+        while(!File.Exists(path))
+        {
+            yield return new WaitForSeconds(0.05f);
+            if(count>9)
+            {
+                count++;
+                isBreak = true;
+                break;
+            }
+        }
+        if(isBreak)
+        {
+            UIManage.instance.ShowTipLine("保存失败", 3f);
+        }
+        else
+        {
+            UIManage.instance.ShowTipLine("保存成功", 3f);
+        }
     }
 
     public void Load(Dictionary<string, InputField> inputDic)
     {
-        using ( BinaryReader reader =new BinaryReader(File.Open(Application.persistentDataPath + "/"+inputDic["文件名"].text, FileMode.Open)))
+        if(!File.Exists(Application.persistentDataPath + "/" + inputDic["文件名"].text))
         {
-            hexGrid.Load(reader);
+            UIManage.instance.ShowTipLine("读取文件不存在", 3f);
+            return;
         }
-        UIManage.instance.HideInputWnd();
-        hexGrid.Refresh();
+        try
+        {
+            using (BinaryReader reader = new BinaryReader(File.Open(Application.persistentDataPath + "/" + inputDic["文件名"].text, FileMode.Open)))
+            {
+                hexGrid.Load(reader);
+            }
+            UIManage.instance.HideInputWnd();
+            hexGrid.Refresh();
+            UIManage.instance.ShowTipLine("读取成功", 3f);
+        }
+        catch
+        {
+            UIManage.instance.ShowTipLine("读取失败", 3f);
+        }
     }
 
 

@@ -191,7 +191,6 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    HexMesh refreshHexMesh = null;
     //刷新单个mesh类型
     public void Refresh(MeshClass meshClass)
     {
