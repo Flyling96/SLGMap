@@ -116,4 +116,8 @@ public class HexMetrics: Singleton<HexMetrics>
     {
         return noiseSource.GetPixelBilinear(position.x* noiseScale, position.z* noiseScale);
     }
+
+    public Color splatColorR = new Color(1, 0, 0);
+    public Color splatColorG = new Color(0, 1, 0);
+    public Color splatColorB = new Color(0, 0, 1);
 }

@@ -8,6 +8,9 @@ public class HexGrid : MonoBehaviour {
 	int width = 6;
 	int height = 6;
 
+    int oldCountX = 4;
+    int oldCountZ = 4;
+
     public int chunkCountX = 4;
     public int chunkCountZ = 4;
 
@@ -28,22 +31,50 @@ public class HexGrid : MonoBehaviour {
 
     HexGridChunk[] chunks;
     Canvas gridCanvas;
-	HexMesh hexMesh;
+	//HexMesh hexMesh;
 
 
     void Start() {
+
+        oldCountX = chunkCountX;
+        oldCountZ = chunkCountZ;
+        chunks = new HexGridChunk[chunkCountX * chunkCountZ];
+        NewMap();
+
+    }
+
+    //改变地图尺寸
+    public void ChangeSize(int width,int height)
+    {
+        chunkCountX = width;
+        chunkCountZ = height;
+    }
+
+    //新建地图
+    public void NewMap()
+    {
+
+        for(int i=0;i< oldCountX * oldCountZ;i++)
+        {
+            if (chunks[i] != null)
+            {
+                chunks[i].Clear();
+                Destroy(chunks[i].gameObject);
+            }
+        }
 
         HexMetrics.noiseSource = noiseSource;
         chunks = new HexGridChunk[chunkCountX * chunkCountZ];
         width = HexMetrics.instance.chunkWidth;
         height = HexMetrics.instance.chunkHeight;
+        oldCountX = chunkCountX;
+        oldCountZ = chunkCountZ;
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
         HexMetrics.noiseSource = noiseSource;
         gridCanvas = GetComponentInChildren<Canvas>();
-		hexMesh = GetComponentInChildren<HexMesh>();
 
-		cells = new HexCell[cellCountWidth * cellCountHeight];
+        cells = new HexCell[cellCountWidth * cellCountHeight];
 
         for (int j = 0, i = 0; j < chunkCountZ; j++)
         {
@@ -58,17 +89,19 @@ public class HexGrid : MonoBehaviour {
 
         for (int j = 0, i = 0; j < cellCountHeight; j++)
         {
-			for (int k = 0; k < cellCountWidth; k++)
+            for (int k = 0; k < cellCountWidth; k++)
             {
-				CreateCell(k, j, i++);
-			}
-		}
-        Refresh();
+                CreateCell(k, j, i++);
+            }
+        }
 
+        Refresh();
     }
 
     public void Save(BinaryWriter writer)
     {
+        writer.Write((byte)chunkCountX);
+        writer.Write((byte)chunkCountZ);
         for (int i = 0; i < cells.Length; i++)
         {
             cells[i].Save(writer);
@@ -77,6 +110,9 @@ public class HexGrid : MonoBehaviour {
 
     public void Load(BinaryReader reader)
     {
+        chunkCountX = reader.ReadByte();
+        chunkCountZ = reader.ReadByte();
+        NewMap();
         for (int i = 0; i < cells.Length; i++)
         {
             cells[i].Load(reader);

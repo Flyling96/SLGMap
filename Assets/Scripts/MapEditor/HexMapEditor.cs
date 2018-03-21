@@ -4,6 +4,8 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Collections;
 using System.IO;
+using System;
+using System.Text.RegularExpressions;
 
 
 public class HexMapEditor : MonoBehaviour {
@@ -373,41 +375,58 @@ public class HexMapEditor : MonoBehaviour {
         UIManage.instance.ShowInputWnd(inputString, Load, null,"加载地图");
     }
 
-    public void Save(Dictionary<string, InputField> inputDic)
+    public void ShowNewMapWnd()
     {
-        using (BinaryWriter writer = new BinaryWriter(File.Open(Application.persistentDataPath + "/" +inputDic["文件名"].text, FileMode.Create)))
+        List<string> inputString = new List<string>();
+        inputString.Add("宽度");
+        inputString.Add("长度");
+        UIManage.instance.ShowInputWnd(inputString, NewMap, null, "新建地图");
+    }
+
+    public void Save(Dictionary<string, InputField> inputDic,ref bool isSuccessful)
+    {
+        try
         {
-            hexGrid.Save(writer);
+            StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"].text));
         }
-        UIManage.instance.HideInputWnd();
-        StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"].text));
+        catch(Exception e)
+        {
+            Debug.Log(e);
+            UIManage.instance.ShowTipLine("保存失败", 3f);
+        }
     }
 
     IEnumerator WaitSave(string path)
     {
         bool isBreak = false;
-        int count = 0;
-        while(!File.Exists(path))
+        new System.Threading.Thread(() =>
         {
-            yield return new WaitForSeconds(0.05f);
-            if(count>9)
+            System.Threading.Thread.Sleep(100);
+            using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create)))
             {
-                count++;
-                isBreak = true;
-                break;
+                hexGrid.Save(writer);
             }
-        }
-        if(isBreak)
+            isBreak = true;
+        }).Start();
+
+        while(!isBreak)
         {
-            UIManage.instance.ShowTipLine("保存失败", 3f);
+            yield return null;
+        }
+
+        if (File.Exists(path))
+        {
+            UIManage.instance.ShowTipLine("保存成功", 3f);
+            UIManage.instance.inputWnd.AddPool(UIManage.instance.inputWnd.inputItem.name, UIManage.instance.inputWnd.transform.Find("ScrollView/Viewport/Content"));
+            UIManage.instance.HideInputWnd();
         }
         else
         {
-            UIManage.instance.ShowTipLine("保存成功", 3f);
+            UIManage.instance.ShowTipLine("保存失败", 3f);
         }
     }
 
-    public void Load(Dictionary<string, InputField> inputDic)
+    public void Load(Dictionary<string, InputField> inputDic,ref bool isSuccessful)
     {
         if(!File.Exists(Application.persistentDataPath + "/" + inputDic["文件名"].text))
         {
@@ -420,13 +439,42 @@ public class HexMapEditor : MonoBehaviour {
             {
                 hexGrid.Load(reader);
             }
-            UIManage.instance.HideInputWnd();
+
             hexGrid.Refresh();
             UIManage.instance.ShowTipLine("读取成功", 3f);
+            isSuccessful = true;
         }
-        catch
+        catch(Exception e)
         {
+            Debug.Log(e);
             UIManage.instance.ShowTipLine("读取失败", 3f);
+        }
+    }
+
+    public void NewMap(Dictionary<string, InputField> inputDic, ref bool isSuccessful)
+    {
+        if (Regex.IsMatch(inputDic["宽度"].text, "^[0-9]*$")==false||
+            Regex.IsMatch(inputDic["长度"].text, "^[0-9]*$") == false)
+        {
+            UIManage.instance.ShowTipLine("请输入[1,50]范围内的整数", 3f);
+            isSuccessful = false;
+        }
+        else
+        {
+            int width = int.Parse(inputDic["宽度"].text);
+            int height = int.Parse(inputDic["长度"].text);
+            if(width>50||height>50||width<1||height<1)
+            {
+                UIManage.instance.ShowTipLine("请输入[1,50]范围内的整数", 3f);
+                isSuccessful = false;
+            }
+            else
+            {
+                hexGrid.ChangeSize(width, height);
+                hexGrid.NewMap();
+                isSuccessful = true;
+                UIManage.instance.ShowTipLine("新建地图成功", 3f);
+            }
         }
     }
 

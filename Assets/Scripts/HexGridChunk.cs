@@ -29,6 +29,12 @@ public class HexGridChunk : MonoBehaviour {
     }
 
 
+    public void Clear()
+    {
+        waterMesh.Clear();
+        waterEdgeMesh.Clear();
+        terrainMesh.Clear();
+    }
 
     public void Refresh()
     {

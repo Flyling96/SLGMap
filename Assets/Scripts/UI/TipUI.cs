@@ -6,8 +6,8 @@ using UnityEngine.UI;
 public class TipUI : MonoBehaviour {
 
 
-    public delegate void OnInputConfirm(Dictionary<string, InputField> inputDic);
-    public delegate void OnInputCancel(Dictionary<string, InputField> inputDic);
+    public delegate void OnInputConfirm(Dictionary<string, InputField> inputDic,ref bool isSuccessful);
+    public delegate void OnInputCancel(Dictionary<string, InputField> inputDic,ref bool isSuccessful);
 
     OnInputConfirm onConfirm = null;
     OnInputCancel onCancel = null;
@@ -40,8 +40,13 @@ public class TipUI : MonoBehaviour {
         {
             if(isInput)
             {
-                onConfirm(inputDic);
-                AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                bool isSuccessful = false;
+                onConfirm(inputDic, ref isSuccessful);
+                if (isSuccessful == true)
+                {
+                    AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                    UIManage.instance.HideInputWnd();
+                }
             }
         }
     }
@@ -52,8 +57,13 @@ public class TipUI : MonoBehaviour {
         {
             if (isInput)
             {
-                onConfirm(inputDic);
-                AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                bool isSuccessful = false;
+                onConfirm(inputDic, ref isSuccessful);
+                if (isSuccessful == true)
+                {
+                    AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                    UIManage.instance.HideInputWnd();
+                }
             }
         }
         else
@@ -61,6 +71,7 @@ public class TipUI : MonoBehaviour {
             if (isInput)
             {
                 AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                UIManage.instance.HideInputWnd();
             }
             gameObject.SetActive(false);
         }
@@ -69,7 +80,7 @@ public class TipUI : MonoBehaviour {
 
 
 
-    void AddPool(string name,Transform parent)
+    public void AddPool(string name,Transform parent)
     {
         foreach (Transform child in parent)
         {

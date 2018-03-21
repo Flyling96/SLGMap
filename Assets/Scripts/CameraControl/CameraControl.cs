@@ -32,7 +32,7 @@ public class CameraControl : MonoBehaviour
 
         distance = 0;
     }
-    HexCell targetCell = null;//旋转的目标
+    //HexCell targetCell = null;//旋转的目标
 
     void Update()
     {
