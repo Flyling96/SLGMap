@@ -12,9 +12,12 @@ public enum MeshClass
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class HexMesh : MonoBehaviour {
 
-	protected Mesh hexMesh;
+    public bool isUseMap = false;//不使用贴图就是指使用颜色
+
+    protected Mesh hexMesh;
     public MeshClass meshClass = MeshClass.terrainMesh;
     static List<Vector3> vertices = new List<Vector3>();
+    static List<Vector3> terrainTypes = new List<Vector3>();
     static List<Color> colors = new List<Color>();
     static List<int> triangles = new List<int>();
     static List<Vector2> uvs = new List<Vector2>();
@@ -44,6 +47,7 @@ public class HexMesh : MonoBehaviour {
 
     public void Clear()
     {
+        terrainTypes.Clear();
         hexMesh.Clear();
         vertices.Clear();
         colors.Clear();
@@ -54,9 +58,17 @@ public class HexMesh : MonoBehaviour {
     public void Draw()
     {
         hexMesh.vertices = vertices.ToArray();
-        hexMesh.colors = colors.ToArray();
         hexMesh.triangles = triangles.ToArray();
-        hexMesh.SetUVs(0, uvs);
+        if(isUseMap)
+        {
+            hexMesh.colors = colors.ToArray();
+            hexMesh.SetUVs(2, terrainTypes); 
+        }
+        else
+        {
+            hexMesh.colors = colors.ToArray();
+            hexMesh.SetUVs(0, uvs);
+        }
         hexMesh.RecalculateNormals();
         meshCollider.sharedMesh = hexMesh;
     }
@@ -117,7 +129,7 @@ public class HexMesh : MonoBehaviour {
     /// <param name="cell"></param>
     /// <param name="v1"></param>
     /// <param name="v2"></param>
-	protected void TriangulateConnection (
+     void TriangulateConnection (
 		HexDirection direction, HexCell cell, EdgeVertices e1
     ) {
 		HexCell neighbor = cell.GetNeighbor(direction);
@@ -136,7 +148,7 @@ public class HexMesh : MonoBehaviour {
         }
         //绘制平面或者陡坡
 		else {
-            TriangulateEdgeStrip(e1, cell.color, e2, neighbor.color);
+            TriangulateEdgeStrip(e1,cell.color, e2, neighbor.color);
         }
 
         //绘制中间三角
@@ -222,7 +234,7 @@ public class HexMesh : MonoBehaviour {
         //CCF CCC FCC CFC 
 		else {
 			AddTriangle(bottom, left, right);
-			AddTriangleColor(bottomCell.color, leftCell.color, rightCell.color);
+			AddTriangleColor(bottomCell.color, leftCell.color,  rightCell.color);
 		}
 	}
 
@@ -444,7 +456,7 @@ public class HexMesh : MonoBehaviour {
     }
 
     //不规则的边内六边形的三角化
-    protected void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, Color color)
+    void TriangulateEdgeFan(Vector3 center, EdgeVertices edge, Color color)
     {
         AddTriangle(center, edge.v1, edge.v2);
         AddTriangleColor(color);
@@ -466,7 +478,7 @@ public class HexMesh : MonoBehaviour {
     }
 
     //不规则边的外梯形绘制
-    protected void TriangulateEdgeStrip(
+    void TriangulateEdgeStrip(
     EdgeVertices e1, Color c1,
     EdgeVertices e2, Color c2
 )
@@ -499,6 +511,23 @@ public class HexMesh : MonoBehaviour {
         uvs.Add(new Vector2(uMax, vMin));
         uvs.Add(new Vector2(uMin, vMax));
         uvs.Add(new Vector2(uMax, vMax));
+    }
+
+
+    //设置地形类型
+    public void AddTriangleTerrain(Vector3 types)
+    {
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+    }
+
+    public void AddQuadTerrain(Vector3 types)
+    {
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
+        terrainTypes.Add(types);
     }
 
 }

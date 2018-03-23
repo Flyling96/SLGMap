@@ -5,6 +5,21 @@ using System.Collections.Generic;
 
 public class HexCell : MonoBehaviour {
 
+
+    //纹理相关
+    TerrainTypes terrainTypeIndex = TerrainTypes.Stone;
+    public TerrainTypes TerrainTypeIndex
+    {
+        get
+        {
+            return terrainTypeIndex;
+        }
+        set
+        {
+            terrainTypeIndex = value;
+        }
+    }
+
     //道路相关
     [SerializeField]
     public bool isRoad = false;

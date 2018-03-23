@@ -30,7 +30,7 @@ public class HexGrid : MonoBehaviour {
 
 
     HexGridChunk[] chunks;
-    Canvas gridCanvas;
+    //Canvas gridCanvas;
 	//HexMesh hexMesh;
 
 
@@ -72,7 +72,7 @@ public class HexGrid : MonoBehaviour {
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
         HexMetrics.noiseSource = noiseSource;
-        gridCanvas = GetComponentInChildren<Canvas>();
+        //gridCanvas = GetComponentInChildren<Canvas>();
 
         cells = new HexCell[cellCountWidth * cellCountHeight];
 

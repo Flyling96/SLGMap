@@ -45,8 +45,8 @@ public class HexRoadMesh : HexMesh {
     //补充边缘
     void TrangulatePreviousRoad(HexDirection direction, HexCell cell, Vector3 center)
     {
-        HexCell previous = cell.GetNeighbor(direction.Previous());
-        center.y = cell.waterY;
+        //HexCell previous = cell.GetNeighbor(direction.Previous());
+        //center.y = cell.waterY;
     }
 
     void TrangulateNextRoad(HexDirection direction, HexCell cell, Vector3 center)
@@ -55,13 +55,13 @@ public class HexRoadMesh : HexMesh {
     }
 
     //绘制六边形
-    public void Triangulate(HexCell cell)
-    {
-        for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
-        {
-            Triangulate(d, cell);
-        }
-    }
+    //public void Triangulate(HexCell cell)
+    //{
+    //    for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
+    //    {
+    //        Triangulate(d, cell);
+    //    }
+    //}
 
     void Triangulate(HexDirection direction, HexCell cell)
     {
@@ -82,7 +82,7 @@ public class HexRoadMesh : HexMesh {
 
         if (direction <= HexDirection.SE)
         {
-            TriangulateConnection(direction, cell, e);
+            //TriangulateConnection(direction, cell, e);
         }
     }
 }
