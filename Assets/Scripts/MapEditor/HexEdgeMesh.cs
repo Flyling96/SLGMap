@@ -90,7 +90,7 @@ public class HexEdgeMesh : MonoBehaviour {
         hexEdgeMesh.vertices = vertices.ToArray();
         hexEdgeMesh.colors = colors.ToArray();
         hexEdgeMesh.triangles = triangles.ToArray();
-        hexEdgeMesh.RecalculateNormals();
+        hexEdgeMesh.RecalculateNormals();//重新计算法线
     }
 
 

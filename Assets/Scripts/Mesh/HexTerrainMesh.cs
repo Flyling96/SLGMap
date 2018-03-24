@@ -39,7 +39,6 @@ public class HexTerrainMesh : HexMesh {
         {
             for (int i = 0; i < cells.Length; i++)
             {
-                cells[i].TerrainTypeIndex = (TerrainTypes)(i % 4);
                 Triangulate(cells[i], isUseMap);
             }
         }
@@ -281,12 +280,14 @@ public class HexTerrainMesh : HexMesh {
 
         for (int i = 2; i < HexMetrics.instance.terraceSteps; i++)
         {
+            EdgeVertices e1 = e2;
+            Color c1 = c2;
             e2 = EdgeVertices.TerraceLerp(begin, end, i);
             c2 = HexMetrics.instance.TerraceLerp(beginCell.color, endCell.color, i);
-            TriangulateEdgeStrip(begin, beginCell.color, (float)beginCell.TerrainTypeIndex, e2, c2, (float)endCell.TerrainTypeIndex);
+            TriangulateEdgeStrip(e1, c1, (float)beginCell.TerrainTypeIndex, e2, c2, (float)endCell.TerrainTypeIndex);
         }
 
-        TriangulateEdgeStrip(begin, beginCell.color, (float)beginCell.TerrainTypeIndex, e2, c2, (float)endCell.TerrainTypeIndex);
+        TriangulateEdgeStrip(e2, c2, (float)beginCell.TerrainTypeIndex, end, endCell.color, (float)endCell.TerrainTypeIndex);
     }
 
     //有出现平面的情况

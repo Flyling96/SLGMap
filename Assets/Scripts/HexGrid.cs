@@ -35,7 +35,7 @@ public class HexGrid : MonoBehaviour {
 
 
     void Start() {
-
+        ConfigDateManage.instance.InitData();
         oldCountX = chunkCountX;
         oldCountZ = chunkCountZ;
         chunks = new HexGridChunk[chunkCountX * chunkCountZ];
