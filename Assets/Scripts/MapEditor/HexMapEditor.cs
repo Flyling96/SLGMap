@@ -417,7 +417,7 @@ public class HexMapEditor : MonoBehaviour {
         if (File.Exists(path))
         {
             UIManage.instance.ShowTipLine("保存成功", 3f);
-            UIManage.instance.inputWnd.AddPool(UIManage.instance.inputWnd.inputItem.name, UIManage.instance.inputWnd.transform.Find("ScrollView/Viewport/Content"));
+            UIManage.instance.AddPool(UIManage.instance.inputWnd.inputItem.name, UIManage.instance.inputWnd.transform.Find("ScrollView/Viewport/Content"));
             UIManage.instance.HideInputWnd();
         }
         else

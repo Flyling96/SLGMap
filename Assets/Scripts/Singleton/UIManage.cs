@@ -67,4 +67,12 @@ public class UIManage : Singleton<UIManage> {
         }
     }
 
+    public void AddPool(string name, Transform parent)
+    {
+        foreach (Transform child in parent)
+        {
+            GameObjectPool.instance.InsertChild(name, child.gameObject);
+        }
+    }
+
 }

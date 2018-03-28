@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class BaseInfo
 {
+
     public virtual void ChangeValues(string[] table) { }
 
     public virtual BaseInfo GetNew() { return new BaseInfo(); }
@@ -31,8 +32,6 @@ public class TerrainTextureInfo : BaseInfo
         return new TerrainTextureInfo();
     }
 }
-
-
 public class ConfigDateManage : Singleton<ConfigDateManage> {
 
 	public void InitData()

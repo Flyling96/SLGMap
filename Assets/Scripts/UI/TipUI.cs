@@ -17,7 +17,7 @@ public class TipUI : MonoBehaviour {
     Dictionary<string,InputField> inputDic = new Dictionary<string, InputField>();
     public void ShowInputWnd(List<string> inputName, OnInputConfirm confirm, OnInputCancel cancel)
     {
-        AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+        UIManage.instance.AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
         onConfirm = confirm;
         onCancel = cancel;
         inputDic.Clear();
@@ -44,7 +44,7 @@ public class TipUI : MonoBehaviour {
                 onConfirm(inputDic, ref isSuccessful);
                 if (isSuccessful == true)
                 {
-                    AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                    UIManage.instance.AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
                     UIManage.instance.HideInputWnd();
                 }
             }
@@ -61,7 +61,7 @@ public class TipUI : MonoBehaviour {
                 onConfirm(inputDic, ref isSuccessful);
                 if (isSuccessful == true)
                 {
-                    AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                    UIManage.instance.AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
                     UIManage.instance.HideInputWnd();
                 }
             }
@@ -70,7 +70,7 @@ public class TipUI : MonoBehaviour {
         {
             if (isInput)
             {
-                AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
+                UIManage.instance.AddPool(inputItem.name, transform.Find("ScrollView/Viewport/Content"));
                 UIManage.instance.HideInputWnd();
             }
             gameObject.SetActive(false);
@@ -79,13 +79,5 @@ public class TipUI : MonoBehaviour {
 
 
 
-
-    public void AddPool(string name,Transform parent)
-    {
-        foreach (Transform child in parent)
-        {
-            GameObjectPool.instance.InsertChild(name, child.gameObject);
-        }
-    }
 }
 

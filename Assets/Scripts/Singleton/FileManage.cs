@@ -29,13 +29,11 @@ public class FileManage : Singleton<FileManage>
     {
         txtTable = ((TextAsset)Resources.Load("Data/"+fileName)).text;
         string[] msgArray = txtTable.Split('\n');
-        string[] singleArray;
         List<BaseInfo> baseInfoList = new List<BaseInfo>();
         for(int i=1;i<msgArray.Length-1;i++)
         {
             BaseInfo newInfo = classType.GetNew();
-            singleArray = msgArray[i].Split(',');
-            newInfo.ChangeValues(singleArray);
+            newInfo.ChangeValues(msgArray[i].Split(','));
             baseInfoList.Add(newInfo);
         }
         CSVTable.Add(fileName, baseInfoList);
