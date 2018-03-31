@@ -6,25 +6,28 @@ using UnityEngine;
 public class BaseInfo
 {
 
-    public virtual void ChangeValues(string[] table) { }
+    public int id;
+    public string iconName;
+    public string iconPath;
+
+    public virtual void ChangeValues(string[] table)
+    {
+        id = int.Parse(table[0]);
+        iconName = table[1];
+        iconPath = table[2];
+    }
 
     public virtual BaseInfo GetNew() { return new BaseInfo(); }
 }
 
 public class TerrainTextureInfo : BaseInfo
 {
-    public int textureID;
-    public string name;
-    public string iconPath;
-    public int terrainType;
+    public TerrainTypes terrainType;
 
     public override void ChangeValues(string[] table)
     {
         base.ChangeValues(table);
-        textureID = int.Parse(table[0]);
-        name = table[1];
-        iconPath = table[2];
-        terrainType = int.Parse(table[3]);
+        terrainType = (TerrainTypes)int.Parse(table[3]);
     }
 
     public override BaseInfo GetNew()

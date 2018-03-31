@@ -344,6 +344,7 @@ public class HexMapEditor : MonoBehaviour {
             else
             {
                 cell.color = cellColor;
+                cell.TerrainTypeIndex = HexMetrics.instance.editorTerrainType;
             }
         }
         List<HexGridChunk> neigborChunk = cell.NeighorChunk();
@@ -361,6 +362,7 @@ public class HexMapEditor : MonoBehaviour {
     }
 
 
+    #region 保存、加载、新建地图
     public void ShowSave()
     {
         List<string> inputString = new List<string>();
@@ -477,6 +479,7 @@ public class HexMapEditor : MonoBehaviour {
             }
         }
     }
+    #endregion
 
 
 }

@@ -7,7 +7,7 @@ public class HexCell : MonoBehaviour {
 
 
     //纹理相关
-    TerrainTypes terrainTypeIndex = TerrainTypes.Stone;
+    TerrainTypes terrainTypeIndex = TerrainTypes.Grass;
     public TerrainTypes TerrainTypeIndex
     {
         get

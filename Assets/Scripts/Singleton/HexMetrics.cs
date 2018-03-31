@@ -120,4 +120,9 @@ public class HexMetrics: Singleton<HexMetrics>
     public Color splatColorR = new Color(1, 0, 0);
     public Color splatColorG = new Color(0, 1, 0);
     public Color splatColorB = new Color(0, 0, 1);
+
+    #region 地图编辑相关
+    public Color editorColor = new Color(0, 0, 0);
+    public TerrainTypes editorTerrainType = TerrainTypes.Grass;
+    #endregion
 }
