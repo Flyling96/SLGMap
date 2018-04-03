@@ -9,6 +9,7 @@ public class TerrainSelectItem : DownSelectWndItem {
 
     public override void OnItemClick(bool isOn)
     {
+        base.OnItemClick(isOn);
         if(isOn)
         {
             HexMetrics.instance.editorTerrainType = terrainType;
@@ -24,6 +25,8 @@ public class TerrainSelectItem : DownSelectWndItem {
     {
         TerrainTextureInfo info = (TerrainTextureInfo)baseInfo;
         base.SetInfo(info);
+        iconPath = info.iconPath;
+        iconName = info.iconName;
         terrainType = info.terrainType;
     }
 

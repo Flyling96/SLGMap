@@ -1,32 +1,44 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum DownSelectWndType
 {
     terrainTexture,
+    terrainColor,
 }
 public class DownSelectWnd : MonoBehaviour {
 
 
     public GameObject selectItem = null;
+    Button backBtn = null;
 
-    Transform root = null;
-    List<DownSelectWndItem> itemClass = null;
+
+    List<DownSelectWndItem> itemClass = new List<DownSelectWndItem>();
 
     private void Start()
     {
-        root = transform.Find("ScrollView/Viewport/Content");
+        backBtn = transform.Find("Back").GetComponent<Button>();
+        backBtn.onClick.AddListener(BackButton);
     }
 
-    public void Init(List<BaseInfo> infoList, DownSelectWndType type)
+    void BackButton()
     {
-        for(int i=0;i<infoList.Count;i++)
+        UIManage.instance.HideDownSelectWnd(selectItem.name);
+    }
+
+    public void ShowDownSelectWnd(List<BaseInfo> infoList, DownSelectWndType type)
+    {
+        itemClass.Clear();
+        UIManage.instance.AddClearPool(selectItem.name, transform.Find("ScrollView/Viewport/Content"));
+        for (int i=0;i<infoList.Count;i++)
         {
-            GameObject item = GameObject.Instantiate(selectItem);
-            item.transform.parent = root;
-            ItemAddComponent(item, DownSelectWndType.terrainTexture);
+            GameObject item = GameObjectPool.instance.GetPoolChild(selectItem.name, selectItem);
+            item.transform.SetParent(transform.Find("ScrollView/Viewport/Content"));
+            ItemAddComponent(item, type);
         }
+        SetInfo(infoList, itemClass);
     } 
 
     void ItemAddComponent(GameObject item,DownSelectWndType type)
@@ -34,13 +46,32 @@ public class DownSelectWnd : MonoBehaviour {
         switch(type)
         {
             case DownSelectWndType.terrainTexture:
-                item.AddComponent<TerrainSelectItem>();
-                break;
+                {
+                    if (item.GetComponent<TerrainSelectItem>() == null)
+                    {
+                        item.AddComponent<TerrainSelectItem>();
+                    }
+                    itemClass.Add(item.GetComponent<TerrainSelectItem>());
+                    break;
+                }
+            case DownSelectWndType.terrainColor:
+                {
+                    if (item.GetComponent<TerrainColorSelectItem>() == null)
+                    {
+                        item.AddComponent<TerrainColorSelectItem>();
+                    }
+                    itemClass.Add(item.GetComponent<TerrainColorSelectItem>());
+                    break;
+                }
         }
     }
 
-    public void SetInfo(List<BaseInfo> infoList,List<DownSelectWndItem> itemList)
+    void SetInfo(List<BaseInfo> infoList,List<DownSelectWndItem> itemList)
     {
-        //for(int i)
+        for(int i=0;i<itemList.Count;i++)
+        {
+            itemList[i].SetInfo(infoList[i]);
+            itemList[i].Init();
+        }
     }
 }

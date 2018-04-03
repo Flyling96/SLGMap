@@ -137,10 +137,18 @@ public class HexCell : MonoBehaviour {
     {
         writer.Write((byte)elevation);
         writer.Write((byte)waterLevel);
-        writer.Write((byte)(color.r*255));
-        writer.Write((byte)(color.g*255));
-        writer.Write((byte)(color.b*255));
-        writer.Write((byte)(color.a*255));
+        if (!HexMetrics.instance.isEditorTexture)
+        {
+            writer.Write((byte)(color.r * 255));
+            writer.Write((byte)(color.g * 255));
+            writer.Write((byte)(color.b * 255));
+            writer.Write((byte)(color.a * 255));
+        }
+        else
+        {
+            writer.Write((byte)terrainTypeIndex);
+        }
+
         for (int i = 0; i < isStepDirection.Length; i++)
         {
             writer.Write(isStepDirection[i]);
@@ -151,7 +159,14 @@ public class HexCell : MonoBehaviour {
     {
         elevation = reader.ReadByte();
         waterLevel = reader.ReadByte();
-        color = new Color(reader.ReadByte()/255.0f, reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f);
+        if (!HexMetrics.instance.isEditorTexture)
+        {
+            color = new Color(reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f, reader.ReadByte() / 255.0f);
+        }
+        else
+        {
+            terrainTypeIndex = (TerrainTypes)reader.ReadByte();
+        }
         RefreshPosition(elevation);
         for (int i = 0; i < isStepDirection.Length; i++)
         {

@@ -22,7 +22,7 @@ public class HexGrid : MonoBehaviour {
     //不规则噪声
     public Texture2D noiseSource;
 
-    public HexGridChunk gridChunkPerfab;
+    HexGridChunk gridChunkPerfab;
     public HexCell cellPrefab;
 	public Text cellLabelPrefab;
 
@@ -53,6 +53,14 @@ public class HexGrid : MonoBehaviour {
     //新建地图
     public void NewMap()
     {
+        if (HexMetrics.instance.isEditorTexture)
+        {
+            gridChunkPerfab = (Instantiate(Resources.Load("Prefabs/Hex Grid Chunk") as GameObject)).GetComponent<HexGridChunk>();
+        }
+        else
+        {
+            gridChunkPerfab = (Instantiate(Resources.Load("Prefabs/Hex Grid Chunk Color") as GameObject)).GetComponent<HexGridChunk>();
+        }
 
         for(int i=0;i< oldCountX * oldCountZ;i++)
         {
@@ -71,7 +79,6 @@ public class HexGrid : MonoBehaviour {
         oldCountZ = chunkCountZ;
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
-        HexMetrics.noiseSource = noiseSource;
         //gridCanvas = GetComponentInChildren<Canvas>();
 
         cells = new HexCell[cellCountWidth * cellCountHeight];
@@ -102,6 +109,7 @@ public class HexGrid : MonoBehaviour {
     {
         writer.Write((byte)chunkCountX);
         writer.Write((byte)chunkCountZ);
+        writer.Write(HexMetrics.instance.isEditorTexture);
         for (int i = 0; i < cells.Length; i++)
         {
             cells[i].Save(writer);
@@ -112,6 +120,7 @@ public class HexGrid : MonoBehaviour {
     {
         chunkCountX = reader.ReadByte();
         chunkCountZ = reader.ReadByte();
+        HexMetrics.instance.isEditorTexture = reader.ReadBoolean();
         NewMap();
         for (int i = 0; i < cells.Length; i++)
         {

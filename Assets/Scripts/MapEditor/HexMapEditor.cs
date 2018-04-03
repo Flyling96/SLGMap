@@ -28,6 +28,9 @@ public class HexMapEditor : MonoBehaviour {
     public Toggle isStepWholeEditorToggle;
 
 
+    Button TerrainTextureBtn;
+
+
 
 
     bool IsEditorStep()
@@ -78,7 +81,13 @@ public class HexMapEditor : MonoBehaviour {
         brushRange = (int)sliderValue;
     }
 
-	void OnEnable()
+    private void Awake()
+    {
+        TerrainTextureBtn = transform.Find("Color Panel/TerrainTextureBtn").GetComponent<Button>();
+        TerrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
+    }
+
+    void OnEnable()
     {
         uiRoot = this.gameObject;
         SelectColor(0);
@@ -113,6 +122,8 @@ public class HexMapEditor : MonoBehaviour {
             }
             else
             {
+                if (!HexMetrics.instance.isEditorTerrain)
+                    return;
                 centerCell = hexGrid.GetCell(hit.point);
                 centerX = centerCell.coordinates.X;
                 centerZ = centerCell.coordinates.Z;
@@ -134,7 +145,7 @@ public class HexMapEditor : MonoBehaviour {
                         cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
                     }
                 }
-                hexEdgeMesh.Triangulate(cells, cellColor);
+                hexEdgeMesh.Triangulate(cells, HexMetrics.instance.editorColor);
             }
         }
     }
@@ -343,7 +354,7 @@ public class HexMapEditor : MonoBehaviour {
             }
             else
             {
-                cell.color = cellColor;
+                cell.color = HexMetrics.instance.editorColor;
                 cell.TerrainTypeIndex = HexMetrics.instance.editorTerrainType;
             }
         }
@@ -361,35 +372,45 @@ public class HexMapEditor : MonoBehaviour {
 
     }
 
-
+    List<string> inputString = new List<string>();
+    List<InputType> inputTypeList = new List<InputType>();
     #region 保存、加载、新建地图
     public void ShowSave()
     {
-        List<string> inputString = new List<string>();
+        inputString.Clear();
+        inputTypeList.Clear();
         inputString.Add("文件名");
-        UIManage.instance.ShowInputWnd(inputString,Save,null,"保存地图");
+        inputTypeList.Add(InputType.InputField);
+        UIManage.instance.ShowInputWnd(inputString,Save,null,"保存地图", inputTypeList);
     }
 
     public void ShowLoad()
     {
-        List<string> inputString = new List<string>();
+        inputString.Clear();
+        inputTypeList.Clear();
         inputString.Add("文件名");
-        UIManage.instance.ShowInputWnd(inputString, Load, null,"加载地图");
+        inputTypeList.Add(InputType.InputField);
+        UIManage.instance.ShowInputWnd(inputString, Load, null,"加载地图", inputTypeList);
     }
 
     public void ShowNewMapWnd()
     {
-        List<string> inputString = new List<string>();
+        inputString.Clear();
+        inputTypeList.Clear();
         inputString.Add("宽度");
         inputString.Add("长度");
-        UIManage.instance.ShowInputWnd(inputString, NewMap, null, "新建地图");
+        inputTypeList.Add(InputType.InputField);
+        inputTypeList.Add(InputType.InputField);
+        inputString.Add("纹理");
+        inputTypeList.Add(InputType.Toggle);
+        UIManage.instance.ShowInputWnd(inputString, NewMap, null, "新建地图", inputTypeList);
     }
 
-    public void Save(Dictionary<string, InputField> inputDic,ref bool isSuccessful)
+    public void Save(Dictionary<string, string> inputDic,ref bool isSuccessful)
     {
         try
         {
-            StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"].text));
+            StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"]));
         }
         catch(Exception e)
         {
@@ -419,8 +440,7 @@ public class HexMapEditor : MonoBehaviour {
         if (File.Exists(path))
         {
             UIManage.instance.ShowTipLine("保存成功", 3f);
-            UIManage.instance.AddPool(UIManage.instance.inputWnd.inputItem.name, UIManage.instance.inputWnd.transform.Find("ScrollView/Viewport/Content"));
-            UIManage.instance.HideInputWnd();
+            UIManage.instance.HideInputWnd(UIManage.instance.inputWnd.inputItem.name);
         }
         else
         {
@@ -428,16 +448,16 @@ public class HexMapEditor : MonoBehaviour {
         }
     }
 
-    public void Load(Dictionary<string, InputField> inputDic,ref bool isSuccessful)
+    public void Load(Dictionary<string, string> inputDic,ref bool isSuccessful)
     {
-        if(!File.Exists(Application.persistentDataPath + "/" + inputDic["文件名"].text))
+        if(!File.Exists(Application.persistentDataPath + "/" + inputDic["文件名"]))
         {
             UIManage.instance.ShowTipLine("读取文件不存在", 3f);
             return;
         }
         try
         {
-            using (BinaryReader reader = new BinaryReader(File.Open(Application.persistentDataPath + "/" + inputDic["文件名"].text, FileMode.Open)))
+            using (BinaryReader reader = new BinaryReader(File.Open(Application.persistentDataPath + "/" + inputDic["文件名"], FileMode.Open)))
             {
                 hexGrid.Load(reader);
             }
@@ -453,18 +473,18 @@ public class HexMapEditor : MonoBehaviour {
         }
     }
 
-    public void NewMap(Dictionary<string, InputField> inputDic, ref bool isSuccessful)
+    public void NewMap(Dictionary<string, string> inputDic, ref bool isSuccessful)
     {
-        if (Regex.IsMatch(inputDic["宽度"].text, "^[0-9]*$")==false||
-            Regex.IsMatch(inputDic["长度"].text, "^[0-9]*$") == false)
+        if (Regex.IsMatch(inputDic["宽度"], "^[0-9]*$")==false||
+            Regex.IsMatch(inputDic["长度"], "^[0-9]*$") == false)
         {
             UIManage.instance.ShowTipLine("请输入[1,50]范围内的整数", 3f);
             isSuccessful = false;
         }
         else
         {
-            int width = int.Parse(inputDic["宽度"].text);
-            int height = int.Parse(inputDic["长度"].text);
+            int width = int.Parse(inputDic["宽度"]);
+            int height = int.Parse(inputDic["长度"]);
             if(width>50||height>50||width<1||height<1)
             {
                 UIManage.instance.ShowTipLine("请输入[1,50]范围内的整数", 3f);
@@ -473,6 +493,7 @@ public class HexMapEditor : MonoBehaviour {
             else
             {
                 hexGrid.ChangeSize(width, height);
+                HexMetrics.instance.isEditorTexture = bool.Parse(inputDic["纹理"]);
                 hexGrid.NewMap();
                 isSuccessful = true;
                 UIManage.instance.ShowTipLine("新建地图成功", 3f);
@@ -481,5 +502,21 @@ public class HexMapEditor : MonoBehaviour {
     }
     #endregion
 
+    #region 地形纹理编辑相关
+    void ShowTerrainTextureWnd()
+    {
+        HexMetrics.instance.isEditorTerrain = true;
+        if (HexMetrics.instance.isEditorTexture)
+        {
+            UIManage.instance.ShowDownSelectWnd(FileManage.instance.CSVTable["terrainTexture"], DownSelectWndType.terrainTexture);
+        }
+        else
+        {
+            UIManage.instance.ShowDownSelectWnd(FileManage.instance.CSVTable["terrainColor"], DownSelectWndType.terrainColor);
+        }
+    }
+
+
+    #endregion
 
 }

@@ -122,7 +122,9 @@ public class HexMetrics: Singleton<HexMetrics>
     public Color splatColorB = new Color(0, 0, 1);
 
     #region 地图编辑相关
-    public Color editorColor = new Color(0, 0, 0);
+    public bool isEditorTerrain = false;
+    public bool isEditorTexture = true;
+    public Color editorColor = new Color(0.18f, 1, 0.18f, 1f);
     public TerrainTypes editorTerrainType = TerrainTypes.Grass;
     #endregion
 }
