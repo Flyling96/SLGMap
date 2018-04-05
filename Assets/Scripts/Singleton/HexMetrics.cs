@@ -122,7 +122,40 @@ public class HexMetrics: Singleton<HexMetrics>
     public Color splatColorB = new Color(0, 0, 1);
 
     #region 地图编辑相关
-    public bool isEditorTerrain = false;
+    bool isEditorTerrain = true;
+    public bool IsEditorTerrain
+    {
+        get
+        {
+            return isEditorTerrain;
+        }
+        set
+        {
+            isEditorTerrain = value;
+            if (value == true)
+            {
+                isEditorSceneObject = !value;
+            }
+        }
+    }
+    bool isEditorSceneObject = false;
+    public bool IsEditorSceneObject
+    {
+        get
+        {
+            return isEditorSceneObject;
+        }
+        set
+        {
+            isEditorSceneObject = value;
+            if (value == true)
+            {
+                isEditorTerrain = !value;
+            }
+        }
+    }
+
+    public GameObject editorSceneObject;
     public bool isEditorTexture = true;
     public Color editorColor = new Color(0.18f, 1, 0.18f, 1f);
     public TerrainTypes editorTerrainType = TerrainTypes.Grass;

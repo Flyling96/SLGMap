@@ -30,8 +30,8 @@ public class DownSelectWndItem : MonoBehaviour {
     {
         if (iconPath != "")
         {
-            Texture2D itemTexture = (Texture2D)Resources.Load(iconPath);
-            Sprite itemSprite = Sprite.Create(itemTexture, new Rect(0, 0, 64, 64), Vector2.zero);
+            //Texture2D itemTexture = (Texture2D)Resources.Load(iconPath);
+            Sprite itemSprite = Resources.Load<Sprite>(iconPath);
             if (transform.Find("IconItem/Image") != null)
             {
                 transform.Find("IconItem/Image").GetComponent<Image>().sprite = itemSprite;

@@ -56,10 +56,12 @@ public class HexGrid : MonoBehaviour {
         if (HexMetrics.instance.isEditorTexture)
         {
             gridChunkPerfab = (Instantiate(Resources.Load("Prefabs/Hex Grid Chunk") as GameObject)).GetComponent<HexGridChunk>();
+            gridChunkPerfab.name = "Hex Grid Chunk Prefab";
         }
         else
         {
             gridChunkPerfab = (Instantiate(Resources.Load("Prefabs/Hex Grid Chunk Color") as GameObject)).GetComponent<HexGridChunk>();
+            gridChunkPerfab.name = "Hex Grid Chunk Color Prefab";
         }
 
         for(int i=0;i< oldCountX * oldCountZ;i++)

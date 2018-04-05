@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TerrainSelectItem : DownSelectWndItem {
 
@@ -19,6 +20,10 @@ public class TerrainSelectItem : DownSelectWndItem {
     public override void Init()
     {
         base.Init();
+        if (transform.Find("IconItem/Image") != null)
+        {
+            transform.Find("IconItem/Image").GetComponent<Image>().color = new Color(1,1,1,1);
+        }
     }
 
     public override void SetInfo(BaseInfo baseInfo)

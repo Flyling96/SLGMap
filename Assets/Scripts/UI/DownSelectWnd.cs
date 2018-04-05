@@ -7,6 +7,7 @@ public enum DownSelectWndType
 {
     terrainTexture,
     terrainColor,
+    sceneObject,
 }
 public class DownSelectWnd : MonoBehaviour {
 
@@ -61,6 +62,15 @@ public class DownSelectWnd : MonoBehaviour {
                         item.AddComponent<TerrainColorSelectItem>();
                     }
                     itemClass.Add(item.GetComponent<TerrainColorSelectItem>());
+                    break;
+                }
+            case DownSelectWndType.sceneObject:
+                {
+                    if (item.GetComponent<SceneObjectItem>() == null)
+                    {
+                        item.AddComponent<SceneObjectItem>();
+                    }
+                    itemClass.Add(item.GetComponent<SceneObjectItem>());
                     break;
                 }
         }

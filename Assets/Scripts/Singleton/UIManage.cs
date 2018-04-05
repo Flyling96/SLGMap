@@ -45,7 +45,6 @@ public class UIManage : Singleton<UIManage> {
     {
         if (downSelectWnd != null)
         {
-            HexMetrics.instance.isEditorTerrain = false;
             AddClearPool(name, downSelectWnd.transform.Find("ScrollView/Viewport/Content"));
             downSelectWnd.gameObject.SetActive(false);
         }

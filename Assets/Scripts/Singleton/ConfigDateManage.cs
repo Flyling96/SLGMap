@@ -50,12 +50,40 @@ public class TerrainColorInfo : BaseInfo
         return new TerrainColorInfo();
     }
 }
+
+public class SceneObjectInfo : BaseInfo
+{
+    public string iconName;
+    public string iconPath;
+    public string modelPathType;
+    public string modelPath;
+
+    public override void ChangeValues(string[] table)
+    {
+        id = int.Parse(table[0]);
+        iconName = table[1];
+        iconPath = table[2];
+        modelPathType = table[3];
+        modelPath = FileManage.instance.CSVHashTable["sceneHashTable"][table[3]].ToString();
+    }
+
+    public override BaseInfo GetNew()
+    {
+        return new SceneObjectInfo();
+    }
+
+}
 public class ConfigDateManage : Singleton<ConfigDateManage> {
 
 	public void InitData()
     {
+        FileManage.instance.LoadHashCSV("sceneHashTable");
+
+
         FileManage.instance.LoadCSV("terrainTexture", new TerrainTextureInfo());
         FileManage.instance.LoadCSV("terrainColor", new TerrainColorInfo());
+        FileManage.instance.LoadCSV("sceneObject", new SceneObjectInfo());
+
     }
 
 }

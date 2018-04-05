@@ -21,14 +21,15 @@ public class HexMapEditor : MonoBehaviour {
     int waterLevel = 0;
     int brushRange = 0;
 
-	Color cellColor;
+	//Color cellColor;
 
     public Toggle isStepEditorToggle;
     public Toggle isSlopeEditorToggle;
     public Toggle isStepWholeEditorToggle;
 
 
-    Button TerrainTextureBtn;
+    Button terrainTextureBtn;
+    Button sceneObjectBtn;
 
 
 
@@ -60,10 +61,10 @@ public class HexMapEditor : MonoBehaviour {
         isEditorWater = value;
     }
 
-	public void SelectColor (int index)
-    {
-		cellColor = colors[index];
-	}
+	//public void SelectColor (int index)
+ //   {
+	//	cellColor = colors[index];
+	//}
 
 	public void SetElevation (float sliderValue)
     {
@@ -83,23 +84,34 @@ public class HexMapEditor : MonoBehaviour {
 
     private void Awake()
     {
-        TerrainTextureBtn = transform.Find("Color Panel/TerrainTextureBtn").GetComponent<Button>();
-        TerrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
+        terrainTextureBtn = transform.Find("Color Panel/TerrainTextureBtn").GetComponent<Button>();
+        terrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
+        sceneObjectBtn = transform.Find("Color Panel/SceneObjectBtn").GetComponent<Button>();
+        sceneObjectBtn.onClick.AddListener(ShowSceneObjectWnd);
     }
 
     void OnEnable()
     {
         uiRoot = this.gameObject;
-        SelectColor(0);
+        //SelectColor(0);
         brushRange = 1;
     }
 
 	void Update () {
 
-
-        if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+        if (HexMetrics.instance.IsEditorTerrain)
         {
-            HandleInput();
+            if (Input.GetMouseButton(0) && !EventSystem.current.IsPointerOverGameObject())
+            {
+                HandleInput();
+            }
+        }
+        else if (HexMetrics.instance.IsEditorSceneObject)
+        {
+           if(Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
+            {
+                HandleInputDown();
+            }
         }
 
         RefreshHexEdgeMesh();
@@ -116,36 +128,53 @@ public class HexMapEditor : MonoBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            if (IsEditorStep() || IsEditorSlope())
+            if(HexMetrics.instance.IsEditorTerrain)
             {
-                EditMeshRefresh(hit.point, hexGrid.GetCell(hit.point));
-            }
-            else
-            {
-                if (!HexMetrics.instance.isEditorTerrain)
-                    return;
-                centerCell = hexGrid.GetCell(hit.point);
-                centerX = centerCell.coordinates.X;
-                centerZ = centerCell.coordinates.Z;
-                for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
+                if (IsEditorStep() || IsEditorSlope())
                 {
-                    for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
+                    EditMeshRefresh(hit.point, hexGrid.GetCell(hit.point));
+                }
+                else
+                {
+                    //if (!HexMetrics.instance.isEditorTerrain)
+                    //    return;
+                    centerCell = hexGrid.GetCell(hit.point);
+                    centerX = centerCell.coordinates.X;
+                    centerZ = centerCell.coordinates.Z;
+                    for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
                     {
-                        if (hexGrid.GetCell(new HexCoordinates(x, z) )!= null)
+                        for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
+                        {
+                            if (hexGrid.GetCell(new HexCoordinates(x, z)) != null)
+                            {
+                                cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                            }
+                        }
+                    }
+
+                    for (int l = 1, z = centerZ + 1; z <= centerZ + brushRange - 1; l++, z++)
+                    {
+                        for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
                         {
                             cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
                         }
                     }
-                }
-
-                for (int l = 1, z = centerZ + 1; z <= centerZ + brushRange - 1; l++, z++)
-                {
-                    for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
+                    if (!isEditorWater)
                     {
-                        cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                        if (HexMetrics.instance.isEditorTexture)
+                        {
+                            hexEdgeMesh.Triangulate(cells, new Color(0.18f, 1, 0.18f, 1f));
+                        }
+                        else
+                        {
+                            hexEdgeMesh.Triangulate(cells, HexMetrics.instance.editorColor);
+                        }
+                    }
+                    else
+                    {
+                        hexEdgeMesh.Triangulate(cells, ToolClass.instance.ConvertColor("#2FD4FFFF"));
                     }
                 }
-                hexEdgeMesh.Triangulate(cells, HexMetrics.instance.editorColor);
             }
         }
     }
@@ -238,6 +267,21 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     List<HexGridChunk> refreshChunkList = new List<HexGridChunk>();
+    void HandleInputDown()
+    {
+        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        HexCell centerCell = null;
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            centerCell = hexGrid.GetCell(hit.point);
+            GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
+            tSceneObject.transform.SetParent(centerCell.transform);
+            tSceneObject.transform.localPosition = new Vector3(0, 0, 0);
+            tSceneObject.SetActive(true);
+        }
+    }
+
 	void HandleInput () {
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
@@ -261,26 +305,27 @@ public class HexMapEditor : MonoBehaviour {
                 }
             }
 
-            for(int l = 1,z = centerZ + 1; z<= centerZ + brushRange - 1;l++,z++)
+            for (int l = 1, z = centerZ + 1; z <= centerZ + brushRange - 1; l++, z++)
             {
-                for(int x = centerX - brushRange + 1; x<= centerX + brushRange - 1-l;x++)
+                for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
                 {
                     EditCell(clickDir, hexGrid.GetCell(new HexCoordinates(x, z)));
                 }
             }
-           for(int i=0;i< refreshChunkList.Count;i++)
+            for (int i = 0; i < refreshChunkList.Count; i++)
             {
-                if(isEditorWater)
+                if (isEditorWater)
                 {
                     refreshChunkList[i].Refresh(MeshClass.waterMesh);
                     refreshChunkList[i].Refresh(MeshClass.waterEdgeMesh);
                 }
-                else 
+                else
                 {
                     refreshChunkList[i].Refresh();
                 }
             }
-		}
+
+        }
 	}
 
     //对整个六边形的边进行编辑
@@ -374,6 +419,7 @@ public class HexMapEditor : MonoBehaviour {
 
     List<string> inputString = new List<string>();
     List<InputType> inputTypeList = new List<InputType>();
+
     #region 保存、加载、新建地图
     public void ShowSave()
     {
@@ -505,7 +551,7 @@ public class HexMapEditor : MonoBehaviour {
     #region 地形纹理编辑相关
     void ShowTerrainTextureWnd()
     {
-        HexMetrics.instance.isEditorTerrain = true;
+        HexMetrics.instance.IsEditorTerrain = true;
         if (HexMetrics.instance.isEditorTexture)
         {
             UIManage.instance.ShowDownSelectWnd(FileManage.instance.CSVTable["terrainTexture"], DownSelectWndType.terrainTexture);
@@ -516,6 +562,11 @@ public class HexMapEditor : MonoBehaviour {
         }
     }
 
+    void ShowSceneObjectWnd()
+    {
+        HexMetrics.instance.IsEditorSceneObject = true;
+        UIManage.instance.ShowDownSelectWnd(FileManage.instance.CSVTable["sceneObject"], DownSelectWndType.sceneObject);
+    }
 
     #endregion
 
