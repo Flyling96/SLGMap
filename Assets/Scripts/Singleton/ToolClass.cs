@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class ToolClass : Singleton<ToolClass> {
@@ -45,6 +46,46 @@ public class ToolClass : Singleton<ToolClass> {
         else
         {
             return 15;
+        }
+    }
+
+    public  bool IsInside(Vector2 checkPoint, List<Vector2> polygonPoints)
+    {
+        int counter = 0;
+        int i;
+        double xinters;
+        Vector2 p1, p2;
+        int pointCount = polygonPoints.Count;
+        p1 = polygonPoints[0];
+        for (i = 1; i <= pointCount; i++)
+        {
+            p2 = polygonPoints[i % pointCount];
+            if (checkPoint.y > Math.Min(p1.y, p2.y)//校验点的y大于线段端点的最小y  
+                && checkPoint.y <= Math.Max(p1.y, p2.y))//校验点的y小于线段端点的最大y  
+            {
+                if (checkPoint.x <= Math.Max(p1.x, p2.x))//校验点的x小于等线段端点的最大x(使用校验点的左射线判断).  
+                {
+                    if (p1.y != p2.y)//线段不平行于x轴  
+                    {
+                        xinters = (checkPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+                        if (p1.x == p2.x || checkPoint.x <= xinters)
+                        {
+                            counter++;
+                        }
+                    }
+                }
+
+            }
+            p1 = p2;
+        }
+
+        if (counter % 2 == 0)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 

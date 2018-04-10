@@ -170,4 +170,5 @@ public class HexMetrics: Singleton<HexMetrics>
         position.z += (sample.z * 2f - 1f) * HexMetrics.instance.cellPerturbStrength;
         return position;
     }
+
 }

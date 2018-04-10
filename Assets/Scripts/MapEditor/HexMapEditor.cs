@@ -279,8 +279,12 @@ public class HexMapEditor : MonoBehaviour {
             centerCell = hexGrid.GetCell(hit.point);
             GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
             tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
-            tSceneObject.transform.position = new Vector3(hit.point.x, centerCell.Position.y, hit.point.z);
+            tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+            tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
             tSceneObject.SetActive(true);
+            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
+            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.position, tSceneObject.transform.rotation, clickDir, centerCell);
+            tSceneObject.GetComponent<SceneObjectClass>().Refresh();
         }
     }
 
@@ -572,5 +576,25 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     #endregion
+
+    ////获取SceneObject的y
+    //public float GetSceneObjectY(Vector3 point, HexCell cell)
+    //{
+    //    //获取方向
+    //    HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(point.x - cell.transform.position.x, point.z - cell.transform.position.z));
+    //    //不在边缘
+    //    if()
+
+
+    //    //斜面
+    //    if(cell.isStepDirection[(int)clickDir])
+    //    {
+
+    //    }
+    //    else
+    //    {
+
+    //    }
+    //}
 
 }
