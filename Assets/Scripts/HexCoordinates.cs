@@ -103,12 +103,4 @@ public struct HexCoordinates {
         }
     }
 
-    public override string ToString () {
-		return "(" +
-			X.ToString() + ", " + Y.ToString() + ", " + Z.ToString() + ")";
-	}
-
-	public string ToStringOnSeparateLines () {
-		return X.ToString() + "\n" + Y.ToString() + "\n" + Z.ToString();
-	}
 }

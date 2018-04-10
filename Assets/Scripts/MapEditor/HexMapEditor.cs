@@ -267,6 +267,8 @@ public class HexMapEditor : MonoBehaviour {
     }
 
     List<HexGridChunk> refreshChunkList = new List<HexGridChunk>();
+
+    //场景物体
     void HandleInputDown()
     {
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -276,12 +278,13 @@ public class HexMapEditor : MonoBehaviour {
         {
             centerCell = hexGrid.GetCell(hit.point);
             GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
-            tSceneObject.transform.SetParent(centerCell.transform);
-            tSceneObject.transform.localPosition = new Vector3(0, 0, 0);
+            tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
+            tSceneObject.transform.position = new Vector3(hit.point.x, centerCell.Position.y, hit.point.z);
             tSceneObject.SetActive(true);
         }
     }
 
+    //地形
 	void HandleInput () {
 		Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;

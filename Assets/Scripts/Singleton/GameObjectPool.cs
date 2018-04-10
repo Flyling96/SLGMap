@@ -29,6 +29,11 @@ public class GameObjectPool : Singleton<GameObjectPool> {
 
     public void InsertChild(string name,GameObject prefab)
     {
+        if(gameObjectPool[name] == null)
+        {
+            gameObjectPool.Add(name, new List<GameObject>());
+        }
+
         if (!gameObjectPool[name].Contains(prefab))
         {
             gameObjectPool[name].Add(prefab);

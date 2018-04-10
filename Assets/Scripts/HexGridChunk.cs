@@ -9,6 +9,8 @@ public class HexGridChunk : MonoBehaviour {
 
     public HexCell[] cells;
 
+    public SceneObjectMgr sceneObjectMgr;
+
     public HexMesh waterMesh,waterEdgeMesh,terrainMesh;
 
     void OnEnable()
@@ -43,6 +45,7 @@ public class HexGridChunk : MonoBehaviour {
         terrainMesh.TrangulateByMeshClass(cells);
     }
 
+    //对mesh进行刷新
     public void Refresh(MeshClass meshClass)
     {
         switch (meshClass)

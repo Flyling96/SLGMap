@@ -160,4 +160,14 @@ public class HexMetrics: Singleton<HexMetrics>
     public Color editorColor = new Color(0.18f, 1, 0.18f, 1f);
     public TerrainTypes editorTerrainType = TerrainTypes.Grass;
     #endregion
+
+    //对地图进行不规则处理
+    public Vector3 Perturb(Vector3 position)
+    {
+        Vector4 sample = HexMetrics.instance.SampleNoise(position);
+        position.x += (sample.x * 2f - 1f) * HexMetrics.instance.cellPerturbStrength;
+        // position.y += (sample.y * 2f - 1f) * HexMetrics.cellPerturbStrength;  //不对y坐标进行微扰，改做对阶梯高度进行微扰
+        position.z += (sample.z * 2f - 1f) * HexMetrics.instance.cellPerturbStrength;
+        return position;
+    }
 }
