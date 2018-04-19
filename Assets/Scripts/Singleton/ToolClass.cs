@@ -49,28 +49,28 @@ public class ToolClass : Singleton<ToolClass> {
         }
     }
 
+    //判断一个点是否在多边形内  射线交点
     public  bool IsInside(Vector2 checkPoint, List<Vector2> polygonPoints)
     {
-        int counter = 0;
-        int i;
-        double xinters;
+        int count = 0;
+        double shadow = 0 ;
         Vector2 p1, p2;
         int pointCount = polygonPoints.Count;
         p1 = polygonPoints[0];
-        for (i = 1; i <= pointCount; i++)
+        for (int i = 1; i <= pointCount; i++)
         {
             p2 = polygonPoints[i % pointCount];
-            if (checkPoint.y > Math.Min(p1.y, p2.y)//校验点的y大于线段端点的最小y  
-                && checkPoint.y <= Math.Max(p1.y, p2.y))//校验点的y小于线段端点的最大y  
+            if (checkPoint.y > Math.Min(p1.y, p2.y)
+                && checkPoint.y <= Math.Max(p1.y, p2.y))
             {
-                if (checkPoint.x <= Math.Max(p1.x, p2.x))//校验点的x小于等线段端点的最大x(使用校验点的左射线判断).  
+                if (checkPoint.x <= Math.Max(p1.x, p2.x))
                 {
                     if (p1.y != p2.y)//线段不平行于x轴  
                     {
-                        xinters = (checkPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-                        if (p1.x == p2.x || checkPoint.x <= xinters)
+                        shadow = (checkPoint.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+                        if (p1.x == p2.x || checkPoint.x <= shadow)
                         {
-                            counter++;
+                            count++;
                         }
                     }
                 }
@@ -78,8 +78,7 @@ public class ToolClass : Singleton<ToolClass> {
             }
             p1 = p2;
         }
-
-        if (counter % 2 == 0)
+        if (count % 2 == 0)
         {
             return false;
         }
@@ -87,6 +86,37 @@ public class ToolClass : Singleton<ToolClass> {
         {
             return true;
         }
+    }
+
+    // 计算两点之间的距离      
+    double PointDistance(double x1, double y1, double x2, double y2)
+    {
+       return  Math.Sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
+    }
+    //点到线段距离    
+    public double PointToLine(Vector2 p0, Vector2 p1, Vector2 p2)
+    {
+        double dis = 0;
+        double a, b, c;
+        a = PointDistance(p1.x, p1.y, p2.x, p2.y);// 线段的长度      
+        b = PointDistance(p1.x, p1.y, p0.x, p0.y);// p1到p0的距离      
+        c = PointDistance(p2.x, p2.y, p0.x, p0.y);// p2到p0的距离 
+        
+        //在一条直线上的情况
+        if (c == a + b)
+        {
+            dis = b;
+            return dis;
+        }
+        if (b  == a + c)
+        {
+            dis = c;
+            return dis;
+        }
+        double p = (a + b + c) / 2;// 半周长      
+        double s = Math.Sqrt(p * (p - a) * (p - b) * (p - c));// 海伦公式求面积      
+        dis = 2 * s / a;// 返回点到线的距离（利用三角形面积公式求高）      
+        return dis;
     }
 
 }

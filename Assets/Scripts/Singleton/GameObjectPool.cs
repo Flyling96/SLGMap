@@ -29,7 +29,7 @@ public class GameObjectPool : Singleton<GameObjectPool> {
 
     public void InsertChild(string name,GameObject prefab)
     {
-        if(gameObjectPool[name] == null)
+        if(!gameObjectPool.ContainsKey(name))
         {
             gameObjectPool.Add(name, new List<GameObject>());
         }

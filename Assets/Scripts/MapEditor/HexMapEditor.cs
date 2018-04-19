@@ -283,8 +283,9 @@ public class HexMapEditor : MonoBehaviour {
             tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
             tSceneObject.SetActive(true);
             HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
-            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.position, tSceneObject.transform.rotation, clickDir, centerCell);
-            tSceneObject.GetComponent<SceneObjectClass>().Refresh();
+            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+            tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+            centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
         }
     }
 

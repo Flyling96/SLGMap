@@ -36,6 +36,7 @@ public class HexGridChunk : MonoBehaviour {
         waterMesh.Clear();
         waterEdgeMesh.Clear();
         terrainMesh.Clear();
+        sceneObjectMgr.Clear();
     }
 
     public void Refresh()
@@ -43,6 +44,7 @@ public class HexGridChunk : MonoBehaviour {
         waterMesh.TrangulateByMeshClass(cells);
         waterEdgeMesh.TrangulateByMeshClass(cells);
         terrainMesh.TrangulateByMeshClass(cells);
+        sceneObjectMgr.Refresh();
     }
 
     //对mesh进行刷新

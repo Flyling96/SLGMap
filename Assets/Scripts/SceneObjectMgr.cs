@@ -21,8 +21,7 @@ public class SceneObjectMgr : MonoBehaviour {
     {
         for(int i=0;i< sceneObjectList.Count;i++)
         {
-            sceneObjectList[i].transform.position = sceneObjectList[i].position;
-            sceneObjectList[i].transform.localRotation = sceneObjectList[i].rotation;
+            sceneObjectList[i].Refresh(false);
         }
     }
 
@@ -40,7 +39,7 @@ public class SceneObjectMgr : MonoBehaviour {
                 sceneObjectList.RemoveAt(i);
             }
         }
-        GameObjectPool.instance.InsertChild(item.gameObject.name, item.gameObject);
+        GameObjectPool.instance.InsertChild(HexMetrics.instance.editorSceneObject.name, item.gameObject);
     }
 	// Update is called once per frame
 	void Update () {
