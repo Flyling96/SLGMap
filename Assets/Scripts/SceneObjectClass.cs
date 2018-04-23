@@ -16,14 +16,14 @@ public class SceneObjectClass : MonoBehaviour {
     public HexCell cell = null;
 
     List<Vector2> pointList = new List<Vector2>(); //不规则六边形的边顶点
-    List<List<Vector2>> edgePointList = new List<List<Vector2>>();
+   // List<List<Vector2>> edgePointList = new List<List<Vector2>>();
 
 
 
     public void SetInfo(Vector3 tPosition, Quaternion tRotation, HexDirection dir,HexCell centerCell)
     {
         pointList.Clear();
-        edgePointList.Clear();
+        //edgePointList.Clear();
 
         position = tPosition;
         rotation = tRotation;
@@ -111,10 +111,7 @@ public class SceneObjectClass : MonoBehaviour {
 
 
                 //如果在斜坡上就直接放入对象池
-                if (cell.transform.position.y > (position.y + HexMetrics.instance.elevationStep*0.5f)
-                    || cell.transform.position.y < (position.y - HexMetrics.instance.elevationStep * 0.5f)
-                    ||cell.GetNeighbor(direction).transform.position.y > (position.y + HexMetrics.instance.elevationStep * 0.5f)
-                    || cell.GetNeighbor(direction).transform.position.y < (position.y - HexMetrics.instance.elevationStep * 0.5f))
+                if (cell.Elevation!= cell.GetNeighbor(direction).Elevation)
                 {
                     transform.parent.GetComponent<SceneObjectMgr>().MinusSceneObject(this);
                 }

@@ -266,7 +266,8 @@ public class HexMapEditor : MonoBehaviour {
 
     }
 
-    List<HexGridChunk> refreshChunkList = new List<HexGridChunk>();
+    List<HexGridChunk> refreshChunkList = new List<HexGridChunk>();//mesh基于chunk刷新
+    List<HexCell> refreshCellList = new List<HexCell>();//sceneObject基于cell刷新
 
     //场景物体
     void HandleInputDown()
@@ -299,9 +300,11 @@ public class HexMapEditor : MonoBehaviour {
         int centerZ = 0;
 
         refreshChunkList.Clear();
+        refreshCellList.Clear();
         if (Physics.Raycast(inputRay, out hit)) {
             centerCell = hexGrid.GetCell(hit.point);
             refreshChunkList.Add(centerCell.chunkParent);
+            refreshCellList.Add(centerCell);
             centerX = centerCell.coordinates.X;
             centerZ = centerCell.coordinates.Z;
             Vector3 pos = hit.point;
@@ -331,7 +334,7 @@ public class HexMapEditor : MonoBehaviour {
                 else
                 {
                     refreshChunkList[i].Refresh();
-                    refreshChunkList[i].sceneObjectMgr.Refresh();
+                    refreshChunkList[i].sceneObjectMgr.Refresh(refreshCellList);
                 }
             }
 

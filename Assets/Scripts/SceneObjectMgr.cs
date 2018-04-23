@@ -8,7 +8,7 @@ public class SceneObjectMgr : MonoBehaviour {
 
     public List<SceneObjectClass> sceneObjectList;
 	// Use this for initialization
-	void Start () {
+	void OnEnable () {
         sceneObjectList = new List<SceneObjectClass>();
     }
 	
@@ -17,11 +17,14 @@ public class SceneObjectMgr : MonoBehaviour {
         sceneObjectList.Clear();
     }
 
-    public void Refresh()
+    public void Refresh(List<HexCell> refreshList)
     {
         for(int i=0;i< sceneObjectList.Count;i++)
         {
-            sceneObjectList[i].Refresh (false);
+            if (refreshList.Contains(sceneObjectList[i].cell))
+            {
+                sceneObjectList[i].Refresh(false);
+            }
         }
     }
 
@@ -39,7 +42,7 @@ public class SceneObjectMgr : MonoBehaviour {
                 sceneObjectList.RemoveAt(i);
             }
         }
-        GameObjectPool.instance.InsertChild(HexMetrics.instance.editorSceneObject.name, item.gameObject);
+        GameObjectPool.instance.InsertChild(item.gameObject.name, item.gameObject);
     }
 	// Update is called once per frame
 	void Update () {
