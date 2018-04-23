@@ -284,6 +284,7 @@ public class HexMapEditor : MonoBehaviour {
             tSceneObject.SetActive(true);
             HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
             tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+            tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
             tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
             centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
         }
@@ -330,6 +331,7 @@ public class HexMapEditor : MonoBehaviour {
                 else
                 {
                     refreshChunkList[i].Refresh();
+                    refreshChunkList[i].sceneObjectMgr.Refresh();
                 }
             }
 
@@ -464,7 +466,8 @@ public class HexMapEditor : MonoBehaviour {
     {
         try
         {
-            StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"]));
+            //StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"]));
+            WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"]);
         }
         catch(Exception e)
         {
@@ -473,23 +476,28 @@ public class HexMapEditor : MonoBehaviour {
         }
     }
 
-    IEnumerator WaitSave(string path)
+    void WaitSave(string path)
     {
-        bool isBreak = false;
-        new System.Threading.Thread(() =>
-        {
-            System.Threading.Thread.Sleep(100);
-            using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create)))
-            {
-                hexGrid.Save(writer);
-            }
-            isBreak = true;
-        }).Start();
+        //bool isBreak = false;
+        //new System.Threading.Thread(() =>
+        //{
+        //    System.Threading.Thread.Sleep(100);
+        //    using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create)))
+        //    {
+        //        hexGrid.Save(writer);
+        //    }
+        //    isBreak = true;
+        //}).Start();
 
-        while(!isBreak)
+        //while(!isBreak)
+        //{
+        //    yield return null;
+        //}
+
+         using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create)))
         {
-            yield return null;
-        }
+              hexGrid.Save(writer);
+         }
 
         if (File.Exists(path))
         {

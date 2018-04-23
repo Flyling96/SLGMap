@@ -116,6 +116,11 @@ public class HexGrid : MonoBehaviour {
         {
             cells[i].Save(writer);
         }
+
+        for(int i=0;i< chunks.Length;i++)
+        {
+            chunks[i].Save(writer);
+        }
     }
 
     public void Load(BinaryReader reader)
@@ -128,6 +133,30 @@ public class HexGrid : MonoBehaviour {
         {
             cells[i].Load(reader);
         }
+
+        List<SceneObjectClass> itemClassList = new List<SceneObjectClass>();
+        GameObject sceneObject;
+        for (int i = 0; i < chunks.Length; i++)
+        {
+            itemClassList = chunks[i].Load(reader);
+            for (int j = 0; j < itemClassList.Count; j++)
+            {
+                Vector3 itemPosition = chunks[i].transform.TransformPoint(itemClassList[j].position);
+                itemClassList[j].cell = GetCell(itemPosition);
+                itemClassList[j].direction = GetPointDirection(new Vector2(itemPosition.x - itemClassList[j].cell.transform.position.x, itemPosition.z - itemClassList[j].cell.transform.position.z));
+                sceneObject = GameObject.Instantiate(Resources.Load(itemClassList[j].sceneObjectInfo.modelPath) as GameObject);
+                sceneObject.AddComponent<SceneObjectClass>();
+                sceneObject.GetComponent<SceneObjectClass>().SetInfo(itemClassList[j].position, itemClassList[j].rotation, itemClassList[j].direction, itemClassList[j].cell);
+                sceneObject.transform.SetParent(chunks[i].sceneObjectMgr.transform);
+                sceneObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                sceneObject.SetActive(true);
+                sceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                chunks[i].sceneObjectMgr.AddSceneObject(sceneObject.GetComponent<SceneObjectClass>());
+            }
+
+        }
+
+
     }
 
 

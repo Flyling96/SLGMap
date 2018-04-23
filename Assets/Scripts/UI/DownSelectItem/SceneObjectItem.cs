@@ -23,6 +23,7 @@ public class SceneObjectItem : DownSelectWndItem
                 sceneObjectModel.SetActive(false);
             }
             HexMetrics.instance.editorSceneObject = sceneObjectModel;
+            HexMetrics.instance.editorSceneObjectInfo = sceneObjectInfo;
             //GameObject item = GameObjectPool.instance.GetPoolChild(selectItem.name, selectItem);
         }
     }

@@ -29,6 +29,7 @@ public class SceneObjectClass : MonoBehaviour {
         rotation = tRotation;
         direction = dir;
         cell = centerCell;
+        //sceneObjectInfo = 
 
         Vector3 center = cell.Position;
 
@@ -71,9 +72,9 @@ public class SceneObjectClass : MonoBehaviour {
     {
         Vector2 point = new Vector2(position.x, position.z);
 
-        //如果在多边形内
         if (!isInit)
         {
+            //如果在多边形内
             if (ToolClass.instance.IsInside(point, pointList))
             {
                 position = new Vector3(position.x, cell.Position.y, position.z);

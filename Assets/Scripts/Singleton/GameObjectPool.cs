@@ -8,6 +8,7 @@ public class GameObjectPool : Singleton<GameObjectPool> {
 
     public GameObject GetPoolChild(string name ,GameObject prefab)
     {
+        name = name.Replace("(Clone)", "");
         GameObject result = null;
         if(gameObjectPool.ContainsKey(name)&&gameObjectPool[name].Count>0)
         {
@@ -27,9 +28,32 @@ public class GameObjectPool : Singleton<GameObjectPool> {
         return result;
     }
 
+    public GameObject GetPoolChild(string name, string path)
+    {
+        name = name.Replace("(Clone)", "");
+        GameObject result = null;
+        if (gameObjectPool.ContainsKey(name) && gameObjectPool[name].Count > 0)
+        {
+            result = gameObjectPool[name][0];
+            gameObjectPool[name].RemoveAt(0);
+        }
+        else if (gameObjectPool.ContainsKey(name) && !(gameObjectPool[name].Count > 0))
+        {
+            result = GameObject.Instantiate(Resources.Load(path) as GameObject);
+        }
+        else
+        {
+            gameObjectPool.Add(name, new List<GameObject>());
+            result = GameObject.Instantiate(Resources.Load(path) as GameObject);
+        }
+        result.SetActive(true);
+        return result;
+    }
+
     public void InsertChild(string name,GameObject prefab)
     {
-        if(!gameObjectPool.ContainsKey(name))
+        name = name.Replace("(Clone)", "");
+        if (!gameObjectPool.ContainsKey(name))
         {
             gameObjectPool.Add(name, new List<GameObject>());
         }

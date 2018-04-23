@@ -21,7 +21,7 @@ public class SceneObjectMgr : MonoBehaviour {
     {
         for(int i=0;i< sceneObjectList.Count;i++)
         {
-            sceneObjectList[i].Refresh(false);
+            sceneObjectList[i].Refresh (false);
         }
     }
 

@@ -156,6 +156,7 @@ public class HexMetrics: Singleton<HexMetrics>
     }
 
     public GameObject editorSceneObject;
+    public SceneObjectInfo editorSceneObjectInfo;
     public bool isEditorTexture = true;
     public Color editorColor = new Color(0.18f, 1, 0.18f, 1f);
     public TerrainTypes editorTerrainType = TerrainTypes.Grass;
