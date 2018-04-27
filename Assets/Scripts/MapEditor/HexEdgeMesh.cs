@@ -204,7 +204,7 @@ public class HexEdgeMesh : MonoBehaviour {
 
 
 
-    void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
+    public void AddQuad(Vector3 v1, Vector3 v2, Vector3 v3, Vector3 v4)
     {
         int vertexIndex = vertices.Count;
         vertices.Add(v1);
@@ -228,7 +228,7 @@ public class HexEdgeMesh : MonoBehaviour {
     }
 
     // 添加四边形四个点的颜色
-    void AddQuadColor(Color c1, Color c2)
+    public void AddQuadColor(Color c1, Color c2)
     {
         colors.Add(c1);
         colors.Add(c1);

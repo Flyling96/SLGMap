@@ -115,7 +115,7 @@ public class ToolClass : Singleton<ToolClass> {
         }
         double p = (a + b + c) / 2;// 半周长      
         double s = Math.Sqrt(p * (p - a) * (p - b) * (p - c));// 海伦公式求面积      
-        dis = 2 * s / a;// 返回点到线的距离（利用三角形面积公式求高）      
+        dis = 2 * s / a;   
         return dis;
     }
 

@@ -149,8 +149,12 @@ public class HexGrid : MonoBehaviour {
                 sceneObject.GetComponent<SceneObjectClass>().SetInfo(itemClassList[j].position, itemClassList[j].rotation, itemClassList[j].direction, itemClassList[j].cell);
                 sceneObject.transform.SetParent(chunks[i].sceneObjectMgr.transform);
                 sceneObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
+                sceneObject.tag = "SceneObject";
                 sceneObject.SetActive(true);
                 sceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                sceneObject.AddComponent<BoxCollider>();
+                sceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
+                sceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
                 chunks[i].sceneObjectMgr.AddSceneObject(sceneObject.GetComponent<SceneObjectClass>());
             }
 

@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 
 public class HexMapEditor : MonoBehaviour {
 
-	public Color[] colors;
+	//public Color[] colors;
     public static GameObject uiRoot;
 
 	public HexGrid hexGrid;
@@ -19,9 +19,13 @@ public class HexMapEditor : MonoBehaviour {
 
     int elevation = 0;
     int waterLevel = 0;
-    int brushRange = 0;
+    int brushRange = 1;
+    int sceneObjectDensity = 1;
 
-	//Color cellColor;
+    //Color cellColor;
+
+    public Toggle isDeleteSceneObject;
+    public Toggle isBrushSceneObject;
 
     public Toggle isStepEditorToggle;
     public Toggle isSlopeEditorToggle;
@@ -31,6 +35,22 @@ public class HexMapEditor : MonoBehaviour {
     Button terrainTextureBtn;
     Button sceneObjectBtn;
 
+
+    bool IsDeleteSceneObject
+    {
+        get
+        {
+            return isDeleteSceneObject.isOn;
+        }
+    }
+
+    bool IsBrushSceneObject
+    {
+        get
+        {
+            return isBrushSceneObject.isOn;
+        }
+    }
 
 
 
@@ -82,11 +102,16 @@ public class HexMapEditor : MonoBehaviour {
         brushRange = (int)sliderValue;
     }
 
+    public void SetSceneObjectBrush(float sliderValue)
+    {
+        sceneObjectDensity = (int)sliderValue;
+    }
+
     private void Awake()
     {
-        terrainTextureBtn = transform.Find("Color Panel/TerrainTextureBtn").GetComponent<Button>();
+        terrainTextureBtn = transform.Find("Terrain Panel/TerrainTextureBtn").GetComponent<Button>();
         terrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
-        sceneObjectBtn = transform.Find("Color Panel/SceneObjectBtn").GetComponent<Button>();
+        sceneObjectBtn = transform.Find("Terrain Panel/SceneObjectBtn").GetComponent<Button>();
         sceneObjectBtn.onClick.AddListener(ShowSceneObjectWnd);
     }
 
@@ -108,6 +133,14 @@ public class HexMapEditor : MonoBehaviour {
         }
         else if (HexMetrics.instance.IsEditorSceneObject)
         {
+            if(IsBrushSceneObject&&!hexEdgeMesh.gameObject.activeSelf)
+            {
+                hexEdgeMesh.gameObject.SetActive(true);
+            }
+            if(!IsBrushSceneObject&&hexEdgeMesh.gameObject.activeSelf)
+            {
+                hexEdgeMesh.gameObject.SetActive(false);
+            }
            if(Input.GetMouseButtonDown(0) && !EventSystem.current.IsPointerOverGameObject())
             {
                 HandleInputDown();
@@ -128,7 +161,7 @@ public class HexMapEditor : MonoBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            if(HexMetrics.instance.IsEditorTerrain)
+            if(HexMetrics.instance.IsEditorTerrain||(HexMetrics.instance.IsEditorSceneObject &&IsBrushSceneObject))
             {
                 if (IsEditorStep() || IsEditorSlope())
                 {
@@ -163,11 +196,44 @@ public class HexMapEditor : MonoBehaviour {
                     {
                         if (HexMetrics.instance.isEditorTexture)
                         {
-                            hexEdgeMesh.Triangulate(cells, new Color(0.18f, 1, 0.18f, 1f));
+                            if (HexMetrics.instance.IsEditorSceneObject && IsDeleteSceneObject && IsBrushSceneObject)
+                            {
+                                hexEdgeMesh.Triangulate(cells, ToolClass.instance.ConvertColor("#FF2020FF"));
+                            }
+                            else if(HexMetrics.instance.IsEditorSceneObject && !IsDeleteSceneObject && IsBrushSceneObject)
+                            {
+                                hexEdgeMesh.Clear();
+                                 Vector2 max = new Vector2(hit.point.x + 8 * brushRange, hit.point.z + 8 * brushRange);
+                                Vector2 min = new Vector2(hit.point.x - 8 * brushRange, hit.point.z - 8 * brushRange);
+                                hexEdgeMesh.AddQuad
+                                    (
+                                        new Vector3(min.x, hit.point.y + 2 ,min.y),
+                                        new Vector3(max.x, hit.point.y + 2, min.y),
+                                        new Vector3(min.x, hit.point.y + 2, max.y),
+                                        new Vector3(max.x, hit.point.y + 2, max.y)
+                                    );
+                                hexEdgeMesh.AddQuadColor
+                                    (
+                                        new Color(0.18f, 1, 0.18f, 1f),
+                                        new Color(0.18f, 1, 0.18f, 1f)
+                                    );
+                                hexEdgeMesh.InputMeshInfo();
+                            }
+                            else
+                            {
+                                hexEdgeMesh.Triangulate(cells, new Color(0.18f, 1, 0.18f, 1f));
+                            }
                         }
                         else
                         {
-                            hexEdgeMesh.Triangulate(cells, HexMetrics.instance.editorColor);
+                            if (HexMetrics.instance.IsEditorSceneObject && IsDeleteSceneObject)
+                            {
+                                hexEdgeMesh.Triangulate(cells, ToolClass.instance.ConvertColor("#FF2020FF"));
+                            }
+                            else
+                            {
+                                hexEdgeMesh.Triangulate(cells, HexMetrics.instance.editorColor);
+                            }
                         }
                     }
                     else
@@ -278,16 +344,98 @@ public class HexMapEditor : MonoBehaviour {
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = hexGrid.GetCell(hit.point);
-            GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
-            tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
-            tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-            tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
-            tSceneObject.SetActive(true);
-            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
-            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
-            tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
-            tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
-            centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+            if (!IsDeleteSceneObject)
+            {
+                if (IsBrushSceneObject)//大量随机
+                {
+                    Vector2 max = new Vector2(hit.point.x + 8 * brushRange, hit.point.z + 8 * brushRange);
+                    Vector2 min = new Vector2(hit.point.x - 8 * brushRange, hit.point.z - 8 * brushRange);
+                    float px, pz,py=0;
+                    for(int i=0;i<sceneObjectDensity * brushRange;i++)
+                    {
+                        px = UnityEngine.Random.Range(min.x, max.x);
+                        pz = UnityEngine.Random.Range(min.y, max.y);
+                        if(Physics.Raycast(new Vector3(px, 35, pz),Vector3.down,out hit))
+                        {
+                            if (hit.collider.gameObject.tag != "Mesh")
+                                continue;
+                            py = hit.point.y;
+                        }
+                        Vector3 tPosition = new Vector3(px, py, pz);
+                        centerCell = hexGrid.GetCell(tPosition);
+                        if(centerCell==null)
+                        {
+                            continue;
+                        }
+                        GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
+                        tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
+                        tSceneObject.transform.position = tPosition;
+                        tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
+                        tSceneObject.SetActive(true);
+                        HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(tPosition.x - centerCell.transform.position.x, tPosition.z - centerCell.transform.position.z));
+                        tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+                        tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
+                        tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                        tSceneObject.AddComponent<BoxCollider>();
+                        tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
+                        tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
+                        tSceneObject.tag = "SceneObject";
+                        centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                    }
+                }
+                else
+                {
+                    if (hit.collider.gameObject.tag == "Mesh")
+                    {
+                        GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
+                        tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
+                        tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                        tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
+                        tSceneObject.SetActive(true);
+                        HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
+                        tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+                        tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
+                        tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                        tSceneObject.AddComponent<BoxCollider>();
+                        tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
+                        tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
+                        tSceneObject.tag = "SceneObject";
+                        centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                    }
+                }
+            }
+            else
+            {
+                int centerX = centerCell.coordinates.X;
+                int centerZ = centerCell.coordinates.Z;
+                if (IsBrushSceneObject&&IsDeleteSceneObject)
+                {
+                    for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
+                    {
+                        for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
+                        {
+                            HexCell cell =  hexGrid.GetCell(new HexCoordinates(x, z));
+                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
+                        }
+                    }
+                    for (int l = 1, z = centerZ + 1; z <= centerZ + brushRange - 1; l++, z++)
+                    {
+                        for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
+                        {
+                            HexCell cell = hexGrid.GetCell(new HexCoordinates(x, z));
+                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
+                        }
+                    }
+
+                }
+                else
+                {
+                    if (hit.collider.gameObject.tag == "SceneObject")
+                    {
+                        hit.collider.gameObject.GetComponent<SceneObjectClass>().cell.chunkParent.sceneObjectMgr.MinusSceneObject(hit.collider.gameObject.GetComponent<SceneObjectClass>());
+                    }
+                }
+            }
         }
     }
 
@@ -334,13 +482,20 @@ public class HexMapEditor : MonoBehaviour {
                 else
                 {
                     refreshChunkList[i].Refresh();
-                    refreshChunkList[i].sceneObjectMgr.Refresh(refreshCellList);
+                    // refreshChunkList[i].sceneObjectMgr.Refresh(refreshCellList);
+                    StartCoroutine(WaitMesh(refreshChunkList[i]));
                 }
             }
 
         }
 	}
 
+    IEnumerator WaitMesh(HexGridChunk chunk)
+    {
+        yield return new WaitForSeconds(0.3f);
+        chunk.sceneObjectMgr.Refresh(refreshCellList);
+    }
+    
     //对整个六边形的边进行编辑
     void EditorWholeCell(HexCell cell)
     {
@@ -570,6 +725,7 @@ public class HexMapEditor : MonoBehaviour {
     #region 地形纹理编辑相关
     void ShowTerrainTextureWnd()
     {
+        hexEdgeMesh.gameObject.SetActive(true);
         HexMetrics.instance.IsEditorTerrain = true;
         if (HexMetrics.instance.isEditorTexture)
         {
@@ -585,6 +741,7 @@ public class HexMapEditor : MonoBehaviour {
     {
         HexMetrics.instance.IsEditorSceneObject = true;
         UIManage.instance.ShowDownSelectWnd(FileManage.instance.CSVTable["sceneObject"], DownSelectWndType.sceneObject);
+        hexEdgeMesh.gameObject.SetActive(false);
     }
 
     #endregion

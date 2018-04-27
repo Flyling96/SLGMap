@@ -74,51 +74,85 @@ public class SceneObjectClass : MonoBehaviour {
 
         if (!isInit)
         {
-            //如果在多边形内
             if (ToolClass.instance.IsInside(point, pointList))
             {
                 position = new Vector3(position.x, cell.Position.y, position.z);
             }
             else
             {
-
-                //    float objectY = cell.transform.position.y;
-                //    List<Vector2> tPointList = new List<Vector2>();
-
-                //    for (int i=0;i< edgePointList.Count;i++)
-                //    {
-                //        if (ToolClass.instance.IsInside(point, edgePointList[i]))
-                //        {
-                //            tPointList = edgePointList[i];
-                //        }
-                //    }
-
-                //    double disCell = ToolClass.instance.PointToLine(point, tPointList[0], tPointList[3]);
-                //    double disNeighbor = ToolClass.instance.PointToLine(point, tPointList[1], tPointList[2]);
-                //    float offest = (float)(disCell/(disCell+disNeighbor));
-
-                //    //如果是阶梯
-                //    if (cell.isStepDirection[(int)direction])
-                //    {
-
-                //    }
-                //    else //如果是斜坡
-                //    {
-                //        objectY = Mathf.Lerp(cell.transform.position.y, cell.GetNeighbor(direction).transform.position.y, offest+0.2f);
-                //    }
-                //    position = new Vector3(position.x, objectY, position.z);
-                //    Debug.Log(2);
-
-
-                //如果在斜坡上就直接放入对象池
-                if (cell.Elevation!= cell.GetNeighbor(direction).Elevation)
+                transform.GetComponent<BoxCollider>().enabled = false;
+                Vector3 worldPosition = transform.parent.TransformPoint(position);
+                RaycastHit hit;
+                //在斜坡上重新计算y的位置
+                if (Physics.Raycast(new Vector3(worldPosition.x, 35, worldPosition.z), Vector3.down, out hit))
                 {
-                    transform.parent.GetComponent<SceneObjectMgr>().MinusSceneObject(this);
+                    if (hit.collider.gameObject.tag != "Mesh")
+                    {
+                        transform.parent.GetComponent<SceneObjectMgr>().MinusSceneObject(this);
+                    }
+                    position = transform.parent.InverseTransformPoint(new Vector3(worldPosition.x, hit.point.y, worldPosition.z));
                 }
-
+                transform.GetComponent<BoxCollider>().enabled = true;
             }
         }
         transform.localPosition = position;
         transform.localRotation = rotation;
+
+        //如果在多边形内
+        //if (ToolClass.instance.IsInside(point, pointList))
+        //{
+        //    position = new Vector3(position.x, cell.Position.y, position.z);
+        //}
+        //else
+        //{
+
+        //    float objectY = cell.transform.position.y;
+        //    List<Vector2> tPointList = new List<Vector2>();
+
+        //    for (int i=0;i< edgePointList.Count;i++)
+        //    {
+        //        if (ToolClass.instance.IsInside(point, edgePointList[i]))
+        //        {
+        //            tPointList = edgePointList[i];
+        //        }
+        //    }
+
+        //    double disCell = ToolClass.instance.PointToLine(point, tPointList[0], tPointList[3]);
+        //    double disNeighbor = ToolClass.instance.PointToLine(point, tPointList[1], tPointList[2]);
+        //    float offest = (float)(disCell/(disCell+disNeighbor));
+
+        //    //如果是阶梯
+        //    if (cell.isStepDirection[(int)direction])
+        //    {
+
+        //    }
+        //    else //如果是斜坡
+        //    {
+        //        objectY = Mathf.Lerp(cell.transform.position.y, cell.GetNeighbor(direction).transform.position.y, offest+0.2f);
+        //    }
+        //    position = new Vector3(position.x, objectY, position.z);
+        //    Debug.Log(2);
+
+
+        //if (cell.Elevation!= cell.GetNeighbor(direction).Elevation)
+        //{
+        //    //如果在斜坡上就直接放入对象池
+        //    //transform.parent.GetComponent<SceneObjectMgr>().MinusSceneObject(this);
+        //    transform.GetComponent<BoxCollider>().enabled = false;
+        //    Vector3 worldPosition = transform.parent.TransformPoint(position);
+        //    RaycastHit hit;
+        //    //在斜坡上重新计算y的位置
+        //    if (Physics.Raycast(new Vector3(worldPosition.x, 35, worldPosition.z), Vector3.down, out hit))
+        //    {
+        //        if (hit.collider.gameObject.tag != "Mesh")
+        //        {
+        //            transform.parent.GetComponent<SceneObjectMgr>().MinusSceneObject(this);
+        //        }
+        //        position = transform.parent.InverseTransformPoint(new Vector3(worldPosition.x, hit.point.y, worldPosition.z));
+        //    }
+        //    transform.GetComponent<BoxCollider>().enabled = true;
+        //}
+
+        //}
     }
 }
