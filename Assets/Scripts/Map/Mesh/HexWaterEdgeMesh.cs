@@ -22,6 +22,7 @@ public class HexWaterEdgeMesh : HexMesh
             if (cells[i].isUnderWaterLevel)
             {
                 TrangulateWaterEdge(cells[i]);
+                cells[i].chunkParent.sceneObjectMgr.MinusSceneObject(cells[i]);
             }
         }
         Draw();

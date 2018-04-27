@@ -380,7 +380,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 95398114}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -266.97003, y: -64.19998, z: 0}
+  m_LocalPosition: {x: -296.47003, y: -64.19998, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1529248817}
@@ -672,7 +672,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 116703502}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -297.27002, y: -32.5, z: 0}
+  m_LocalPosition: {x: -326.77002, y: -32.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 127081376}
@@ -1344,7 +1344,7 @@ MonoBehaviour:
   m_Colors:
     m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
     m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
+    m_PressedColor: {r: 1, g: 1, b: 1, a: 1}
     m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
@@ -1362,15 +1362,15 @@ MonoBehaviour:
   m_FillRect: {fileID: 559361993}
   m_HandleRect: {fileID: 1529450888}
   m_Direction: 2
-  m_MinValue: 0
-  m_MaxValue: 6
+  m_MinValue: 1
+  m_MaxValue: 10
   m_WholeNumbers: 1
-  m_Value: 0
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 2142000451}
-        m_MethodName: SetElevation
+        m_MethodName: SetSceneObjectBrush
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1474,7 +1474,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 473996484}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -266.7, y: 171.34004, z: 0}
+  m_LocalPosition: {x: -296.2, y: 171.34004, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1035461517}
@@ -2648,7 +2648,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 896018430}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -266.69998, y: 124.90004, z: 0}
+  m_LocalPosition: {x: -296.19998, y: 124.90004, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1068579874}
@@ -4843,7 +4843,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1715340326}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -326.915, y: 300.5, z: 0}
+  m_LocalPosition: {x: -356.415, y: 300.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1793065162}
@@ -4929,7 +4929,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1735349335}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -328.2, y: 97.70004, z: 0}
+  m_LocalPosition: {x: -357.7, y: 97.70004, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 802440241}
@@ -5012,7 +5012,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1773662964}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -266.70004, y: 9.400055, z: 0}
+  m_LocalPosition: {x: -296.20004, y: 9.400055, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1782389534}
@@ -5152,7 +5152,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1780010102}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -236.67, y: -32.5, z: 0}
+  m_LocalPosition: {x: -266.16998, y: -32.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1185888613}
@@ -6302,7 +6302,7 @@ RectTransform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2142000446}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 329.5, y: 300.5, z: 0}
+  m_LocalPosition: {x: 359, y: 300.5, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1715340327}
@@ -6339,7 +6339,7 @@ MonoBehaviour:
   hexGrid: {fileID: 1571186511}
   hexEdgeMesh: {fileID: 809001741}
   isDeleteSceneObject: {fileID: 125899506}
-  isBrushSceneObject: {fileID: 125899506}
+  isBrushSceneObject: {fileID: 609869696}
   isStepEditorToggle: {fileID: 802440240}
   isSlopeEditorToggle: {fileID: 1257905356}
   isStepWholeEditorToggle: {fileID: 57472262}

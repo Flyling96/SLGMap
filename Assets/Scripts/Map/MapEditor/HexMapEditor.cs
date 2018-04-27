@@ -207,7 +207,7 @@ public class HexMapEditor : MonoBehaviour {
                                 Vector2 min = new Vector2(hit.point.x - 8 * brushRange, hit.point.z - 8 * brushRange);
                                 hexEdgeMesh.AddQuad
                                     (
-                                        new Vector3(min.x, hit.point.y + 2 ,min.y),
+                                        new Vector3(min.x, hit.point.y + 2, min.y),
                                         new Vector3(max.x, hit.point.y + 2, min.y),
                                         new Vector3(min.x, hit.point.y + 2, max.y),
                                         new Vector3(max.x, hit.point.y + 2, max.y)
@@ -238,7 +238,10 @@ public class HexMapEditor : MonoBehaviour {
                     }
                     else
                     {
-                        hexEdgeMesh.Triangulate(cells, ToolClass.instance.ConvertColor("#2FD4FFFF"));
+                        if (!HexMetrics.instance.IsEditorSceneObject)
+                        {
+                            hexEdgeMesh.Triangulate(cells, ToolClass.instance.ConvertColor("#2FD4FFFF"));
+                        }
                     }
                 }
             }
@@ -363,7 +366,7 @@ public class HexMapEditor : MonoBehaviour {
                         }
                         Vector3 tPosition = new Vector3(px, py, pz);
                         centerCell = hexGrid.GetCell(tPosition);
-                        if(centerCell==null)
+                        if(centerCell.isUnderWaterLevel|| centerCell == null)
                         {
                             continue;
                         }
@@ -387,20 +390,23 @@ public class HexMapEditor : MonoBehaviour {
                 {
                     if (hit.collider.gameObject.tag == "Mesh")
                     {
-                        GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
-                        tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
-                        tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
-                        tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
-                        tSceneObject.SetActive(true);
-                        HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
-                        tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
-                        tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
-                        tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
-                        tSceneObject.AddComponent<BoxCollider>();
-                        tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
-                        tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
-                        tSceneObject.tag = "SceneObject";
-                        centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                        if (!centerCell.isUnderWaterLevel && centerCell != null)
+                        {
+                            GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
+                            tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
+                            tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                            tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
+                            tSceneObject.SetActive(true);
+                            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
+                            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+                            tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
+                            tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                            tSceneObject.AddComponent<BoxCollider>();
+                            tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
+                            tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
+                            tSceneObject.tag = "SceneObject";
+                            centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                        }
                     }
                 }
             }

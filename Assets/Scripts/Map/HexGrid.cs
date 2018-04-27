@@ -3,13 +3,13 @@ using UnityEngine.UI;
 using System.IO;
 using System.Collections.Generic;
 
-public class HexGrid : MonoBehaviour {
+public class HexGrid : Singleton<HexGrid> {
 
 	int width = 6;
 	int height = 6;
 
-    int oldCountX = 4;
-    int oldCountZ = 4;
+    int oldCountX = 0;
+    int oldCountZ = 0;
 
     public int chunkCountX = 4;
     public int chunkCountZ = 4;
@@ -35,11 +35,11 @@ public class HexGrid : MonoBehaviour {
 
 
     void Start() {
-        ConfigDateManage.instance.InitData();
-        oldCountX = chunkCountX;
-        oldCountZ = chunkCountZ;
-        chunks = new HexGridChunk[chunkCountX * chunkCountZ];
-        NewMap();
+        //ConfigDateManage.instance.InitData();
+        //oldCountX = chunkCountX;
+        //oldCountZ = chunkCountZ;
+        //chunks = new HexGridChunk[chunkCountX * chunkCountZ];
+        //NewMap();
 
     }
 
@@ -53,6 +53,8 @@ public class HexGrid : MonoBehaviour {
     //新建地图
     public void NewMap()
     {
+        chunks = new HexGridChunk[chunkCountX * chunkCountZ];
+
         if (HexMetrics.instance.isEditorTexture)
         {
             gridChunkPerfab = (Instantiate(Resources.Load("Prefabs/Hex Grid Chunk") as GameObject)).GetComponent<HexGridChunk>();
