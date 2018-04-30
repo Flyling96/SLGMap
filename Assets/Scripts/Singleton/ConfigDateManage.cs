@@ -78,7 +78,7 @@ public class ConfigDateManage : Singleton<ConfigDateManage> {
 	public void InitData()
     {
         FileManage.instance.LoadHashCSV("sceneHashTable");
-
+        FileManage.instance.LoadHashCSV("gameUnitModelTable");
 
         FileManage.instance.LoadCSV("terrainTexture", new TerrainTextureInfo());
         FileManage.instance.LoadCSV("terrainColor", new TerrainColorInfo());

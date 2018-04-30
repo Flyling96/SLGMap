@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.IO;
 using System.Collections.Generic;
+using System.Collections;
 
 public class HexGrid : Singleton<HexGrid> {
 
@@ -30,8 +31,8 @@ public class HexGrid : Singleton<HexGrid> {
 
 
     HexGridChunk[] chunks;
-    //Canvas gridCanvas;
-	//HexMesh hexMesh;
+    Canvas gridCanvas;
+    //HexMesh hexMesh;
 
 
     void Start() {
@@ -43,6 +44,25 @@ public class HexGrid : Singleton<HexGrid> {
 
     }
 
+    public void DistanceToOther(HexCell cell)
+    {
+        StopAllCoroutines();
+        StartCoroutine(Search(cell));
+    }
+
+    IEnumerator Search(HexCell cell)
+    {
+        WaitForSeconds delay = new WaitForSeconds(1 / 60f);
+
+        for (int i = 0; i < cells.Length; i++)
+        {
+
+            yield return delay;
+
+            cells[i].DistanceWithOthers =cell.coordinates.DistanceToOther(cells[i].coordinates);
+
+        }
+    }
     //改变地图尺寸
     public void ChangeSize(int width,int height)
     {
@@ -83,7 +103,7 @@ public class HexGrid : Singleton<HexGrid> {
         oldCountZ = chunkCountZ;
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
-        //gridCanvas = GetComponentInChildren<Canvas>();
+        gridCanvas = GetComponentInChildren<Canvas>();
 
         cells = new HexCell[cellCountWidth * cellCountHeight];
 
@@ -290,12 +310,11 @@ public class HexGrid : Singleton<HexGrid> {
 			}
 		}
 
-		//Text label = Instantiate<Text>(cellLabelPrefab);
-		//label.rectTransform.SetParent(gridCanvas.transform, false);
-		//label.rectTransform.anchoredPosition =new Vector2(position.x, position.z);
-		//label.text = cell.coordinates.ToStringOnSeparateLines();
-		//cell.uiRect = label.rectTransform;
-
+        Text label = Instantiate<Text>(cellLabelPrefab);
+        label.rectTransform.SetParent(gridCanvas.transform, false);
+        label.rectTransform.anchoredPosition3D = new Vector3(position.x, position.z,cell.transform.position.y);
+        cell.label = label;
+        cell.uiRect = label.rectTransform;
 
         cell.isStepDirection = new bool[]{false,false,false,false,false,false};
         CellToChunk(x, z, cell);

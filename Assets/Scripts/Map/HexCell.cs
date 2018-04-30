@@ -1,9 +1,30 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.IO;
 using System.Collections.Generic;
 
 
 public class HexCell : MonoBehaviour {
+
+
+    //距离相关
+    public Text label;
+    int distanceWithOthers = 0;
+
+    public int DistanceWithOthers
+    {
+
+        get
+        {
+            return distanceWithOthers;
+        }
+
+        set
+        {
+            distanceWithOthers = value;
+            label.text = distanceWithOthers.ToString();
+        }
+    }
 
 
     //纹理相关
@@ -32,7 +53,7 @@ public class HexCell : MonoBehaviour {
 
     public bool IsDrawPreviousRoadMesh(HexDirection direction)
     {
-        if(isThroughRoad[(int)direction]==true&&isThroughRoad[(int)direction.Previous()]==false)
+        if (isThroughRoad[(int)direction] == true && isThroughRoad[(int)direction.Previous()] == false)
         {
             return true;
         }
@@ -113,6 +134,10 @@ public class HexCell : MonoBehaviour {
         position.y = value * HexMetrics.instance.elevationStep;
         position.y += (HexMetrics.instance.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;//对高度进行微扰;
         transform.localPosition = position;
+
+        Vector3 uiPosition = uiRect.localPosition;
+        uiPosition.z = -position.y;
+        uiRect.localPosition = uiPosition;
     }
 
     public Vector3 Position
