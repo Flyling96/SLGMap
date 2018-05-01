@@ -112,6 +112,92 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1001 &11213382
+Prefab:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalPosition.y
+      value: 5.0999994
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_AnchoredPosition.y
+      value: 5.0999994
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_SizeDelta.x
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_SizeDelta.y
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_AnchorMin.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_AnchorMax.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 22429454, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_Pivot.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 174918, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 100100000, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
+  m_IsPrefabParent: 0
 --- !u!1 &263352179
 GameObject:
   m_ObjectHideFlags: 0
@@ -610,7 +696,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   chunkCountX: 5
   chunkCountZ: 5
-  defaultColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultColor: {r: 0, g: 0.503448, b: 1, a: 1}
   noiseSource: {fileID: 2800000, guid: c49a12caaa0de9e42833492850e400c9, type: 3}
   cellPrefab: {fileID: 11422220, guid: 94c2312396697489abc866a188f80152, type: 2}
   cellLabelPrefab: {fileID: 11470134, guid: f68794ca03b6f4510b9a5bd6ee9ba2f4, type: 2}
@@ -628,5 +714,5 @@ Transform:
   - {fileID: 293599572}
   - {fileID: 323766258}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
