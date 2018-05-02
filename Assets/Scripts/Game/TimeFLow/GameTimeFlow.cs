@@ -5,7 +5,7 @@ using System.IO;
 
 public class GameTimeFlow : MonoBehaviour {
 
-    public HexGrid hexGrid;
+    //public HexGrid hexGrid;
 	// Use this for initialization
 	void Start () {
         ConfigDateManage.instance.InitData();
@@ -21,9 +21,9 @@ public class GameTimeFlow : MonoBehaviour {
     {
         using (BinaryReader reader = new BinaryReader(File.Open(Application.streamingAssetsPath + "/" + fileName, FileMode.Open)))
         {
-            hexGrid.Load(reader);
+            HexGrid.instance.Load(reader);
         }
 
-        hexGrid.Refresh();
+        HexGrid.instance.Refresh();
     }
 }

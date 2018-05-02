@@ -27,7 +27,7 @@ public class HexGrid : Singleton<HexGrid> {
     public HexCell cellPrefab;
 	public Text cellLabelPrefab;
 
-	HexCell[] cells;
+	public HexCell[] cells;
 
 
     HexGridChunk[] chunks;
@@ -70,9 +70,21 @@ public class HexGrid : Singleton<HexGrid> {
         chunkCountZ = height;
     }
 
+    IEnumerator waitInstantiate()
+    {
+        while(cellPrefab==null||cellLabelPrefab==null||noiseSource==null)
+        {
+            yield return null;
+        }
+    }
     //新建地图
     public void NewMap()
     {
+
+        cellPrefab = (Instantiate(Resources.Load("Prefabs/Hex Cell") as GameObject)).GetComponent<HexCell>();
+        cellLabelPrefab = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Cell Label") as GameObject)).GetComponent<Text>(); 
+        noiseSource =Resources.Load("Texture/Noise") as Texture2D;
+        StartCoroutine(waitInstantiate());
         chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
         if (HexMetrics.instance.isEditorTexture)
@@ -103,7 +115,7 @@ public class HexGrid : Singleton<HexGrid> {
         oldCountZ = chunkCountZ;
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
-        gridCanvas = GetComponentInChildren<Canvas>();
+        gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
 
         cells = new HexCell[cellCountWidth * cellCountHeight];
 
@@ -278,7 +290,7 @@ public class HexGrid : Singleton<HexGrid> {
 	}
 
 	void CreateCell (int x, int z, int i) {
-		Vector3 position;
+        Vector3 position;
 		position.x = (x + z * 0.5f - z / 2) * (HexMetrics.instance.innerRadius * 2f);
 		position.y = 0f;
 		position.z = z * (HexMetrics.instance.outerRadius * 1.5f);

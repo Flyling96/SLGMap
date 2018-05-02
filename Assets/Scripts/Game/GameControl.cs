@@ -5,14 +5,20 @@ using UnityEngine.UI;
 
 public class GameControl : MonoBehaviour {
 
-    public HexGrid hexGrid;
+    //public HexGrid hexGrid;
 
-    int distanceInOneRound = 5;
+    int distanceInOneRound = 15;
 
-    List<HexCell> showHightlightCellList = new List<HexCell>();
+    List<HexCell> canGotoCellList = new List<HexCell>();
+    List<HexCell> cantGotoNowList = new List<HexCell>();
+    List<HexCell> allCellList = new List<HexCell>();
 	// Use this for initialization
 	void Start () {
-        showHightlightCellList.Clear();
+        canGotoCellList.Clear();
+        for(int i=0;i<HexGrid.instance.cells.Length;i++)
+        {
+            allCellList.Add(HexGrid.instance.cells[i]);
+        }
     }
 
 	// Update is called once per frame
@@ -31,13 +37,18 @@ public class GameControl : MonoBehaviour {
         }
         else if(Input.GetMouseButtonDown(1))
         {
-            for(int i=0;i<showHightlightCellList.Count;i++)
+            for(int i=0;i<canGotoCellList.Count;i++)
             {
-                showHightlightCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
             }
-            showHightlightCellList.Clear();
-            startCell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
-            endCell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+            for(int i=0;i<cantGotoNowList.Count;i++)
+            {
+                cantGotoNowList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                cantGotoNowList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+            }
+            canGotoCellList.Clear();
+            cantGotoNowList.Clear();
             startCell = null;
             endCell = null;
         }
@@ -52,15 +63,40 @@ public class GameControl : MonoBehaviour {
         RaycastHit hit;
         if (Physics.Raycast(inputRay, out hit))
         {
-            endCell = hexGrid.GetCell(hit.point);
+            endCell = HexGrid.instance.GetCell(hit.point);
             endCell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
             endCell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#0080FFFF");
         }
-        showHightlightCellList.Add(endCell);
+        //canGotoCellList.Add(endCell);
+        //Debug.Log(canGotoCellList.IndexOf(endCell));
+        List<HexCell> road = new List<HexCell>();
+        if (!canGotoCellList.Contains(endCell))
+        {
+            road = FindRoad.instance.Dijkstra(startCell, endCell, allCellList);
+        }
+        else
+        {
+            road = FindRoad.instance.Dijkstra(startCell, endCell, canGotoCellList);
+        }
+
+        for(int i=0;i<road.Count;i++)
+        {
+            if (canGotoCellList.Contains(road[i]))
+            {
+                road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00FF76FF");
+            }
+            else
+            {
+                road[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
+                road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#0080FFFF");
+                cantGotoNowList.Add(road[i]);
+            }
+        }
     }
 
     void ClickStartCell()
     {
+        canGotoCellList.Clear();
         HexCell NeighborCell = null;
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -68,8 +104,8 @@ public class GameControl : MonoBehaviour {
         int centerZ;
         if (Physics.Raycast(inputRay, out hit))
         {
-            startCell = hexGrid.GetCell(hit.point);
-            hexGrid.DistanceToOther(startCell);
+            startCell = HexGrid.instance.GetCell(hit.point);
+            //hexGrid.DistanceToOther(startCell);
 
             centerX = startCell.coordinates.X;
             centerZ = startCell.coordinates.Z;
@@ -77,13 +113,13 @@ public class GameControl : MonoBehaviour {
             {
                 for (int x = centerX - distanceInOneRound + 1 + l; x <= centerX + distanceInOneRound - 1; x++)
                 {
-                    if (hexGrid.GetCell(new HexCoordinates(x, z)) != null)
+                    if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
                     {
-                        NeighborCell = hexGrid.GetCell(new HexCoordinates(x, z));
+                        NeighborCell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
                         if (startCell.coordinates.DistanceToOther(NeighborCell.coordinates)<=distanceInOneRound)
                         {
                             NeighborCell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
-                            showHightlightCellList.Add(NeighborCell);
+                            canGotoCellList.Add(NeighborCell);
                         }
                     }
                 }
@@ -93,13 +129,13 @@ public class GameControl : MonoBehaviour {
             {
                 for (int x = centerX - distanceInOneRound + 1; x <= centerX + distanceInOneRound - 1 - l; x++)
                 {
-                    if (hexGrid.GetCell(new HexCoordinates(x, z)) != null)
+                    if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
                     {
-                        NeighborCell = hexGrid.GetCell(new HexCoordinates(x, z));
+                        NeighborCell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
                         if (startCell.coordinates.DistanceToOther(NeighborCell.coordinates) <= distanceInOneRound)
                         {
                             NeighborCell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
-                            showHightlightCellList.Add(NeighborCell);
+                            canGotoCellList.Add(NeighborCell);
                         }
                     }
                 }
