@@ -72,11 +72,11 @@ public class GameControl : MonoBehaviour {
         List<HexCell> road = new List<HexCell>();
         if (!canGotoCellList.Contains(endCell))
         {
-            road = FindRoad.instance.Dijkstra(startCell, endCell, allCellList);
+            road = FindRoad.instance.AStar(startCell, endCell, allCellList);
         }
         else
         {
-            road = FindRoad.instance.Dijkstra(startCell, endCell, canGotoCellList);
+            road = FindRoad.instance.AStar(startCell, endCell, canGotoCellList);
         }
 
         for(int i=0;i<road.Count;i++)
