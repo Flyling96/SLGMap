@@ -19,6 +19,7 @@ public class GameControl : MonoBehaviour {
         {
             allCellList.Add(HexGrid.instance.cells[i]);
         }
+        FindRoad.instance.Init(allCellList);
     }
 
 	// Update is called once per frame
