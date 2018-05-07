@@ -153,7 +153,8 @@ public class FindRoad : Singleton<FindRoad> {
             {
                 if (cells.Contains(cells[i].GetNeighbor((HexDirection)j)))
                 {
-                    distance[i, cells.IndexOf(cells[i].GetNeighbor((HexDirection)j))] = cells[i].coordinates.DistanceToOther(cells[i].GetNeighbor((HexDirection)j).coordinates);
+                    // distance[i, cells.IndexOf(cells[i].GetNeighbor((HexDirection)j))] = cells[i].coordinates.DistanceToOther(cells[i].GetNeighbor((HexDirection)j).coordinates);
+                    distance[i, cells.IndexOf(cells[i].GetNeighbor((HexDirection)j))] = CellDistance(cells[i], (HexDirection)j);
                 }
             }
         }
@@ -181,7 +182,7 @@ public class FindRoad : Singleton<FindRoad> {
             distanceToStart[i] = distance[startIndex, i];
             if (distanceToStart[i] < int.MaxValue)
             {
-                cost[i] = distance[startIndex, i] + SixDirectsDistance(cells[i], end)* h;
+                cost[i] = distance[startIndex, i] ;
             }
             queue.Push(new KeyValuePair<int, float>(i, cost[i]));
         }
@@ -307,6 +308,19 @@ public class FindRoad : Singleton<FindRoad> {
                 heap[n] = heap[n2];
             }
             heap[n] = v;
+        }
+    }
+
+
+    int CellDistance(HexCell cell, HexDirection dir)
+    {
+        if(cell.GetEdgeType(cell.isStepDirection[(int)dir],dir)==HexEdgeType.Cliff)
+        {
+            return int.MaxValue;
+        }
+        else
+        {
+            return 1;
         }
     }
 }

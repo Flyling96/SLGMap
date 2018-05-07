@@ -7,7 +7,7 @@ public class GameControl : MonoBehaviour {
 
     //public HexGrid hexGrid;
 
-    int distanceInOneRound = 15;
+    int distanceInOneRound = 3;
 
     List<HexCell> canGotoCellList = new List<HexCell>();
     List<HexCell> cantGotoNowList = new List<HexCell>();
@@ -71,14 +71,7 @@ public class GameControl : MonoBehaviour {
         //canGotoCellList.Add(endCell);
         //Debug.Log(canGotoCellList.IndexOf(endCell));
         List<HexCell> road = new List<HexCell>();
-        if (!canGotoCellList.Contains(endCell))
-        {
-            road = FindRoad.instance.AStar(startCell, endCell, allCellList);
-        }
-        else
-        {
-            road = FindRoad.instance.AStar(startCell, endCell, canGotoCellList);
-        }
+        road = FindRoad.instance.AStar(startCell, endCell, allCellList);
 
         for(int i=0;i<road.Count;i++)
         {

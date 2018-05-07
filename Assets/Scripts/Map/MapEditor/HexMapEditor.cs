@@ -109,6 +109,7 @@ public class HexMapEditor : MonoBehaviour {
 
     private void Awake()
     {
+        ConfigDateManage.instance.InitData();
         terrainTextureBtn = transform.Find("Terrain Panel/TerrainTextureBtn").GetComponent<Button>();
         terrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
         sceneObjectBtn = transform.Find("Terrain Panel/SceneObjectBtn").GetComponent<Button>();
@@ -165,22 +166,22 @@ public class HexMapEditor : MonoBehaviour {
             {
                 if (IsEditorStep() || IsEditorSlope())
                 {
-                    EditMeshRefresh(hit.point, hexGrid.GetCell(hit.point));
+                    EditMeshRefresh(hit.point, HexGrid.instance.GetCell(hit.point));
                 }
                 else
                 {
                     //if (!HexMetrics.instance.isEditorTerrain)
                     //    return;
-                    centerCell = hexGrid.GetCell(hit.point);
+                    centerCell = HexGrid.instance.GetCell(hit.point);
                     centerX = centerCell.coordinates.X;
                     centerZ = centerCell.coordinates.Z;
                     for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
                     {
                         for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
                         {
-                            if (hexGrid.GetCell(new HexCoordinates(x, z)) != null)
+                            if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
                             {
-                                cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                                cells.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
                             }
                         }
                     }
@@ -189,7 +190,7 @@ public class HexMapEditor : MonoBehaviour {
                     {
                         for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
                         {
-                            cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                            cells.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
                         }
                     }
                     if (!isEditorWater)
@@ -259,9 +260,9 @@ public class HexMapEditor : MonoBehaviour {
         {
             for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
             {
-                if (hexGrid.GetCell(new HexCoordinates(x, z)) != null)
+                if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
                 {
-                    cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                    cells.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
                 }
             }
         }
@@ -270,11 +271,11 @@ public class HexMapEditor : MonoBehaviour {
         {
             for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
             {
-                cells.Add(hexGrid.GetCell(new HexCoordinates(x, z)));
+                cells.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
             }
         }
 
-        HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
+        HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(pos.x - cell.transform.position.x, pos.z - cell.transform.position.z));
         if (IsEditorStep())
         {
             if (!IsWholeEditor())
@@ -346,7 +347,7 @@ public class HexMapEditor : MonoBehaviour {
         HexCell centerCell = null;
         if (Physics.Raycast(inputRay, out hit))
         {
-            centerCell = hexGrid.GetCell(hit.point);
+            centerCell = HexGrid.instance.GetCell(hit.point);
             if (!IsDeleteSceneObject)
             {
                 if (IsBrushSceneObject)//大量随机
@@ -365,7 +366,7 @@ public class HexMapEditor : MonoBehaviour {
                             py = hit.point.y;
                         }
                         Vector3 tPosition = new Vector3(px, py, pz);
-                        centerCell = hexGrid.GetCell(tPosition);
+                        centerCell = HexGrid.instance.GetCell(tPosition);
                         if(centerCell.isUnderWaterLevel|| centerCell == null)
                         {
                             continue;
@@ -375,7 +376,7 @@ public class HexMapEditor : MonoBehaviour {
                         tSceneObject.transform.position = tPosition;
                         tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
                         tSceneObject.SetActive(true);
-                        HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(tPosition.x - centerCell.transform.position.x, tPosition.z - centerCell.transform.position.z));
+                        HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(tPosition.x - centerCell.transform.position.x, tPosition.z - centerCell.transform.position.z));
                         tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
                         tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
                         tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
@@ -397,7 +398,7 @@ public class HexMapEditor : MonoBehaviour {
                             tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
                             tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
                             tSceneObject.SetActive(true);
-                            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
+                            HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
                             tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
                             tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
                             tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
@@ -420,7 +421,7 @@ public class HexMapEditor : MonoBehaviour {
                     {
                         for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
                         {
-                            HexCell cell =  hexGrid.GetCell(new HexCoordinates(x, z));
+                            HexCell cell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
                             cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
                         }
                     }
@@ -428,7 +429,7 @@ public class HexMapEditor : MonoBehaviour {
                     {
                         for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
                         {
-                            HexCell cell = hexGrid.GetCell(new HexCoordinates(x, z));
+                            HexCell cell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
                             cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
                         }
                     }
@@ -456,18 +457,18 @@ public class HexMapEditor : MonoBehaviour {
         refreshChunkList.Clear();
         refreshCellList.Clear();
         if (Physics.Raycast(inputRay, out hit)) {
-            centerCell = hexGrid.GetCell(hit.point);
+            centerCell = HexGrid.instance.GetCell(hit.point);
             refreshChunkList.Add(centerCell.chunkParent);
             refreshCellList.Add(centerCell);
             centerX = centerCell.coordinates.X;
             centerZ = centerCell.coordinates.Z;
             Vector3 pos = hit.point;
-            HexDirection clickDir = hexGrid.GetPointDirection(new Vector2(pos.x - centerCell.transform.position.x, pos.z - centerCell.transform.position.z));
+            HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(pos.x - centerCell.transform.position.x, pos.z - centerCell.transform.position.z));
             for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)
             {
                 for (int x = centerX - brushRange + 1 + l; x <= centerX + brushRange - 1; x++)
                 {
-                    EditCell(clickDir, hexGrid.GetCell(new HexCoordinates(x, z)));
+                    EditCell(clickDir, HexGrid.instance.GetCell(new HexCoordinates(x, z)));
                 }
             }
 
@@ -475,7 +476,7 @@ public class HexMapEditor : MonoBehaviour {
             {
                 for (int x = centerX - brushRange + 1; x <= centerX + brushRange - 1 - l; x++)
                 {
-                    EditCell(clickDir, hexGrid.GetCell(new HexCoordinates(x, z)));
+                    EditCell(clickDir, HexGrid.instance.GetCell(new HexCoordinates(x, z)));
                 }
             }
             for (int i = 0; i < refreshChunkList.Count; i++)
@@ -628,14 +629,31 @@ public class HexMapEditor : MonoBehaviour {
 
     public void Save(Dictionary<string, string> inputDic,ref bool isSuccessful)
     {
+        string path = Application.persistentDataPath + "/" + inputDic["文件名"];
         try
         {
             //StartCoroutine(WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"]));
-            WaitSave(Application.persistentDataPath + "/" + inputDic["文件名"]);
+            WaitSave(path);
         }
         catch(Exception e)
         {
             Debug.Log(e);
+            string secondPath = path + "_t";
+            if(File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            //备份还原
+            if (File.Exists(secondPath))
+            {
+                FileInfo file = new FileInfo(secondPath);
+                file.CopyTo(path);
+            }
+
+            if (File.Exists(secondPath))
+            {
+                File.Delete(secondPath);
+            }
             UIManage.instance.ShowTipLine("保存失败", 3f);
         }
     }
@@ -658,13 +676,25 @@ public class HexMapEditor : MonoBehaviour {
         //    yield return null;
         //}
 
+        //备份
+        string secondPath = path + "_t";
+        if(File.Exists(path))
+        {
+            FileInfo file = new FileInfo(path);
+            file.CopyTo(secondPath);
+        }
+
          using (BinaryWriter writer = new BinaryWriter(File.Open(path, FileMode.Create)))
         {
-              hexGrid.Save(writer);
+            HexGrid.instance.Save(writer);
          }
 
         if (File.Exists(path))
         {
+            if (File.Exists(secondPath))
+            {
+                File.Delete(secondPath);
+            }
             UIManage.instance.ShowTipLine("保存成功", 3f);
             UIManage.instance.HideInputWnd(UIManage.instance.inputWnd.inputItem.name);
         }
@@ -685,10 +715,10 @@ public class HexMapEditor : MonoBehaviour {
         {
             using (BinaryReader reader = new BinaryReader(File.Open(Application.persistentDataPath + "/" + inputDic["文件名"], FileMode.Open)))
             {
-                hexGrid.Load(reader);
+                HexGrid.instance.Load(reader);
             }
 
-            hexGrid.Refresh();
+            HexGrid.instance.Refresh();
             UIManage.instance.ShowTipLine("读取成功", 3f);
             isSuccessful = true;
         }
@@ -718,9 +748,9 @@ public class HexMapEditor : MonoBehaviour {
             }
             else
             {
-                hexGrid.ChangeSize(width, height);
+                HexGrid.instance.ChangeSize(width, height);
                 HexMetrics.instance.isEditorTexture = bool.Parse(inputDic["纹理"]);
-                hexGrid.NewMap();
+                HexGrid.instance.NewMap();
                 isSuccessful = true;
                 UIManage.instance.ShowTipLine("新建地图成功", 3f);
             }

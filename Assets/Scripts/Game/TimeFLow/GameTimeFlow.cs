@@ -9,7 +9,7 @@ public class GameTimeFlow : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         ConfigDateManage.instance.InitData();
-        LoadMap("map001");
+        LoadMap("map002");
     }
 	
 	// Update is called once per frame

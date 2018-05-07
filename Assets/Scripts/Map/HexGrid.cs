@@ -181,6 +181,7 @@ public class HexGrid : Singleton<HexGrid> {
                 sceneObject = GameObject.Instantiate(Resources.Load(itemClassList[j].sceneObjectInfo.modelPath) as GameObject);
                 sceneObject.AddComponent<SceneObjectClass>();
                 sceneObject.GetComponent<SceneObjectClass>().SetInfo(itemClassList[j].position, itemClassList[j].rotation, itemClassList[j].direction, itemClassList[j].cell);
+                sceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = itemClassList[j].sceneObjectInfo;
                 sceneObject.transform.SetParent(chunks[i].sceneObjectMgr.transform);
                 sceneObject.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);
                 sceneObject.tag = "SceneObject";

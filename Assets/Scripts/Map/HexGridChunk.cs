@@ -125,11 +125,10 @@ public class HexGridChunk : MonoBehaviour {
         for (int i = 0; i < count; i++)
         {
             SceneObjectClass itemClass = new SceneObjectClass();
-            SceneObjectInfo itemInfo = new SceneObjectInfo();
+            itemClass.sceneObjectInfo = new SceneObjectInfo();
             modelPathType = reader.ReadInt32();
-            itemInfo.modelPathType = modelPathType.ToString();
-            itemInfo.modelPath = FileManage.instance.CSVHashTable["sceneHashTable"][itemInfo.modelPathType].ToString();
-            itemClass.sceneObjectInfo = itemInfo;
+            itemClass.sceneObjectInfo.modelPathType = modelPathType.ToString();
+            itemClass.sceneObjectInfo.modelPath = FileManage.instance.CSVHashTable["sceneHashTable"][itemClass.sceneObjectInfo.modelPathType].ToString();
             itemPosition = new Vector3((float)reader.ReadDouble(), (float)reader.ReadDouble(), (float)reader.ReadDouble());
             itemRotaiton = new Quaternion((float)reader.ReadDouble(), (float)reader.ReadDouble(), (float)reader.ReadDouble(), (float)reader.ReadDouble());
             itemClass.position = itemPosition;
