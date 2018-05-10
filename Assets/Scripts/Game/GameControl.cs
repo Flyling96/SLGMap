@@ -86,6 +86,13 @@ public class GameControl : MonoBehaviour {
                 cantGotoNowList.Add(road[i]);
             }
         }
+        if(startCell.unit!=null)
+        {
+            startCell.unit.Move(road);
+            endCell.unit = startCell.unit;
+            startCell.unit = null;
+        }
+
     }
 
     void ClickStartCell()

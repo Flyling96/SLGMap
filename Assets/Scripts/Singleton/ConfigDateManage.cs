@@ -73,6 +73,63 @@ public class SceneObjectInfo : BaseInfo
     }
 
 }
+
+public class BattleUnitInitInfo:BaseInfo
+{
+    public string mapName;
+    public int unitId;
+    public BattleUnitInfo battleUnitInfo;
+    public HexCoordinates coordinates;
+
+    public override void ChangeValues(string[] table)
+    {
+        id = int.Parse(table[0]);
+        mapName = table[1];
+        unitId = int.Parse(table[2]);
+        coordinates = new HexCoordinates(int.Parse(table[3]), int.Parse(table[4]));
+        if(FileManage.instance.CSVTable["battleUnitInfo"]!=null)
+        {
+            for(int i=0;i<FileManage.instance.CSVTable["battleUnitInfo"].Count;i++)
+            {
+                if(FileManage.instance.CSVTable["battleUnitInfo"][i].id == unitId)
+                {
+                    battleUnitInfo = (BattleUnitInfo)FileManage.instance.CSVTable["battleUnitInfo"][i];
+                    break;
+                }
+            }
+        }
+    }
+
+    public override BaseInfo GetNew()
+    {
+        return new BattleUnitInitInfo();
+    }
+
+}
+
+public class BattleUnitInfo:BaseInfo
+{
+    public string modelName;
+    public BattleUnitProperty property;
+    public override void ChangeValues(string[] table)
+    {
+        id = int.Parse(table[0]);
+        modelName = table[1];
+        property = new BattleUnitProperty();
+        property.unitHP = int.Parse(table[2]);
+        property.unitMP = int.Parse(table[3]);
+        property.actionPower = int.Parse(table[4]);
+        property.attack = int.Parse(table[5]);
+        property.defanse = int.Parse(table[6]);
+        property.attackDistance = int.Parse(table[7]);
+    }
+
+    public override BaseInfo GetNew()
+    {
+        return new BattleUnitInfo();
+    }
+
+}
 public class ConfigDateManage : Singleton<ConfigDateManage> {
 
 	public void InitData()
@@ -83,6 +140,8 @@ public class ConfigDateManage : Singleton<ConfigDateManage> {
         FileManage.instance.LoadCSV("terrainTexture", new TerrainTextureInfo());
         FileManage.instance.LoadCSV("terrainColor", new TerrainColorInfo());
         FileManage.instance.LoadCSV("sceneObject", new SceneObjectInfo());
+        FileManage.instance.LoadCSV("battleUnitInfo", new BattleUnitInfo());
+        FileManage.instance.LoadCSV("battleUnitInit", new BattleUnitInitInfo());
 
     }
 

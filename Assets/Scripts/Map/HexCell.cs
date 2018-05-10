@@ -7,6 +7,8 @@ using System.Collections.Generic;
 public class HexCell : MonoBehaviour {
 
 
+    public BattleUnit unit;
+
     //距离相关
     public Text label;
     int distanceWithOthers = 0;
@@ -120,7 +122,7 @@ public class HexCell : MonoBehaviour {
 		set {
 			elevation = value;
             RefreshPosition(value);
-
+            label.text = coordinates.X.ToString() + "\n" + coordinates.Y.ToString() + "\n" + coordinates.Z.ToString();
             //Vector3 uiPosition = uiRect.localPosition;
             //uiPosition.z = -position.y;
             //uiRect.localPosition = uiPosition;

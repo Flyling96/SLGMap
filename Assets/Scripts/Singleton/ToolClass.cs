@@ -119,4 +119,17 @@ public class ToolClass : Singleton<ToolClass> {
         return dis;
     }
 
+
+    //贝塞尔曲线相关计算
+    public  Vector3 GetBezierPoint(Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        float r = 1f - t;
+        return r * r * a + 2f * r * t * b + t * t * c;
+    }
+
+    public  Vector3 GetBezierDerivative( Vector3 a, Vector3 b, Vector3 c, float t)
+    {
+        return 2f * ((1f - t) * (b - a) + t * (c - b));
+    }
+
 }

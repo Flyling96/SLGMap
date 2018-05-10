@@ -9,7 +9,8 @@ public class GameTimeFlow : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         ConfigDateManage.instance.InitData();
-        LoadMap("map002");
+        LoadMap("map001");
+        GameUnitManage.instance.LoadBattleUnitInit(FileManage.instance.CSVTable["battleUnitInit"]);
     }
 	
 	// Update is called once per frame
@@ -26,4 +27,18 @@ public class GameTimeFlow : MonoBehaviour {
 
         HexGrid.instance.Refresh();
     }
+
+    
+
+    void LoadBattleUnitInit(List<BaseInfo> battleUnitInitInfoList)
+    {
+        for(int i=0; i < battleUnitInitInfoList.Count;i++)
+        {
+            BattleUnitInitInfo battleUnitInit = (BattleUnitInitInfo)battleUnitInitInfoList[i];
+            string modelName = battleUnitInit.battleUnitInfo.modelName;
+            string modelPath = (string)FileManage.instance.CSVHashTable["gameUnitModelTable"][modelName];
+        }
+    }
+
+
 }
