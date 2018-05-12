@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public struct BattleUnitProperty
 {
@@ -18,10 +19,29 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
     float moveSpeed = 2.5f;
     float rotateSpeed = 180f;
 
-    public HexCell cell;
+    public int power = 0;//势力编号
 
-    public BattleUnitProperty battleUnitProperty;
-    List<HexCell> currentRoad;
+    HexCell cell;
+
+    public HexCell Cell
+    {
+        get
+        {
+            return cell;
+        }
+        set
+        {
+            if (cell != null)
+            {
+                FindRoad.instance.UnBlockRoad(cell,power);
+            }
+            cell = value;
+            FindRoad.instance.BlockRoad(cell);
+        }
+    }
+
+    public BattleUnitProperty battleUnitProperty;//属性
+    BattleUnit target;//攻击目标
 
     public void FireSoldier(BattleUnit hiter)
     {
@@ -33,8 +53,78 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
 
     }
 
+
+    List<HexCell> road = new List<HexCell>();
+    List<HexCell> roadInRound = new List<HexCell>();
+    List<HexCell> canGotoCellList = new List<HexCell>();
+    public bool isMoveComplete = true;
+
+
+    public void ShowRoad(ref List<HexCell> canGoCellList)
+    {
+        canGotoCellList.Clear();
+        int distanceInOneRound = battleUnitProperty.actionPower;
+        canGotoCellList = FindRoad.instance.FindCanGoList(cell, HexGrid.instance.AllCellList, distanceInOneRound);
+        for (int i = 0; i < canGotoCellList.Count; i++)
+        {
+            canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
+        }
+        cell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00FF76FF");
+
+        for(int i=0;i< roadInRound.Count;i++)
+        {
+            roadInRound[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00FF76FF");
+        }
+
+        for(int i=0;i<road.Count;i++)
+        {
+            road[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
+            road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#0080FFFF");
+            canGotoCellList.Add(road[i]);
+        }
+        canGoCellList = canGotoCellList;
+    }
+
+    public void HideRoad()
+    {
+        for(int i=0;i<canGotoCellList.Count;i++)
+        {
+            canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+            canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+        }
+    }
+
+    public void SetRoad(List<HexCell> roadCells)
+    {
+        road = roadCells;
+    }
+
+    public void MoveInRound()
+    {
+        roadInRound.Clear();
+        int canMoveDistance = battleUnitProperty.actionPower;
+        if (road.Count > canMoveDistance)
+        {
+            isMoveComplete = false;
+            for (int i = 0; i < canMoveDistance; i++)
+            {
+                roadInRound.Add(road[0]);
+                road.RemoveAt(0);
+            }
+            Move(roadInRound);
+        }
+        else
+        {
+            isMoveComplete = true;
+            Move(road);
+        }
+    }
+
     public void Move(List<HexCell> cells)
     {
+        Cell.unit = null;
+        cells[cells.Count - 1].unit = this;
+        Cell = cells[cells.Count - 1];
         StartCoroutine(MoveAnim(cells));
     }
 
@@ -66,6 +156,7 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
                 yield return null;
             }
         }
+        cells.Clear();
     }
 
     IEnumerator LookAt(Vector3 point)
@@ -81,49 +172,6 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
             yield return null;
         }
 
-        //transform.LookAt(-point);
-        //orientation = transform.localRotation.eulerAngles.y;
     }
-
-
-    //IEnumerator TravelPath()
-    //{
-    //    Vector3 a, b, c = pathToTravel[0].Position;
-    //    transform.localPosition = c;
-    //    yield return LookAt(pathToTravel[1].Position);
-
-    //    float t = Time.deltaTime * travelSpeed;
-    //    for (int i = 1; i < pathToTravel.Count; i++)
-    //    {
-    //        a = c;
-    //        b = pathToTravel[i - 1].Position;
-    //        c = (b + pathToTravel[i].Position) * 0.5f;
-    //        for (; t < 1f; t += Time.deltaTime * travelSpeed)
-    //        {
-    //            transform.localPosition = Bezier.GetPoint(a, b, c, t);
-    //            Vector3 d = Bezier.GetDerivative(a, b, c, t);
-    //            d.y = 0f;
-    //            transform.localRotation = Quaternion.LookRotation(d);
-    //            yield return null;
-    //        }
-    //        t -= 1f;
-    //    }
-
-    //    a = c;
-    //    b = pathToTravel[pathToTravel.Count - 1].Position;
-    //    c = b;
-    //    for (; t < 1f; t += Time.deltaTime * travelSpeed)
-    //    {
-    //        transform.localPosition = Bezier.GetPoint(a, b, c, t);
-    //        Vector3 d = Bezier.GetDerivative(a, b, c, t);
-    //        d.y = 0f;
-    //        transform.localRotation = Quaternion.LookRotation(d);
-    //        yield return null;
-    //    }
-
-    //    transform.localPosition = location.Position;
-    //    orientation = transform.localRotation.eulerAngles.y;
-    //    ListPool<HexCell>.Add(pathToTravel);
-    //    pathToTravel = null;
-    //}
+ 
 }

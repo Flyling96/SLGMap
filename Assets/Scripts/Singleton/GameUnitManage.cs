@@ -5,7 +5,11 @@ using UnityEngine;
 public class GameUnitManage : Singleton<GameUnitManage> {
 
 
-    List<BattleUnit> battleUnitList = new List<BattleUnit>();
+    /// <summary>
+    /// 势力的战斗单位列表
+    /// </summary>
+    public Dictionary<int, List<BattleUnit>> battleUnitPowerDic = new Dictionary<int, List<BattleUnit>>();
+
 
     public void LoadBattleUnitInit(List<BaseInfo> battleUnitInitInfoList)
     {
@@ -17,11 +21,48 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             GameObject battleUnitModel = GameObjectPool.instance.GetPoolChild(modelName, modelPath);
             battleUnitModel.AddComponent<BattleUnit>();
             battleUnitModel.GetComponent<BattleUnit>().battleUnitProperty = battleUnitInit.battleUnitInfo.property;
-            battleUnitModel.GetComponent<BattleUnit>().cell = HexGrid.instance.GetCell(battleUnitInit.coordinates);
+            battleUnitModel.GetComponent<BattleUnit>().Cell = HexGrid.instance.GetCell(battleUnitInit.coordinates);
             HexGrid.instance.GetCell(battleUnitInit.coordinates).unit = battleUnitModel.GetComponent<BattleUnit>();
-            battleUnitModel.transform.position = battleUnitModel.GetComponent<BattleUnit>().cell.transform.position;
+            battleUnitModel.GetComponent<BattleUnit>().power = battleUnitInit.power;
+            battleUnitModel.transform.position = battleUnitModel.GetComponent<BattleUnit>().Cell.transform.position;
             battleUnitModel.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
-            battleUnitList.Add(battleUnitModel.GetComponent<BattleUnit>());
+            if(!battleUnitPowerDic.ContainsKey(battleUnitInit.power))
+            {
+                battleUnitPowerDic.Add(battleUnitInit.power, new List<BattleUnit>());
+            }
+            battleUnitPowerDic[battleUnitInit.power].Add(battleUnitModel.GetComponent<BattleUnit>());
+        }
+    }
+
+    public void UnitAction(int power)
+    {
+        List<BattleUnit> units = battleUnitPowerDic[power];
+        for(int i=0;i< units.Count;i++)
+        {
+            UnitAction(units[i]);
+        }
+    }
+
+    public void UnitAction(BattleUnit unit)
+    {
+        unit.MoveInRound();
+    }
+
+    public void UnBlockRoad(int power)
+    {
+        List<BattleUnit> units = battleUnitPowerDic[power];
+        for(int i=0;i<units.Count;i++)
+        {
+            FindRoad.instance.UnBlockRoad(units[i].Cell,power);
+        }
+    }
+
+    public void BlockRoad(int power)
+    {
+        List<BattleUnit> units = battleUnitPowerDic[power];
+        for (int i = 0; i < units.Count; i++)
+        {
+            FindRoad.instance.BlockRoad(units[i].Cell);
         }
     }
 

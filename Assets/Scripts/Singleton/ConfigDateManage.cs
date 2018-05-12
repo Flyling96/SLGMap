@@ -78,6 +78,7 @@ public class BattleUnitInitInfo:BaseInfo
 {
     public string mapName;
     public int unitId;
+    public int power;
     public BattleUnitInfo battleUnitInfo;
     public HexCoordinates coordinates;
 
@@ -98,6 +99,8 @@ public class BattleUnitInitInfo:BaseInfo
                 }
             }
         }
+
+        power = int.Parse(table[5]);
     }
 
     public override BaseInfo GetNew()

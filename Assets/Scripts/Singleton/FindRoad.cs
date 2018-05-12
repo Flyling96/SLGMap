@@ -131,9 +131,12 @@ public class FindRoad : Singleton<FindRoad> {
 
     public float h = 1;
 
+
+
     int[,] distance;
-    public void Init(List<HexCell> cells)
+    public void Init()
     {
+        List<HexCell> cells = HexGrid.instance.AllCellList;
         distance = new int[cells.Count, cells.Count]; 
         for (int i = 0; i < cells.Count; i++)
         {
@@ -160,6 +163,13 @@ public class FindRoad : Singleton<FindRoad> {
         }
     }
 
+    /// <summary>
+    /// 寻找最短路径
+    /// </summary>
+    /// <param name="start"></param>
+    /// <param name="end"></param>
+    /// <param name="cells"></param>
+    /// <returns></returns>
     public List<HexCell> AStar(HexCell start,HexCell end,List<HexCell> cells)
     {
         float time = Time.realtimeSinceStartup;
@@ -228,6 +238,74 @@ public class FindRoad : Singleton<FindRoad> {
         while (resultInt.Count != 0)
         {
             result.Add(cells[resultInt.Pop()]);
+        }
+        Debug.Log(Time.realtimeSinceStartup - time);
+        return result;
+    }
+
+
+    /// <summary>
+    /// 寻找可到达的cell
+    /// </summary>
+    /// <param name="center"></param>
+    /// <param name="cells"></param>
+    /// <param name="movePower"></param>
+    /// <returns></returns>
+    public List<HexCell> FindCanGoList(HexCell center, List<HexCell> cells,int movePower)
+    {
+        float time = Time.realtimeSinceStartup;
+        int[] distanceToStart = new int[cells.Count];
+        int[] previous = new int[cells.Count];
+        int startIndex = cells.IndexOf(center);
+        PriorityQueue<KeyValuePair<int, float>> queue = new PriorityQueue<KeyValuePair<int, float>>(new disCompare());//优先队列
+
+        List<HexCell> result = new List<HexCell>();
+        for (int i = 0; i < cells.Count; i++)
+        {
+            previous[i] = startIndex;
+        }
+
+
+        for (int i = 0; i < cells.Count; i++)
+        {
+            distanceToStart[i] = distance[startIndex, i];
+            if (distanceToStart[i] < int.MaxValue)
+            {
+                queue.Push(new KeyValuePair<int, float>(i, distanceToStart[i]));
+            }
+        }
+
+
+        for (int i = 0; i < cells.Count - 1; i++)
+        {
+            if(queue.Count==0)
+            {
+                break;
+            }
+            float min = queue.Top().Value;
+            int point = queue.Top().Key;
+            if(min<movePower)
+            {
+                result.Add(cells[point]);
+            }
+            else
+            {
+                break;
+            }
+
+            queue.Pop();
+
+            for (int j = 0; j < cells.Count; j++)
+            {
+                if (distance[point, j] < int.MaxValue)
+                {
+                    if (distanceToStart[j] > distanceToStart[point] + distance[point, j])
+                    {
+                        distanceToStart[j] = distanceToStart[point] + distance[point, j];
+                        queue.Push(new KeyValuePair<int, float>(j, distanceToStart[j]));
+                    }
+                }
+            }
         }
         Debug.Log(Time.realtimeSinceStartup - time);
         return result;
@@ -321,6 +399,41 @@ public class FindRoad : Singleton<FindRoad> {
         else
         {
             return 1;
+        }
+    }
+
+
+    //阻塞道路，刷新distance
+    public void BlockRoad(HexCell cell)
+    {
+        List<HexCell> cells = HexGrid.instance.AllCellList;
+        int index = cells.IndexOf(cell);
+        for(int i=(int)HexDirection.NE; i <= (int)HexDirection.NW; i++)
+        {
+            if (cell.GetNeighbor((HexDirection)i) != null)
+            {
+                int n = cells.IndexOf(cell.GetNeighbor((HexDirection)i));
+                distance[index, n] = int.MaxValue;
+                distance[n, index] = int.MaxValue;
+            }
+        }
+
+    }
+
+    //解除阻塞，刷新distance
+    public void UnBlockRoad(HexCell cell,int power)
+    {
+        List<HexCell> cells = HexGrid.instance.AllCellList;
+        int index = cells.IndexOf(cell);
+        for (int i = (int)HexDirection.NE; i <= (int)HexDirection.NW; i++)
+        {
+            if (cell.GetNeighbor((HexDirection)i) != null && (cell.GetNeighbor((HexDirection)i).unit == null ||
+                 cell.GetNeighbor((HexDirection)i).unit.power== power))
+            {
+                int n = cells.IndexOf(cell.GetNeighbor((HexDirection)i));
+                distance[index, n] = CellDistance(cell, (HexDirection)i);
+                distance[n, index] = CellDistance(cell, (HexDirection)i);
+            }
         }
     }
 }

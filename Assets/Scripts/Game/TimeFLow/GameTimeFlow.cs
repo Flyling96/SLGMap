@@ -10,6 +10,7 @@ public class GameTimeFlow : MonoBehaviour {
 	void Start () {
         ConfigDateManage.instance.InitData();
         LoadMap("map001");
+        FindRoad.instance.Init();
         GameUnitManage.instance.LoadBattleUnitInit(FileManage.instance.CSVTable["battleUnitInit"]);
     }
 	
@@ -26,18 +27,6 @@ public class GameTimeFlow : MonoBehaviour {
         }
 
         HexGrid.instance.Refresh();
-    }
-
-    
-
-    void LoadBattleUnitInit(List<BaseInfo> battleUnitInitInfoList)
-    {
-        for(int i=0; i < battleUnitInitInfoList.Count;i++)
-        {
-            BattleUnitInitInfo battleUnitInit = (BattleUnitInitInfo)battleUnitInitInfoList[i];
-            string modelName = battleUnitInit.battleUnitInfo.modelName;
-            string modelPath = (string)FileManage.instance.CSVHashTable["gameUnitModelTable"][modelName];
-        }
     }
 
 

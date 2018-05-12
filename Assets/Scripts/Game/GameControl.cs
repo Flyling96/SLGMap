@@ -10,48 +10,47 @@ public class GameControl : MonoBehaviour {
     int distanceInOneRound = 3;
 
     List<HexCell> canGotoCellList = new List<HexCell>();
-    List<HexCell> cantGotoNowList = new List<HexCell>();
-    List<HexCell> allCellList = new List<HexCell>();
-	// Use this for initialization
-	void Start () {
+
+    public bool isMyRound = true;
+
+    // Use this for initialization
+    void Start () {
         canGotoCellList.Clear();
-        for(int i=0;i<HexGrid.instance.cells.Length;i++)
-        {
-            allCellList.Add(HexGrid.instance.cells[i]);
-        }
-        FindRoad.instance.Init(allCellList);
     }
 
 	// Update is called once per frame
 	void Update () {
-
-        if (Input.GetMouseButtonDown(0))
+        if (isMyRound)
         {
-            if (startCell == null)
+            if (Input.GetMouseButtonDown(0))
             {
-                ClickStartCell();
+                if (startCell == null)
+                {
+                    ClickStartCell();
+                }
+                else if (endCell == null)
+                {
+                    ClickEndCell();
+                }
             }
-            else if (endCell == null)
+            else if (Input.GetMouseButtonDown(1))
             {
-                ClickEndCell();
+                if(battleUnit!=null)
+                {
+                    GameUnitManage.instance.BlockRoad(battleUnit.power);
+                }
+                if (startCell != null)
+                {
+                    for (int i = 0; i < canGotoCellList.Count; i++)
+                    {
+                        canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                        canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+                    }
+                    canGotoCellList.Clear();
+                    startCell = null;
+                    endCell = null;
+                }
             }
-        }
-        else if(Input.GetMouseButtonDown(1))
-        {
-            for(int i=0;i<canGotoCellList.Count;i++)
-            {
-                canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
-                canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
-            }
-            for(int i=0;i<cantGotoNowList.Count;i++)
-            {
-                cantGotoNowList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
-                cantGotoNowList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
-            }
-            canGotoCellList.Clear();
-            cantGotoNowList.Clear();
-            startCell = null;
-            endCell = null;
         }
 
     }
@@ -71,7 +70,18 @@ public class GameControl : MonoBehaviour {
         //canGotoCellList.Add(endCell);
         //Debug.Log(canGotoCellList.IndexOf(endCell));
         List<HexCell> road = new List<HexCell>();
-        road = FindRoad.instance.AStar(startCell, endCell, allCellList);
+        road = FindRoad.instance.AStar(startCell, endCell, HexGrid.instance.AllCellList);
+        List<HexCell> nowCanGoList = FindRoad.instance.FindCanGoList(startCell, HexGrid.instance.AllCellList, distanceInOneRound);
+        for(int i=canGotoCellList.Count-1;i>=0;i--)
+        {
+            canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+            if (!nowCanGoList.Contains(canGotoCellList[i]))
+            {
+                canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                canGotoCellList.RemoveAt(i);
+            }
+        }
+
 
         for(int i=0;i<road.Count;i++)
         {
@@ -83,67 +93,50 @@ public class GameControl : MonoBehaviour {
             {
                 road[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
                 road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#0080FFFF");
-                cantGotoNowList.Add(road[i]);
+                canGotoCellList.Add(road[i]);
             }
         }
         if(startCell.unit!=null)
         {
-            startCell.unit.Move(road);
-            endCell.unit = startCell.unit;
-            startCell.unit = null;
+            startCell.unit.SetRoad(road);
+            startCell.unit.MoveInRound();
         }
 
     }
 
+    BattleUnit battleUnit = null;
     void ClickStartCell()
     {
         canGotoCellList.Clear();
-        HexCell NeighborCell = null;
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        int centerX;
-        int centerZ;
         if (Physics.Raycast(inputRay, out hit))
         {
             startCell = HexGrid.instance.GetCell(hit.point);
-            //hexGrid.DistanceToOther(startCell);
 
-            centerX = startCell.coordinates.X;
-            centerZ = startCell.coordinates.Z;
-            for (int l = 0, z = centerZ; z >= centerZ - distanceInOneRound + 1; l++, z--)
+            if (startCell.unit != null)
             {
-                for (int x = centerX - distanceInOneRound + 1 + l; x <= centerX + distanceInOneRound - 1; x++)
+                battleUnit = startCell.unit;
+                GameUnitManage.instance.UnBlockRoad(battleUnit.power);
+                //如果startCell现在没有还未行径的路径
+                if (startCell.unit.isMoveComplete)
                 {
-                    if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
+                    distanceInOneRound = startCell.unit.battleUnitProperty.actionPower;
+                    canGotoCellList = FindRoad.instance.FindCanGoList(startCell, HexGrid.instance.AllCellList, distanceInOneRound);
+                    for (int i = 0; i < canGotoCellList.Count; i++)
                     {
-                        NeighborCell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
-                        if (startCell.coordinates.DistanceToOther(NeighborCell.coordinates)<=distanceInOneRound)
-                        {
-                            NeighborCell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
-                            canGotoCellList.Add(NeighborCell);
-                        }
+                        canGotoCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
                     }
+                    startCell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00FF76FF");
+                }
+                else
+                {
+                    startCell.unit.ShowRoad(ref canGotoCellList);
                 }
             }
-
-            for (int l = 1, z = centerZ + 1; z <= centerZ + distanceInOneRound - 1; l++, z++)
-            {
-                for (int x = centerX - distanceInOneRound + 1; x <= centerX + distanceInOneRound - 1 - l; x++)
-                {
-                    if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
-                    {
-                        NeighborCell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
-                        if (startCell.coordinates.DistanceToOther(NeighborCell.coordinates) <= distanceInOneRound)
-                        {
-                            NeighborCell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
-                            canGotoCellList.Add(NeighborCell);
-                        }
-                    }
-                }
-            }
-
-            startCell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00FF76FF");
 
         }
     }
+
+
 }

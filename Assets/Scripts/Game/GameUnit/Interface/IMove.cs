@@ -5,4 +5,6 @@ using UnityEngine;
 public interface IMove{
 
     void Move(List<HexCell> cells);
+
+    void MoveInRound();
 }

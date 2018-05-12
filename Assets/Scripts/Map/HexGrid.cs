@@ -29,6 +29,23 @@ public class HexGrid : Singleton<HexGrid> {
 
 	public HexCell[] cells;
 
+    List<HexCell> allCellList;
+    public List<HexCell> AllCellList
+    {
+        get
+        {
+            if (allCellList == null && cells != null)
+            {
+                allCellList = new List<HexCell>();
+                for (int i = 0; i <cells.Length; i++)
+                {
+                    allCellList.Add(cells[i]);
+                }
+            }
+            return allCellList;
+        }
+    }
+
 
     HexGridChunk[] chunks;
     Canvas gridCanvas;
