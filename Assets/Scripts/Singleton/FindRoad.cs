@@ -436,4 +436,19 @@ public class FindRoad : Singleton<FindRoad> {
             }
         }
     }
+
+    //判断两个hexcell是否在相隔为1且可到达
+    public bool isCanGoNeighbor(HexCell cell,HexCell cell1,int actionPower)
+    {
+        int i = HexGrid.instance.AllCellList.IndexOf(cell);
+        int j = HexGrid.instance.AllCellList.IndexOf(cell1);
+        if(distance[i,j]> actionPower)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
 }

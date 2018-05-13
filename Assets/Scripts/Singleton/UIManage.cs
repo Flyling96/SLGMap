@@ -11,6 +11,8 @@ public class UIManage : Singleton<UIManage> {
     public TipUI inputWnd = null;
     public TipLineUI tipLine = null;
     public DownSelectWnd downSelectWnd = null;
+    public ActionWnd actionWnd = null;
+    
 
 
     public GameObject UIRoot
@@ -19,6 +21,8 @@ public class UIManage : Singleton<UIManage> {
         {
             if (uiRoot == null)
                 uiRoot = HexMapEditor.uiRoot;
+            if (uiRoot == null)
+                uiRoot = GameObject.Find("UICanvas");
             return uiRoot;
         }
     }
@@ -103,6 +107,30 @@ public class UIManage : Singleton<UIManage> {
             tipLine.gameObject.SetActive(true);
             tipLine.ShowTipLine(content, time);
         }
+    }
+
+    public void ShowActionWnd(ActionWnd.OnClickButton cb, List<string> buttonNames)
+    {
+        if (actionWnd == null)
+        {
+            GameObject temp = GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/ActionWnd") as GameObject);
+            temp.transform.SetParent(UIRoot.transform);
+            temp.GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
+            temp.GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
+            actionWnd = temp.GetComponent<ActionWnd>();
+            actionWnd.ShowActionWnd(cb, buttonNames);
+        }
+        else
+        {
+            actionWnd.gameObject.SetActive(true);
+            actionWnd.ShowActionWnd(cb, buttonNames);
+        }
+    }
+
+    public void HideActionWnd()
+    {
+        actionWnd.HideActionWnd();
+        actionWnd.gameObject.SetActive(false);
     }
 
     public void AddPool(string name, Transform parent)

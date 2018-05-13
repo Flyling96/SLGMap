@@ -4,6 +4,7 @@
 		_MainTex("Terrain Texture Array", 2DArray) = "white" {}
 		_Glossiness("Smoothness", Range(0,1)) = 0.5
 		_Metallic("Metallic", Range(0,1)) = 0.0
+		_GridTex ("Grid Texture", 2D)= "white" {}
 	}
 		SubShader{
 		Tags{ "RenderType" = "Opaque" }
@@ -30,6 +31,7 @@
 	half _Glossiness;
 	half _Metallic;
 	fixed4 _Color;
+	sampler2D _GridTex;
 
 
 	float4 GetTerrainColor(Input IN, int index) {
@@ -48,7 +50,12 @@
 			GetTerrainColor(IN, 0) +
 			GetTerrainColor(IN, 1) +
 			GetTerrainColor(IN, 2);
-		o.Albedo = c.rgb *_Color;
+
+		float2 gridUV = IN.worldPos.xz;
+		gridUV.x *= 1 / (4 * 8.66025404);
+		gridUV.y *= 1 / (2 * 15.0);
+		fixed4 grid = tex2D(_GridTex, gridUV);
+		o.Albedo = c.rgb * grid * _Color;
 		o.Metallic = _Metallic;
 		o.Smoothness = _Glossiness;
 		o.Alpha = c.a;

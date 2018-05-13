@@ -10,7 +10,7 @@ public class TipLineUI : MonoBehaviour
     private void Awake()
     {
         contentColor = ToolClass.instance.ConvertColor(50, 50, 50, 255);
-        backgroundColor = ToolClass.instance.ConvertColor(255, 255, 255, 114);
+        backgroundColor = ToolClass.instance.ConvertColor(255, 255, 255, 255);
     }
 
     public void ShowTipLine(string content, float time)
