@@ -15,15 +15,15 @@ public class ActionWnd : MonoBehaviour {
         button = transform.Find("Button").GetComponent<Button>();
     }
 
-    public void ShowActionWnd(OnClickButton cb,List<string> buttonNames)
+    public void ShowActionWnd(OnClickButton cb, Dictionary<int, string> buttonNames)
     {
         ClickButton = cb;
-        for(int i=0;i<buttonNames.Count;i++)
+        foreach(KeyValuePair<int,string> child in buttonNames)
         {
             GameObject item = GameObject.Instantiate(button.gameObject);
             item.transform.parent = this.transform;
-            item.transform.Find("Text").GetComponent<Text>().text = buttonNames[i];
-            item.name = "Button" + i;
+            item.transform.Find("Text").GetComponent<Text>().text = child.Value;
+            item.name = "Button" + child.Key;
             item.SetActive(true);
             item.GetComponent<Button>().onClick.AddListener(delegate() { ClickButton(item.name[item.name.Length-1]-'0'); });
         }

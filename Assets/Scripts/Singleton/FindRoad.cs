@@ -46,6 +46,7 @@ public class FindRoad : Singleton<FindRoad> {
 
 
 
+
     public List<HexCell> Dijkstra(HexCell start,HexCell end,List<HexCell> cells)
     {
         int[,] distance = new int[cells.Count,cells.Count];
@@ -177,12 +178,14 @@ public class FindRoad : Singleton<FindRoad> {
         int[] previous = new int[cells.Count];
         float[] cost = new float[cells.Count];
         int startIndex = cells.IndexOf(start);
-        PriorityQueue<KeyValuePair<int, float>> queue = new PriorityQueue<KeyValuePair<int, float>>(new disCompare());//优先队列
+        PriorityQueue<KeyValuePair<int, float>> queue = new PriorityQueue<KeyValuePair<int, float>>(new disCompare());//优先队列 int 为cell编号，float 为cost
+        PriorityQueue<KeyValuePair<int, float>> cellQueue = new PriorityQueue<KeyValuePair<int, float>>(new cellCompare());//int 为cell编号，float 为 启发因子
+
 
         Stack<int> resultInt = new Stack<int>();
         for (int i = 0; i < cells.Count; i++)
         {
-            previous[i] = startIndex;
+            previous[i] = int.MaxValue;
             cost[i] = float.MaxValue;
         }
 
@@ -192,6 +195,7 @@ public class FindRoad : Singleton<FindRoad> {
             distanceToStart[i] = distance[startIndex, i];
             if (distanceToStart[i] < int.MaxValue)
             {
+                previous[i] = startIndex;
                 cost[i] = distance[startIndex, i] ;
             }
             queue.Push(new KeyValuePair<int, float>(i, cost[i]));
@@ -217,6 +221,7 @@ public class FindRoad : Singleton<FindRoad> {
                     {
                         distanceToStart[j] = distanceToStart[point] + distance[point, j];
                         previous[j] = point;
+                        cellQueue.Push(new KeyValuePair<int, float>(j, SixDirectsDistance(cells[j], end)));
                         cost[j] = distanceToStart[j] + SixDirectsDistance(cells[j], end)* h;
                         queue.Push(new KeyValuePair<int, float>(j, cost[j]));
                     }
@@ -225,12 +230,49 @@ public class FindRoad : Singleton<FindRoad> {
         }
 
         int previousIndex = cells.IndexOf(end);
+        bool isCanArrive = true;
         while (previous[previousIndex] != startIndex)
         {
+            if(previous[previousIndex]==int.MaxValue)
+            {
+                isCanArrive = false;
+                break;
+            }
             resultInt.Push(previousIndex);
             previousIndex = previous[previousIndex];
         }
         resultInt.Push(previousIndex);
+
+        //若不可到达，寻找离得最近的可到达路径
+        if(!isCanArrive)
+        {
+            while(cellQueue.Count!=0)
+            {
+                resultInt.Clear();
+                previousIndex = cellQueue.Top().Key;
+                cellQueue.Pop();
+                while (previous[previousIndex] != startIndex)
+                {
+                    if (previous[previousIndex] == int.MaxValue)
+                    {
+                        isCanArrive = false;
+                        break;
+                    }
+                    resultInt.Push(previousIndex);
+                    previousIndex = previous[previousIndex];
+                    if(previous[previousIndex]== startIndex)
+                    {
+                        isCanArrive = true;
+                    }
+                }
+                resultInt.Push(previousIndex);
+                if(isCanArrive)
+                {
+                    break;
+                }
+            }
+        }
+
 
         List<HexCell> result = new List<HexCell>();
 
@@ -262,7 +304,7 @@ public class FindRoad : Singleton<FindRoad> {
         List<HexCell> result = new List<HexCell>();
         for (int i = 0; i < cells.Count; i++)
         {
-            previous[i] = startIndex;
+            previous[i] = int.MaxValue;
         }
 
 
@@ -271,6 +313,7 @@ public class FindRoad : Singleton<FindRoad> {
             distanceToStart[i] = distance[startIndex, i];
             if (distanceToStart[i] < int.MaxValue)
             {
+                previous[i] = startIndex;
                 queue.Push(new KeyValuePair<int, float>(i, distanceToStart[i]));
             }
         }
@@ -320,6 +363,17 @@ public class FindRoad : Singleton<FindRoad> {
     public class disCompare : IComparer<KeyValuePair<int, float>>
     {
         public int Compare(KeyValuePair<int, float> x, KeyValuePair<int, float> y)
+        {
+            if (x.Value > y.Value)
+                return -1;
+            else
+                return 1;
+        }
+    }
+
+    public class cellCompare : IComparer<KeyValuePair<int, float>>
+    {
+        public int Compare(KeyValuePair<int , float> x, KeyValuePair<int , float> y)
         {
             if (x.Value > y.Value)
                 return -1;
@@ -435,6 +489,12 @@ public class FindRoad : Singleton<FindRoad> {
                 distance[n, index] = CellDistance(cell, (HexDirection)i);
             }
         }
+    }
+
+    List<HexCell> CanClickList = new List<HexCell>();
+    public void CanClick(HexCell cell)
+    {
+        CanClickList.Add(cell);
     }
 
     //判断两个hexcell是否在相隔为1且可到达

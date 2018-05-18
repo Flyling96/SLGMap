@@ -57,12 +57,37 @@ public class GameUnitManage : Singleton<GameUnitManage> {
         }
     }
 
+    public void UnBlockRoadAll()
+    {
+        foreach(KeyValuePair<int,List<BattleUnit>> child in battleUnitPowerDic)
+        {
+            for(int i =0;i<child.Value.Count;i++)
+            {
+                FindRoad.instance.UnBlockRoad(child.Value[i].Cell, child.Key);
+            }
+        }
+    }
+
     public void BlockRoad(int power)
     {
         List<BattleUnit> units = battleUnitPowerDic[power];
         for (int i = 0; i < units.Count; i++)
         {
             FindRoad.instance.BlockRoad(units[i].Cell);
+        }
+    }
+
+    public void BlockRoadExcept(int power)
+    {
+        foreach (KeyValuePair<int, List<BattleUnit>> child in battleUnitPowerDic)
+        {
+            if (child.Key != power)
+            {
+                for (int i = 0; i < child.Value.Count; i++)
+                {
+                    FindRoad.instance.UnBlockRoad(child.Value[i].Cell, child.Key);
+                }
+            }
         }
     }
 

@@ -91,26 +91,31 @@ public class GameControl : MonoBehaviour {
             endCell = HexGrid.instance.GetCell(hit.point);
             Vector3 position;
             isClickEndCell = true;
-            List<string> buttonNames = new List<string>();
+            Dictionary<int,string> buttonNames = new Dictionary<int, string>();
             road = FindRoad.instance.AStar(startCell, endCell, HexGrid.instance.AllCellList);
 
-            if (!FindRoad.instance.isCanGoNeighbor(startCell, endCell, battleUnit.battleUnitProperty.actionPower) && road.Count == 2)
+            if (road[road.Count-1]!=endCell)
             {
                 UIManage.instance.ShowTipLine("该地点无法到达", 3);
-                endCell = null;
-                return;
             }
 
             if (endCell.unit!=null)
             {
                 position = transform.Find("Main Camera").GetComponent<Camera>().WorldToScreenPoint(endCell.unit.transform.position);
-                buttonNames.Add("移动");
-                buttonNames.Add("攻击");
+                if (endCell.unit.power != battleUnit.power)
+                {
+                    buttonNames.Add(0, "移动");
+                    buttonNames.Add(1, "攻击");
+                }
+                else
+                {
+                    buttonNames.Add(0, "移动");
+                }
             }
             else
             {
                 position = transform.Find("Main Camera").GetComponent<Camera>().WorldToScreenPoint(endCell.transform.position);
-                buttonNames.Add("移动");
+                buttonNames.Add(0,"移动");
             }
             UIManage.instance.ShowActionWnd(UnitAction, buttonNames);
             UIManage.instance.actionWnd.GetComponent<RectTransform>().anchoredPosition =
@@ -171,6 +176,7 @@ public class GameControl : MonoBehaviour {
             {
                 battleUnit = startCell.unit;
                 GameUnitManage.instance.UnBlockRoad(battleUnit.power);
+                //GameUnitManage.instance.UnBlockRoadAll();
                 //如果startCell现在没有还未行径的路径
                 if (startCell.unit.isMoveComplete)
                 {
@@ -199,12 +205,10 @@ public class GameControl : MonoBehaviour {
             case (int)UnitActionEnum.Move:
                 {
                     UnitMove();
-                    Debug.Log(0);
                 }
                 break;
             case (int)UnitActionEnum.Attack:
                 {
-                    Debug.Log(1);
                 }
                 break;
         }

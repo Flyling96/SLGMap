@@ -109,7 +109,7 @@ public class UIManage : Singleton<UIManage> {
         }
     }
 
-    public void ShowActionWnd(ActionWnd.OnClickButton cb, List<string> buttonNames)
+    public void ShowActionWnd(ActionWnd.OnClickButton cb, Dictionary<int, string> buttonNames)
     {
         if (actionWnd == null)
         {
