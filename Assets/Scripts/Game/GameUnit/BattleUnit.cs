@@ -6,58 +6,115 @@ using UnityEngine.UI;
 public struct BattleUnitProperty
 {
     public int unitHP;
+    public int nowHP;
     public int unitMP;
+    public int nowMp;
     public int actionPower;
     public int attack;
     public int defanse;
     public int attackDistance;
 }
 
+public enum UnitType
+{
+    Soldier,
+    Buide,
+}
 
-public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
+public class BattleUnit : Unit, IAttack, IMove, IHit
 {
     float moveSpeed = 2.5f;
     float rotateSpeed = 180f;
 
-    public int power = 0;//势力编号
 
-    HexCell cell;
-
-    public HexCell Cell
+    void Start()
     {
-        get
-        {
-            return cell;
-        }
-        set
-        {
-            if (cell != null)
-            {
-                FindRoad.instance.UnBlockRoad(cell,power);
-            }
-            cell = value;
-            FindRoad.instance.BlockRoad(cell);
-        }
+        unityType = UnitType.Soldier;
     }
+
+    public bool isMoveComplete = true;
 
     public BattleUnitProperty battleUnitProperty;//属性
-    BattleUnit target;//攻击目标
 
-    public void FireSoldier(BattleUnit hiter)
+
+    public void NewRound()
+    {
+        isMove = false;
+        isAttack = false;
+    }
+
+    public void AttackSoldier(BattleUnit hiter)
+    {
+        StartCoroutine(WaitForMove(hiter));
+        isAttack = true;
+    }
+
+    IEnumerator WaitForMove(BattleUnit hiter)
+    {
+        int count = 0;
+        while(count<50)
+        {
+            if(!isMoveAnimFinish)
+            {
+                yield return new WaitForSeconds(0.1f);
+                count++;
+            }
+            else
+            {
+                break;
+            }
+        }
+
+        StartCoroutine(LookAt(hiter.transform.position));
+
+        hiter.Hit(this);
+
+    }
+
+    public void AttackBuilder(BuildUnit hiter)
+    {
+    }
+
+    public void Hit(BattleUnit attacker)
+    {
+        battleUnitProperty.nowHP -= CalculationOfInjury(attacker);
+    }
+
+    int CalculationOfInjury(BattleUnit attacker)
+    {
+        int result = attacker.battleUnitProperty.attack * 2 - battleUnitProperty.defanse;
+        return result;
+    }
+
+    public void Hit(BuildUnit attacker)
     {
 
     }
 
-    public void FireBuilder(BuildUnit hiter)
-    {
 
+    public bool IsInAttackDis(Unit hiter)
+    {
+        if (Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
+            <= battleUnitProperty.attackDistance + (Cell.Elevation - hiter.Cell.Elevation))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
+
+    public int NeedMoveCount(Unit hiter)
+    {
+        return Cell.coordinates.DistanceToOther(hiter.Cell.coordinates) - (battleUnitProperty.attackDistance + (Cell.Elevation - hiter.Cell.Elevation));
+    }
+
 
 
     List<HexCell> road = new List<HexCell>();
     List<HexCell> roadInRound = new List<HexCell>();
     List<HexCell> canGotoCellList = new List<HexCell>();
-    public bool isMoveComplete = true;
 
 
     public void ShowRoad(ref List<HexCell> canGoCellList)
@@ -101,6 +158,7 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
 
     public void MoveInRound()
     {
+        isMoveAnimFinish = false;
         roadInRound.Clear();
         int canMoveDistance = battleUnitProperty.actionPower;
         if (road.Count > canMoveDistance)
@@ -122,12 +180,14 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
 
     public void Move(List<HexCell> cells)
     {
+        isMove = true;
         Cell.unit = null;
         cells[cells.Count - 1].unit = this;
         Cell = cells[cells.Count - 1];
         StartCoroutine(MoveAnim(cells));
     }
 
+    bool isMoveAnimFinish = true;
     IEnumerator MoveAnim(List<HexCell> cells)
     {
         Vector3 a, b, c = cells[0].transform.position;
@@ -156,6 +216,7 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
                 yield return null;
             }
         }
+        isMoveAnimFinish = true;
         cells.Clear();
     }
 
@@ -173,5 +234,12 @@ public class BattleUnit : MonoBehaviour, IBattleUnitFire, IMove
         }
 
     }
- 
+
+    public override void RefreshHUD()
+    {
+        base.RefreshHUD();
+        Vector3 position = GameControl.mainCamera.WorldToScreenPoint(transform.position);
+        hud.RefreshHUD(battleUnitProperty.nowHP, battleUnitProperty.unitHP, position,40);
+    }
+
 }

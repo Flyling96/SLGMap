@@ -7,7 +7,8 @@ using System.Collections.Generic;
 public class HexCell : MonoBehaviour {
 
 
-    public BattleUnit unit;
+    public BattleUnit unit = null;
+    public BuildUnit buildUnit = null;
 
     //距离相关
     public Text label;
@@ -116,13 +117,15 @@ public class HexCell : MonoBehaviour {
 
     //高度
 	public int Elevation {
-		get {
+		get
+        {
 			return elevation;
 		}
-		set {
+		set
+        {
 			elevation = value;
             RefreshPosition(value);
-            label.text = coordinates.X.ToString() + "\n" + coordinates.Y.ToString() + "\n" + coordinates.Z.ToString();
+            //label.text = coordinates.X.ToString() + "\n" + coordinates.Y.ToString() + "\n" + coordinates.Z.ToString();
             //Vector3 uiPosition = uiRect.localPosition;
             //uiPosition.z = -position.y;
             //uiRect.localPosition = uiPosition;

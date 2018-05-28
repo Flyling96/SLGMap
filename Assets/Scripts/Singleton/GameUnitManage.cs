@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameUnitManage : Singleton<GameUnitManage> {
 
@@ -9,7 +10,9 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     /// 势力的战斗单位列表
     /// </summary>
     public Dictionary<int, List<BattleUnit>> battleUnitPowerDic = new Dictionary<int, List<BattleUnit>>();
+    public List<int> powerList = new List<int>();
 
+    public int myPower = 0;
 
     public void LoadBattleUnitInit(List<BaseInfo> battleUnitInitInfoList)
     {
@@ -22,6 +25,12 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             battleUnitModel.AddComponent<BattleUnit>();
             battleUnitModel.GetComponent<BattleUnit>().battleUnitProperty = battleUnitInit.battleUnitInfo.property;
             battleUnitModel.GetComponent<BattleUnit>().Cell = HexGrid.instance.GetCell(battleUnitInit.coordinates);
+            battleUnitModel.GetComponent<BattleUnit>().hud = GameObjectPool.instance.GetPoolChild("UnitHUD", UIManage.instance.NewHUD()).GetComponent<HUD>();
+            battleUnitModel.GetComponent<BattleUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform);
+            if(battleUnitInit.power == myPower)
+            {
+                battleUnitModel.GetComponent<BattleUnit>().hud.transform.Find("Fill").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00DD269A");
+            }
             HexGrid.instance.GetCell(battleUnitInit.coordinates).unit = battleUnitModel.GetComponent<BattleUnit>();
             battleUnitModel.GetComponent<BattleUnit>().power = battleUnitInit.power;
             battleUnitModel.transform.position = battleUnitModel.GetComponent<BattleUnit>().Cell.transform.position;
@@ -31,8 +40,81 @@ public class GameUnitManage : Singleton<GameUnitManage> {
                 battleUnitPowerDic.Add(battleUnitInit.power, new List<BattleUnit>());
             }
             battleUnitPowerDic[battleUnitInit.power].Add(battleUnitModel.GetComponent<BattleUnit>());
+            if(!powerList.Contains(battleUnitInit.power))
+            {
+                powerList.Add(battleUnitInit.power);
+            }
         }
+        powerList.Sort();
     }
+
+
+    public List<BattleUnit> FindCanAttack(BattleUnit attacker)
+    {
+        List<BattleUnit> result = new List<BattleUnit>();
+        foreach(KeyValuePair<int,List<BattleUnit>> child in battleUnitPowerDic)
+        {
+            List<BattleUnit> childValues = child.Value;
+            if (child.Key == attacker.power )
+            {
+                continue;
+            }
+            else
+            {
+                for (int i = 0; i < childValues.Count; i++)
+                {
+                    if (CanAttack(attacker,childValues[i]))
+                    {
+                        result.Add(childValues[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+
+    bool CanAttack(BattleUnit attacker,BattleUnit hiter)
+    {
+        if (attacker.isMove)
+        {
+            if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
+                <= attacker.battleUnitProperty.attackDistance + (attacker.Cell.Elevation - hiter.Cell.Elevation))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
+                <= attacker.battleUnitProperty.attackDistance + (attacker.Cell.Elevation - hiter.Cell.Elevation)+attacker.battleUnitProperty.actionPower)
+            {
+                FindRoad.instance.UnBlockRoad(hiter.Cell, hiter.power);
+                int realDis = FindRoad.instance.AStar(attacker.Cell, hiter.Cell,HexGrid.instance.AllCellList).Count;
+                FindRoad.instance.BlockRoad(hiter.Cell);
+
+                if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
+                <= attacker.battleUnitProperty.actionPower + (attacker.Cell.Elevation - hiter.Cell.Elevation) + realDis)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+    }
+
 
     public void UnitAction(int power)
     {
@@ -92,4 +174,14 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     }
 
 
+    private void Update()
+    {
+        foreach (KeyValuePair<int, List<BattleUnit>> child in battleUnitPowerDic)
+        {
+            for (int i = 0; i < child.Value.Count; i++)
+            {
+                child.Value[i].RefreshHUD();
+            }
+        }
+    }
 }

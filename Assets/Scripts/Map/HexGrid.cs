@@ -102,7 +102,7 @@ public class HexGrid : Singleton<HexGrid> {
         cellLabelPrefab = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Cell Label") as GameObject)).GetComponent<Text>(); 
         noiseSource =Resources.Load("Texture/Noise") as Texture2D;
         StartCoroutine(waitInstantiate());
-        chunks = new HexGridChunk[chunkCountX * chunkCountZ];
+        //chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
         if (HexMetrics.instance.isEditorTexture)
         {

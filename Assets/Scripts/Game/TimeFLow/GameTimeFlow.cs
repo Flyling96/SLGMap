@@ -29,5 +29,10 @@ public class GameTimeFlow : MonoBehaviour {
         HexGrid.instance.Refresh();
     }
 
+    public void ExitMyRound()
+    {
+        RoundManage.instance.ChangePower();
+    }
+
 
 }

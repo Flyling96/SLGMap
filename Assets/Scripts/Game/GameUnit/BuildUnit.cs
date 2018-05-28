@@ -2,14 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuildUnit : MonoBehaviour, IBuildUnitFire
+public class BuildUnit : Unit, IAttack
 {
-
+    void Start()
+    {
+        unityType = UnitType.Buide;
+    }
     int fireDistance;
 
-    public void FireSoldier(BattleUnit hiter)
+    public void AttackSoldier(BattleUnit hiter)
     {
 
     }
 
+    public void AttackBuilder(BuildUnit hiter)
+    {
+
+    }
+    public bool IsInAttackDis(Unit hiter)
+    {
+        return true;
+    }
+
+    public int NeedMoveCount(Unit hiter)
+    {
+        return 0;
+    }
 }

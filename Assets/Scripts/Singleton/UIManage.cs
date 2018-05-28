@@ -109,6 +109,8 @@ public class UIManage : Singleton<UIManage> {
         }
     }
 
+
+    public UnitActionEnum actionType = UnitActionEnum.Move;
     public void ShowActionWnd(ActionWnd.OnClickButton cb, Dictionary<int, string> buttonNames)
     {
         if (actionWnd == null)
@@ -125,6 +127,11 @@ public class UIManage : Singleton<UIManage> {
             actionWnd.gameObject.SetActive(true);
             actionWnd.ShowActionWnd(cb, buttonNames);
         }
+    }
+
+    public GameObject NewHUD()
+    {
+        return  GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/UnitHUD") as GameObject);
     }
 
     public void HideActionWnd()
@@ -181,6 +188,11 @@ public class UIManage : Singleton<UIManage> {
             }
             GameObjectPool.instance.InsertChild(name, child.gameObject);
         }
+    }
+
+    public void RefreshHUD()
+    {
+
     }
 
 }

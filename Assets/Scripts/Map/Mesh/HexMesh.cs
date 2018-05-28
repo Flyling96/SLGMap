@@ -69,8 +69,8 @@ public class HexMesh : MonoBehaviour {
             hexMesh.colors = colors.ToArray();
             hexMesh.SetUVs(0, uvs);
         }
-        hexMesh.RecalculateNormals();
-        meshCollider.sharedMesh = hexMesh;
+        hexMesh.RecalculateNormals();//mesh重新计算发现
+        meshCollider.sharedMesh = hexMesh;//设置mesh碰撞器
     }
 
 

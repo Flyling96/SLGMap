@@ -120,7 +120,9 @@ public class BattleUnitInfo:BaseInfo
         modelName = table[1];
         property = new BattleUnitProperty();
         property.unitHP = int.Parse(table[2]);
+        property.nowHP = property.unitHP;
         property.unitMP = int.Parse(table[3]);
+        property.nowMp = property.unitMP;
         property.actionPower = int.Parse(table[4]);
         property.attack = int.Parse(table[5]);
         property.defanse = int.Parse(table[6]);

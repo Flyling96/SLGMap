@@ -2,14 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IBattleUnitFire
+public interface IAttack
 {
+
+    bool IsInAttackDis(Unit hiter);
+
+    int NeedMoveCount(Unit hiter);
+
     /// <summary>
     /// 作战单位攻击作战单位
     /// </summary>
     /// <param name="attacker"></param>
     /// <param name="hiter"></param>
-    void FireSoldier( BattleUnit hiter);
+    void AttackSoldier( BattleUnit hiter);
 
 
     /// <summary>
@@ -17,18 +22,19 @@ public interface IBattleUnitFire
     /// </summary>
     /// <param name="attacker"></param>
     /// <param name="hiter"></param>
-    void FireBuilder(BuildUnit hiter);
+    void AttackBuilder(BuildUnit hiter);
+
 
 }
 
-public interface IBuildUnitFire
+
+public interface IHit
 {
     /// <summary>
-    /// 建筑攻击作战单位
+    /// 作战单位受击
     /// </summary>
     /// <param name="attacker"></param>
-    /// <param name="hiter"></param>
-    void FireSoldier(BattleUnit hiter);
+    void Hit(BattleUnit attacker);
 
-
+    void Hit(BuildUnit attacker);
 }
