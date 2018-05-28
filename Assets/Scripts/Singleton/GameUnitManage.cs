@@ -79,7 +79,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
         if (attacker.isMove)
         {
             if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
-                <= attacker.battleUnitProperty.attackDistance + (attacker.Cell.Elevation - hiter.Cell.Elevation))
+                < attacker.battleUnitProperty.attackDistance )//+ (attacker.Cell.Elevation - hiter.Cell.Elevation))
             {
                 return true;
             }
@@ -91,14 +91,14 @@ public class GameUnitManage : Singleton<GameUnitManage> {
         else
         {
             if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
-                <= attacker.battleUnitProperty.attackDistance + (attacker.Cell.Elevation - hiter.Cell.Elevation)+attacker.battleUnitProperty.actionPower)
+                <=attacker.battleUnitProperty.attackDistance +attacker.battleUnitProperty.actionPower)//+ (attacker.Cell.Elevation - hiter.Cell.Elevation))
             {
                 FindRoad.instance.UnBlockRoad(hiter.Cell, hiter.power);
                 int realDis = FindRoad.instance.AStar(attacker.Cell, hiter.Cell,HexGrid.instance.AllCellList).Count;
                 FindRoad.instance.BlockRoad(hiter.Cell);
 
                 if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
-                <= attacker.battleUnitProperty.actionPower + (attacker.Cell.Elevation - hiter.Cell.Elevation) + realDis)
+                <= attacker.battleUnitProperty.attackDistance + realDis)//+ (attacker.Cell.Elevation - hiter.Cell.Elevation)
                 {
                     return true;
                 }
@@ -113,6 +113,16 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             }
         }
 
+    }
+
+    public void UnitDie(BattleUnit dieUnit)
+    {
+        battleUnitPowerDic[dieUnit.power].Remove(dieUnit);
+        if(battleUnitPowerDic[dieUnit.power].Count == 0)
+        {
+            powerList.Remove(dieUnit.power);
+        }
+        Destroy(dieUnit.gameObject);
     }
 
 

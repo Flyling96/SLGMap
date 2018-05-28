@@ -117,16 +117,19 @@ public class BattleUnitInfo:BaseInfo
     public override void ChangeValues(string[] table)
     {
         id = int.Parse(table[0]);
-        modelName = table[1];
+        modelName = table[2];
         property = new BattleUnitProperty();
-        property.unitHP = int.Parse(table[2]);
+        property.name = table[1];
+        property.unitHP = int.Parse(table[3]);
         property.nowHP = property.unitHP;
-        property.unitMP = int.Parse(table[3]);
+        property.unitMP = int.Parse(table[4]);
         property.nowMp = property.unitMP;
-        property.actionPower = int.Parse(table[4]);
-        property.attack = int.Parse(table[5]);
-        property.defanse = int.Parse(table[6]);
-        property.attackDistance = int.Parse(table[7]);
+        property.actionPower = int.Parse(table[5]);
+        property.attack = int.Parse(table[6]);
+        property.defence = int.Parse(table[7]);
+        property.attackDistance = int.Parse(table[8]);
+        property.atlasPath = table[9];
+        property.iconName = table[10];
     }
 
     public override BaseInfo GetNew()

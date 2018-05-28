@@ -25,7 +25,21 @@ public class RoundManage : Singleton<RoundManage> {
 
     public void ChangePower()
     {
+        List<BattleUnit> unit = GameUnitManage.instance.battleUnitPowerDic[curPower];
+        for(int i=0;i<unit.Count;i++)
+        {
+            if (unit[i].AttackTarget != null)
+            {
+                unit[i].AutoAttack();
+            }
+            else
+            {
+                unit[i].AutoMove();
+            }
+        }
+
         List<int> powerList = GameUnitManage.instance.powerList;
+        ExitRound();
         if (powerList.IndexOf(curPower) < powerList.Count - 1)
         {
             curPower = powerList[powerList.IndexOf(curPower) + 1];
@@ -34,7 +48,6 @@ public class RoundManage : Singleton<RoundManage> {
         {
             curPower = powerList[0];
         }
-
         NewRound(curPower);
     }
 

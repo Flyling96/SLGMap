@@ -327,7 +327,7 @@ public class FindRoad : Singleton<FindRoad> {
             }
             float min = queue.Top().Value;
             int point = queue.Top().Key;
-            if(min<movePower)
+            if(min<=movePower)
             {
                 result.Add(cells[point]);
             }
@@ -457,6 +457,8 @@ public class FindRoad : Singleton<FindRoad> {
     //阻塞道路，刷新distance
     public void BlockRoad(HexCell cell)
     {
+        if (cell == null)
+            return;
         List<HexCell> cells = HexGrid.instance.AllCellList;
         int index = cells.IndexOf(cell);
         for(int i=(int)HexDirection.NE; i <= (int)HexDirection.NW; i++)

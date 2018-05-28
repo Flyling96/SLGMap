@@ -10,6 +10,7 @@ public class BuildUnit : Unit, IAttack
     }
     int fireDistance;
 
+
     public void AttackSoldier(BattleUnit hiter)
     {
 
@@ -27,5 +28,13 @@ public class BuildUnit : Unit, IAttack
     public int NeedMoveCount(Unit hiter)
     {
         return 0;
+    }
+    public bool CanAttackInRound(Unit hiter)
+    {
+        return false;
+    }
+
+    public void SetAttackTarget(Unit target)
+    {
     }
 }

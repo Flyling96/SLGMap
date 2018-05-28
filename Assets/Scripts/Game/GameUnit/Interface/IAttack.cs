@@ -5,9 +5,13 @@ using UnityEngine;
 public interface IAttack
 {
 
+    bool CanAttackInRound(Unit hiter);
+
     bool IsInAttackDis(Unit hiter);
 
     int NeedMoveCount(Unit hiter);
+
+    void SetAttackTarget(Unit target);
 
     /// <summary>
     /// 作战单位攻击作战单位

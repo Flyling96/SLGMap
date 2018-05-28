@@ -5,14 +5,17 @@ using UnityEngine.UI;
 
 public struct BattleUnitProperty
 {
+    public string name;
     public int unitHP;
     public int nowHP;
     public int unitMP;
     public int nowMp;
     public int actionPower;
     public int attack;
-    public int defanse;
+    public int defence;
     public int attackDistance;
+    public string atlasPath;
+    public string iconName;
 }
 
 public enum UnitType
@@ -21,7 +24,7 @@ public enum UnitType
     Buide,
 }
 
-public class BattleUnit : Unit, IAttack, IMove, IHit
+public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
 {
     float moveSpeed = 2.5f;
     float rotateSpeed = 180f;
@@ -41,10 +44,13 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
     {
         isMove = false;
         isAttack = false;
+        RefreshAttackRoad();
+        RefreshRoadInRound();
     }
 
     public void AttackSoldier(BattleUnit hiter)
     {
+        road.Clear();
         StartCoroutine(WaitForMove(hiter));
         isAttack = true;
     }
@@ -67,6 +73,7 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
 
         StartCoroutine(LookAt(hiter.transform.position));
 
+
         hiter.Hit(this);
 
     }
@@ -75,14 +82,40 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
     {
     }
 
+    bool isRefreshInjuryHUD = false;
     public void Hit(BattleUnit attacker)
     {
-        battleUnitProperty.nowHP -= CalculationOfInjury(attacker);
+        isRefreshInjuryHUD = true;
+        attacker.AttackTarget = null;
+        int injury = CalculationOfInjury(attacker);
+        hud.data.text = injury.ToString();
+        battleUnitProperty.nowHP -= injury;
+        if(battleUnitProperty.nowHP<=0)
+        {
+            StartCoroutine(WaitHUDAnimDie());
+        }
+    }
+    IEnumerator WaitHUDAnimDie()
+    {
+        int count = 0;
+        while (count < 50)
+        {
+            if (!hud.isDie())
+            {
+                yield return new WaitForSeconds(0.1f);
+                count++;
+            }
+            else
+            {
+                break;
+            }
+        }
+        Die();
     }
 
     int CalculationOfInjury(BattleUnit attacker)
     {
-        int result = attacker.battleUnitProperty.attack * 2 - battleUnitProperty.defanse;
+        int result = attacker.battleUnitProperty.attack * 2 - battleUnitProperty.defence;
         return result;
     }
 
@@ -91,11 +124,20 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
 
     }
 
+    public bool isDie = false;
+    public void Die()
+    { 
+        isDie = true;
+        gameObject.SetActive(false);
+        Cell = null;
+        GameObjectPool.instance.InsertChild("UnitHUD", hud.gameObject);
+        GameUnitManage.instance.UnitDie(this);
+    }
 
     public bool IsInAttackDis(Unit hiter)
     {
         if (Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
-            <= battleUnitProperty.attackDistance + (Cell.Elevation - hiter.Cell.Elevation))
+            <= battleUnitProperty.attackDistance )//+(Cell.Elevation - hiter.Cell.Elevation))
         {
             return true;
         }
@@ -107,9 +149,140 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
 
     public int NeedMoveCount(Unit hiter)
     {
-        return Cell.coordinates.DistanceToOther(hiter.Cell.coordinates) - (battleUnitProperty.attackDistance + (Cell.Elevation - hiter.Cell.Elevation));
+        return Cell.coordinates.DistanceToOther(hiter.Cell.coordinates) - battleUnitProperty.attackDistance ;//(Cell.Elevation - hiter.Cell.Elevation));
     }
 
+    public bool CanAttackInRound(Unit hiter)
+    {
+        if(NeedMoveCount(hiter)>battleUnitProperty.actionPower)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    public Unit AttackTarget = null;
+    public void SetAttackTarget(Unit target)
+    {
+        AttackTarget = target;
+    }
+
+    void RefreshAttackRoad()
+    {
+        if (AttackTarget!=null)
+        {
+            isMoveComplete = false;
+            //重新计算位置
+            FindRoad.instance.UnBlockRoad(AttackTarget.cell, AttackTarget.power);
+            SetRoad(FindRoad.instance.AStar(Cell, AttackTarget.Cell, HexGrid.instance.AllCellList));
+            FindRoad.instance.BlockRoad(AttackTarget.cell);
+        }
+        else
+        {
+            isMoveComplete = true;
+        }
+    }
+    void RefreshRoadInRound()
+    {
+        roadInRound.Clear();
+        if (AttackTarget != null)
+        {
+            if (road.Count <= battleUnitProperty.attackDistance)
+            {
+                return;
+            }
+            else
+            {
+                int need = NeedMoveCount(AttackTarget)+1;
+                for (int i = 0; i < need; i++)
+                {
+                    if (road.Count > 0)
+                    {
+                        roadInRound.Add(road[0]);
+                        road.RemoveAt(0);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            int canMoveDistance = battleUnitProperty.actionPower;
+            roadInRound.Add(Cell);
+            for (int i = 0; i < canMoveDistance; i++)
+            {
+                if (road.Count > 0)
+                {
+                    roadInRound.Add(road[0]);
+                    road.RemoveAt(0);
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+    }
+    public void AutoAttack()
+    {
+        if (AttackTarget == null||isAttack)
+            return;
+        if (!isMove)
+        {
+            if (CanAttackInRound(AttackTarget))
+            {
+                if (!IsInAttackDis(AttackTarget))
+                {
+                    AutoMove();
+                }
+
+                switch (AttackTarget.unityType)
+                {
+                    case UnitType.Soldier:
+                        {
+                            AttackSoldier((BattleUnit)AttackTarget);
+                            break;
+                        }
+                    case UnitType.Buide:
+                        {
+                            AttackBuilder((BuildUnit)AttackTarget);
+                            break;
+                        }
+                }
+            }
+            else
+            {
+                AutoMove();
+            }
+        }
+        else
+        {
+            if (IsInAttackDis(AttackTarget))
+            {
+                switch (AttackTarget.unityType)
+                {
+                    case UnitType.Soldier:
+                        {
+                            AttackSoldier((BattleUnit)AttackTarget);
+                            break;
+                        }
+                    case UnitType.Buide:
+                        {
+                            AttackBuilder((BuildUnit)AttackTarget);
+                            break;
+                        }
+                }
+            }
+
+        }
+    }
 
 
     List<HexCell> road = new List<HexCell>();
@@ -139,6 +312,30 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
             road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#0080FFFF");
             canGotoCellList.Add(road[i]);
         }
+
+        if(AttackTarget!=null)
+        {
+            int need = NeedMoveCount(AttackTarget)+1;
+            if(need>roadInRound.Count)
+            {
+                need -= roadInRound.Count;
+                for(int i=need;i<road.Count;i++)
+                {
+                    road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
+                }
+            }
+            else
+            {
+                for(int i=need;i<roadInRound.Count;i++)
+                {
+                    roadInRound[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
+                }
+                for(int i=0;i<road.Count;i++)
+                {
+                    road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
+                }
+            }
+        }
         canGoCellList = canGotoCellList;
     }
 
@@ -156,15 +353,40 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
         road = roadCells;
     }
 
+    public void AutoMove()
+    {
+        if(!isMove&& roadInRound.Count>1)
+        {
+            AutoMoveInRound();
+        }
+    }
+
+    void AutoMoveInRound()
+    {
+        isMove = true;
+        isMoveAnimFinish = false;
+        if (road.Count > 0)
+        {
+            isMoveComplete = false;
+        }
+        else
+        {
+            isMoveComplete = true;
+        }
+        Move(roadInRound);
+    }
+
     public void MoveInRound()
     {
+        AttackTarget = null;
+        isMove = true;
         isMoveAnimFinish = false;
         roadInRound.Clear();
         int canMoveDistance = battleUnitProperty.actionPower;
-        if (road.Count > canMoveDistance)
+        if (road.Count > canMoveDistance+1)
         {
             isMoveComplete = false;
-            for (int i = 0; i < canMoveDistance; i++)
+            for (int i = 0; i < canMoveDistance+1; i++)
             {
                 roadInRound.Add(road[0]);
                 road.RemoveAt(0);
@@ -180,7 +402,6 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
 
     public void Move(List<HexCell> cells)
     {
-        isMove = true;
         Cell.unit = null;
         cells[cells.Count - 1].unit = this;
         Cell = cells[cells.Count - 1];
@@ -239,7 +460,9 @@ public class BattleUnit : Unit, IAttack, IMove, IHit
     {
         base.RefreshHUD();
         Vector3 position = GameControl.mainCamera.WorldToScreenPoint(transform.position);
-        hud.RefreshHUD(battleUnitProperty.nowHP, battleUnitProperty.unitHP, position,40);
+        hud.RefreshHUD(battleUnitProperty.nowHP, battleUnitProperty.unitHP, position,40,ref isRefreshInjuryHUD);
     }
+
+
 
 }

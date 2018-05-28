@@ -11,6 +11,7 @@ public class UIManage : Singleton<UIManage> {
     public TipUI inputWnd = null;
     public TipLineUI tipLine = null;
     public DownSelectWnd downSelectWnd = null;
+    public GameObject unitInfoWnd = null;
     public ActionWnd actionWnd = null;
     
 
@@ -91,6 +92,7 @@ public class UIManage : Singleton<UIManage> {
         }
     }
 
+
     public void ShowTipLine(string content,float time)
     {
         if (tipLine == null)
@@ -109,6 +111,37 @@ public class UIManage : Singleton<UIManage> {
         }
     }
 
+    public void ShowUnitInfoWnd(BattleUnit unit)
+    {
+        if (unitInfoWnd == null)
+        {
+            unitInfoWnd = GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/UnitInfoWnd") as GameObject);
+            unitInfoWnd.transform.SetParent(UIRoot.transform);
+            unitInfoWnd.GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
+            unitInfoWnd.GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);
+        }
+        else
+        {
+            unitInfoWnd.gameObject.SetActive(true);
+        }
+
+        unitInfoWnd.transform.Find("name").GetComponent<Text>().text = unit.battleUnitProperty.name;
+        //unitInfoWnd.transform.Find("icon").GetComponent<Image>().sprite  = (Sprite)Resources.LoadAll(unit.battleUnitProperty.iconPath)[2];
+        unitInfoWnd.transform.Find("icon").GetComponent<Image>().sprite = AtlasManage.instance.LoadAtlasSprite(unit.battleUnitProperty.atlasPath, unit.battleUnitProperty.iconName);
+        unitInfoWnd.transform.Find("pro").transform.Find("UnitHUD").GetComponent<Slider>().value = unit.battleUnitProperty.nowHP / (unit.battleUnitProperty.unitHP * 1.0f);
+        unitInfoWnd.transform.Find("pro").transform.Find("HP").GetComponent<Text>().text = "HP: " + unit.battleUnitProperty.nowHP + "/" + unit.battleUnitProperty.unitHP;
+        unitInfoWnd.transform.Find("pro").transform.Find("Attack").GetComponent<Text>().text = "攻击: " + unit.battleUnitProperty.attack;
+        unitInfoWnd.transform.Find("pro").transform.Find("Defence").GetComponent<Text>().text = "防御: " + unit.battleUnitProperty.defence;
+        unitInfoWnd.transform.Find("pro").transform.Find("AttackDis").GetComponent<Text>().text = "射程: " + unit.battleUnitProperty.attackDistance;
+        unitInfoWnd.transform.Find("pro").transform.Find("ActionPower").GetComponent<Text>().text = "移动距离: " + unit.battleUnitProperty.actionPower;
+
+
+    }
+
+    public void HideUnitInfoWnd()
+    {
+        unitInfoWnd.SetActive(false);
+    }
 
     public UnitActionEnum actionType = UnitActionEnum.Move;
     public void ShowActionWnd(ActionWnd.OnClickButton cb, Dictionary<int, string> buttonNames)
@@ -133,6 +166,7 @@ public class UIManage : Singleton<UIManage> {
     {
         return  GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/UnitHUD") as GameObject);
     }
+
 
     public void HideActionWnd()
     {
