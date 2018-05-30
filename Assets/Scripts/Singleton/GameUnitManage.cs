@@ -10,6 +10,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     /// 势力的战斗单位列表
     /// </summary>
     public Dictionary<int, List<BattleUnit>> battleUnitPowerDic = new Dictionary<int, List<BattleUnit>>();
+    public Dictionary<int, List<BuildUnit>> buildUnitPowerDic = new Dictionary<int, List<BuildUnit>>();
     public List<int> powerList = new List<int>();
 
     public int myPower = 0;
@@ -49,9 +50,47 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     }
 
 
-    public List<BattleUnit> FindCanAttack(BattleUnit attacker)
+    public void LoadBuildUnitInit(List<BaseInfo> buildUnitInitInfoList)
     {
-        List<BattleUnit> result = new List<BattleUnit>();
+        for (int i = 0; i < buildUnitInitInfoList.Count; i++)
+        {
+            BuildUnitInitInfo buildUnitInit = (BuildUnitInitInfo)buildUnitInitInfoList[i];
+            string modelName = buildUnitInit.buildUnitInfo.modelName;
+            string modelPath = (string)FileManage.instance.CSVHashTable["gameUnitModelTable"][modelName];
+            GameObject buildUnitModel = GameObjectPool.instance.GetPoolChild(modelName, modelPath);
+            buildUnitModel.AddComponent<BuildUnit>();
+            buildUnitModel.GetComponent<BuildUnit>().property = buildUnitInit.buildUnitInfo.property;
+            buildUnitModel.GetComponent<BuildUnit>().Cell = HexGrid.instance.GetCell(buildUnitInit.coordinates);
+            buildUnitModel.GetComponent<BuildUnit>().hud = GameObjectPool.instance.GetPoolChild("UnitHUD", UIManage.instance.NewHUD()).GetComponent<HUD>();
+            buildUnitModel.GetComponent<BuildUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform);
+            if (buildUnitInit.power == myPower)
+            {
+                buildUnitModel.GetComponent<BuildUnit>().hud.transform.Find("Fill").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00DD269A");
+            }
+            List<HexCell> cells = HexGrid.instance.GetRangeCells(buildUnitModel.GetComponent<BuildUnit>().Cell, buildUnitModel.GetComponent<BuildUnit>().property.range);
+            for(int j=0;j<cells.Count;j++)
+            {
+                cells[j].buildUnit = buildUnitModel.GetComponent<BuildUnit>();
+            }
+            buildUnitModel.GetComponent<BuildUnit>().power = buildUnitInit.power;
+            buildUnitModel.transform.position = buildUnitModel.GetComponent<BuildUnit>().Cell.transform.position;
+            //buildUnitModel.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
+            if (!buildUnitPowerDic.ContainsKey(buildUnitInit.power))
+            {
+                buildUnitPowerDic.Add(buildUnitInit.power, new List<BuildUnit>());
+            }
+            buildUnitPowerDic[buildUnitInit.power].Add(buildUnitModel.GetComponent<BuildUnit>());
+            if (!powerList.Contains(buildUnitInit.power))
+            {
+                powerList.Add(buildUnitInit.power);
+            }
+        }
+        powerList.Sort();
+    }
+
+    public List<Unit> FindCanAttack(BattleUnit attacker)
+    {
+        List<Unit> result = new List<Unit>();
         foreach(KeyValuePair<int,List<BattleUnit>> child in battleUnitPowerDic)
         {
             List<BattleUnit> childValues = child.Value;
@@ -70,11 +109,30 @@ public class GameUnitManage : Singleton<GameUnitManage> {
                 }
             }
         }
+
+        foreach (KeyValuePair<int, List<BuildUnit>> child in buildUnitPowerDic)
+        {
+            List<BuildUnit> childValues = child.Value;
+            if (child.Key == attacker.power)
+            {
+                continue;
+            }
+            else
+            {
+                for (int i = 0; i < childValues.Count; i++)
+                {
+                    if (CanAttack(attacker, childValues[i]))
+                    {
+                        result.Add(childValues[i]);
+                    }
+                }
+            }
+        }
         return result;
     }
 
 
-    bool CanAttack(BattleUnit attacker,BattleUnit hiter)
+    bool CanAttack(BattleUnit attacker,Unit hiter)
     {
         if (attacker.isMove)
         {
@@ -115,14 +173,33 @@ public class GameUnitManage : Singleton<GameUnitManage> {
 
     }
 
-    public void UnitDie(BattleUnit dieUnit)
+
+
+    public void UnitDie(Unit dieUnit)
     {
-        battleUnitPowerDic[dieUnit.power].Remove(dieUnit);
-        if(battleUnitPowerDic[dieUnit.power].Count == 0)
+        switch (dieUnit.unitType)
         {
-            powerList.Remove(dieUnit.power);
+            case UnitType.Soldier:
+                {
+                    battleUnitPowerDic[dieUnit.power].Remove((BattleUnit)dieUnit);
+                    if (battleUnitPowerDic[dieUnit.power].Count == 0)
+                    {
+                        powerList.Remove(dieUnit.power);
+                    }
+                    Destroy(dieUnit.gameObject);
+                }
+                break;
+            case UnitType.Buide:
+                {
+                    buildUnitPowerDic[dieUnit.power].Remove((BuildUnit)dieUnit);
+                    if (battleUnitPowerDic[dieUnit.power].Count == 0)
+                    {
+                        powerList.Remove(dieUnit.power);
+                    }
+                    Destroy(dieUnit.gameObject);
+                }
+                break;
         }
-        Destroy(dieUnit.gameObject);
     }
 
 
@@ -140,12 +217,43 @@ public class GameUnitManage : Singleton<GameUnitManage> {
         unit.MoveInRound();
     }
 
+    public void UnBlockRoad(BuildUnit unit)
+    {
+        List<HexCell> cells = HexGrid.instance.GetRangeCells(unit.Cell, unit.property.range);
+        for(int i=0;i<cells.Count;i++)
+        {
+            FindRoad.instance.UnBlockRoad(cells[i], unit.power);
+        }
+    }
+
+    public void BlockRoad(BuildUnit unit)
+    {
+        List<HexCell> cells = HexGrid.instance.GetRangeCells(unit.Cell, unit.property.range);
+        for (int i = 0; i < cells.Count; i++)
+        {
+            FindRoad.instance.BlockRoad(cells[i]);
+        }
+    }
+
     public void UnBlockRoad(int power)
     {
         List<BattleUnit> units = battleUnitPowerDic[power];
         for(int i=0;i<units.Count;i++)
         {
             FindRoad.instance.UnBlockRoad(units[i].Cell,power);
+        }
+
+        if (buildUnitPowerDic.ContainsKey(power))
+        {
+            List<BuildUnit> buildUnit = buildUnitPowerDic[power];
+            for (int i = 0; i < buildUnit.Count; i++)
+            {
+                List<HexCell> cells = HexGrid.instance.GetRangeCells(buildUnit[i].Cell, buildUnit[i].property.range);
+                for (int j = 0; j < cells.Count; j++)
+                {
+                    FindRoad.instance.UnBlockRoad(cells[i], power);
+                }
+            }
         }
     }
 
@@ -167,6 +275,19 @@ public class GameUnitManage : Singleton<GameUnitManage> {
         {
             FindRoad.instance.BlockRoad(units[i].Cell);
         }
+
+        if (buildUnitPowerDic.ContainsKey(power))
+        {
+            List<BuildUnit> buildUnit = buildUnitPowerDic[power];
+            for (int i = 0; i < buildUnit.Count; i++)
+            {
+                List<HexCell> cells = HexGrid.instance.GetRangeCells(buildUnit[i].Cell, buildUnit[i].property.range);
+                for (int j = 0; j < cells.Count; j++)
+                {
+                    FindRoad.instance.BlockRoad(cells[i]);
+                }
+            }
+        }
     }
 
     public void BlockRoadExcept(int power)
@@ -187,6 +308,14 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     private void Update()
     {
         foreach (KeyValuePair<int, List<BattleUnit>> child in battleUnitPowerDic)
+        {
+            for (int i = 0; i < child.Value.Count; i++)
+            {
+                child.Value[i].RefreshHUD();
+            }
+        }
+
+        foreach (KeyValuePair<int, List<BuildUnit>> child in buildUnitPowerDic)
         {
             for (int i = 0; i < child.Value.Count; i++)
             {

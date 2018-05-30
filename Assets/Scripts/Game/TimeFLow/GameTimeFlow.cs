@@ -13,6 +13,7 @@ public class GameTimeFlow : MonoBehaviour {
         LoadMap("map001");
         FindRoad.instance.Init();
         GameUnitManage.instance.LoadBattleUnitInit(FileManage.instance.CSVTable["battleUnitInit"]);
+        GameUnitManage.instance.LoadBuildUnitInit(FileManage.instance.CSVTable["buildUnitInit"]);
         gameControl = transform.GetComponent<GameControl>();
     }
 	

@@ -18,7 +18,7 @@ public class RoundManage : Singleton<RoundManage> {
         }
     }
 
-    public void ExitRound()
+    void ExitRound()
     {
         GameUnitManage.instance.BlockRoad(curPower);
     }

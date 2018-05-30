@@ -28,13 +28,13 @@ public class GameControl : MonoBehaviour {
         mainCamera = transform.Find("Main Camera").GetComponent<Camera>();
     }
     // Use this for initialization
-    void Start () {
+    void Start() {
         canDrawCellList.Clear();
     }
 
     UnitActionEnum actionType = UnitActionEnum.Move;
     // Update is called once per frame
-    void Update () {
+    void Update() {
 
         isMyRound = GameUnitManage.instance.myPower == RoundManage.instance.curPower;
 
@@ -75,7 +75,7 @@ public class GameControl : MonoBehaviour {
 
             if (startCell != null && endCell != null)
             {
-                if (startCell.unit != null && endCell.unit != null)
+                if ((startCell.unit != null && endCell.unit != null|| endCell.buildUnit!=null))
                 {
                     switch (UIManage.instance.actionType)
                     {
@@ -113,12 +113,24 @@ public class GameControl : MonoBehaviour {
                 canDrawCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
                 canDrawCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
             }
-            for(int i=0;i<canAttackUnit.Count;i++)
+            for (int i = 0; i < canAttackUnit.Count; i++)
             {
                 if (canAttackUnit[i].Cell == null)
                     continue;
-                canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
-                canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+                if (canAttackUnit[i].unitType == UnitType.Buide)
+                {
+                    List<HexCell> cells = canAttackUnit[i].GetCell();
+                    for(int j=0;j<cells.Count;j++)
+                    {
+                        cells[j].label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                        cells[j].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+                    }
+                }
+                else
+                {
+                    canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = false;
+                    canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FFFFFFFF");
+                }
             }
             canDrawCellList.Clear();
             startCell = null;
@@ -177,16 +189,37 @@ public class GameControl : MonoBehaviour {
     {
         if (endCell != null)
         {
-            if(endCell.unit.isDie)
+            if (endCell.unit != null)
             {
-                return;
+                if (endCell.unit.isDie)
+                {
+                    return;
+                }
             }
-            int moveCount = attack.NeedMoveCount(endCell.unit);
+
+            if(endCell.buildUnit!=null)
+            {
+                if (endCell.buildUnit.isDie)
+                {
+                    return;
+                }
+            }
+            int moveCount=0;
+
+            if (endCell.unit != null)
+            {
+                 moveCount = attack.NeedMoveCount(endCell.unit);
+            }
+            else if(endCell.buildUnit!=null)
+            {
+                moveCount = attack.NeedMoveCount(endCell.buildUnit);
+            }
+
             for (int i = 0; i < road.Count; i++)
             {
                 if (canDrawCellList.Contains(road[i]))
                 {
-                    if (i-1 < moveCount)
+                    if (i - 1 < moveCount)
                     {
                         if (nowCanGoList.Contains(road[i]))
                         {
@@ -196,7 +229,7 @@ public class GameControl : MonoBehaviour {
                         {
                             road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#0080FFFF");
                         }
-                      
+
                     }
                     else
                     {
@@ -231,8 +264,20 @@ public class GameControl : MonoBehaviour {
     {
         for (int i = 0; i < canAttackUnit.Count; i++)
         {
-            canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
-            canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
+            if (canAttackUnit[i].unitType == UnitType.Buide)
+            {
+                List<HexCell> cells = canAttackUnit[i].GetCell();
+                for (int j = 0; j < cells.Count; j++)
+                {
+                    cells[j].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
+                    cells[j].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
+                }
+            }
+            else
+            {
+                canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
+                canAttackUnit[i].Cell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
+            }
         }
     }
 
@@ -242,12 +287,13 @@ public class GameControl : MonoBehaviour {
     {
         Dictionary<int, string> buttonNames = new Dictionary<int, string>();
         Vector3 position;
-        if(startCell.unit.power!=GameUnitManage.instance.myPower)
+
+        if (startCell.unit.power != GameUnitManage.instance.myPower)
         {
             position = mainCamera.WorldToScreenPoint(startCell.unit.transform.position);
             buttonNames.Add(2, "UnitInfo");
         }
-        else if((startCell == endCell && startCell.unit==endCell.unit)||startCell.unit.isAttack)
+        else if ((startCell == endCell && startCell.unit == endCell.unit) || startCell.unit.isAttack)
         {
             position = mainCamera.WorldToScreenPoint(startCell.unit.transform.position);
             buttonNames.Add(2, "UnitInfo");
@@ -256,6 +302,35 @@ public class GameControl : MonoBehaviour {
         {
             position = mainCamera.WorldToScreenPoint(endCell.unit.transform.position);
             if (endCell.unit.power != startCell.unit.power)
+            {
+                if (!battleUnit.isMove)
+                {
+                    buttonNames.Add(0, "Move");
+                    buttonNames.Add(1, "Attack");
+                }
+                else
+                {
+                    buttonNames.Add(1, "Attack");
+                }
+            }
+            else
+            {
+                if (!battleUnit.isMove)
+                {
+                    buttonNames.Add(0, "Move");
+                }
+            }
+        }
+        //建筑相关
+        else if (startCell.buildUnit!=null)
+        {
+            position = mainCamera.WorldToScreenPoint(startCell.buildUnit.transform.position);
+            buttonNames.Add(2, "UnitInfo");
+        }
+        else if(endCell.buildUnit!=null)
+        {
+            position = mainCamera.WorldToScreenPoint(endCell.buildUnit.transform.position);
+            if (endCell.buildUnit.power != startCell.unit.power)
             {
                 if (!battleUnit.isMove)
                 {
@@ -288,7 +363,7 @@ public class GameControl : MonoBehaviour {
 
     void ClickEndCell()
     {
-        if(!isMyPowerUnit)
+        if (!isMyPowerUnit)
         {
             return;
         }
@@ -299,46 +374,69 @@ public class GameControl : MonoBehaviour {
             endCell = HexGrid.instance.GetCell(hit.point);
             isClickEndCell = true;
 
-            //获取
-            if(endCell.unit!=null)
+            if (endCell.buildUnit != null)
             {
-                if(endCell.unit.power != startCell.unit.power)
+                if (endCell.buildUnit.power != startCell.unit.power)
                 {
-                    FindRoad.instance.UnBlockRoad(endCell,endCell.unit.power);
+                    GameUnitManage.instance.UnBlockRoad(endCell.buildUnit);
                 }
-            }
+                road = FindRoad.instance.AStar(startCell, endCell, HexGrid.instance.AllCellList);
 
-            road = FindRoad.instance.AStar(startCell, endCell, HexGrid.instance.AllCellList);
-
-            if (endCell.unit != null)
-            {
-                if (endCell.unit.power != startCell.unit.power)
+                if (endCell.buildUnit.power != startCell.unit.power)
                 {
-                    FindRoad.instance.BlockRoad(endCell);
+                    GameUnitManage.instance.BlockRoad(endCell.buildUnit);
                 }
-            }
+                if (road[road.Count - 1] != endCell)
+                {
+                    UIManage.instance.ShowTipLine("该地点无法到达", 3);
+                }
 
-            if (road[road.Count-1]!=endCell)
+                RegisterAction();
+                ShowMoveRoad();
+
+            }
+            else
             {
-                UIManage.instance.ShowTipLine("该地点无法到达", 3);
-            }
+                //获取
+                if (endCell.unit != null)
+                {
+                    if (endCell.unit.power != startCell.unit.power)
+                    {
+                        FindRoad.instance.UnBlockRoad(endCell, endCell.unit.power);
+                    }
+                }
 
-            RegisterAction();
-            ShowMoveRoad();
+                road = FindRoad.instance.AStar(startCell, endCell, HexGrid.instance.AllCellList);
+
+                if (endCell.unit != null)
+                {
+                    if (endCell.unit.power != startCell.unit.power)
+                    {
+                        FindRoad.instance.BlockRoad(endCell);
+                    }
+                }
+
+                if (road[road.Count - 1] != endCell)
+                {
+                    UIManage.instance.ShowTipLine("该地点无法到达", 3);
+                }
+
+                RegisterAction();
+                ShowMoveRoad();
+            }
         }
+
+    }
 
       
         //canDrawCellList.Add(endCell);
         //Debug.Log(canDrawCellList.IndexOf(endCell));
 
 
-    }
-
-
     IMove move;
     IAttack attack;
     BattleUnit battleUnit;
-    List<BattleUnit> canAttackUnit = new List<BattleUnit>();
+    List<Unit> canAttackUnit = new List<Unit>();
     bool isMyPowerUnit = true;
     void ClickStartCell()
     {
@@ -474,12 +572,13 @@ public class GameControl : MonoBehaviour {
             {
                 int needMoveCount = 0;
                 //如果射程不足，需要先移动一定单位
-                if (!attack.IsInAttackDis(endCell.unit))
+                if (endCell.unit!=null&&!attack.IsInAttackDis(endCell.unit))
                 {
                     bool canAttack = attack.CanAttackInRound(endCell.unit);
                     needMoveCount = attack.NeedMoveCount(endCell.unit);
                     List<HexCell> MoveList = new List<HexCell>();
-                    for(int i=0;i< needMoveCount; i++)
+                    MoveList.Add(startCell);
+                    for (int i=0;i< needMoveCount; i++)
                     {
                         MoveList.Add(road[i]);
                     }
@@ -491,22 +590,35 @@ public class GameControl : MonoBehaviour {
                         return;
                     }
                 }
+                else if(endCell.buildUnit!=null && !attack.IsInAttackDis(endCell.buildUnit))
+                {
+                    bool canAttack = attack.CanAttackInRound(endCell.buildUnit);
+                    needMoveCount = attack.NeedMoveCount(endCell.buildUnit);
+                    List<HexCell> MoveList = new List<HexCell>();
+                    MoveList.Add(startCell);
+                    for (int i = 0; i < needMoveCount; i++)
+                    {
+                        MoveList.Add(road[i]);
+                    }
+                    UnitMove(MoveList);
+                    if (!canAttack)
+                    {
+                        attack.SetAttackTarget(endCell.buildUnit);
+                        //UIManage.instance.ShowTipLine("射程不足", 3);
+                        return;
+                    }
+                }
             }
 
             if(!battleUnit.isAttack)
             {
-                switch(endCell.unit.unityType)
+                if(endCell.unit!=null)
                 {
-                    case UnitType.Soldier:
-                        {
-                            attack.AttackSoldier(endCell.unit);
-                            break;
-                        }
-                    case UnitType.Buide:
-                        {
-                            attack.AttackBuilder(endCell.buildUnit);
-                            break;
-                        }
+                    attack.AttackSoldier(endCell.unit);
+                }
+                else if(endCell.buildUnit!=null)
+                {
+                    attack.AttackBuilder(endCell.buildUnit);
                 }
             }
 

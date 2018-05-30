@@ -24,7 +24,7 @@ public enum UnitType
     Buide,
 }
 
-public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
+public class BattleUnit : Unit, IAttack, IMove,IDie
 {
     float moveSpeed = 2.5f;
     float rotateSpeed = 180f;
@@ -32,7 +32,7 @@ public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
 
     void Start()
     {
-        unityType = UnitType.Soldier;
+        unitType = UnitType.Soldier;
     }
 
     public bool isMoveComplete = true;
@@ -55,7 +55,7 @@ public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
         isAttack = true;
     }
 
-    IEnumerator WaitForMove(BattleUnit hiter)
+    IEnumerator WaitForMove(Unit hiter)
     {
         int count = 0;
         while(count<50)
@@ -72,18 +72,19 @@ public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
         }
 
         StartCoroutine(LookAt(hiter.transform.position));
-
-
         hiter.Hit(this);
 
     }
 
     public void AttackBuilder(BuildUnit hiter)
     {
+        road.Clear();
+        StartCoroutine(WaitForMove(hiter));
+        isAttack = true;
     }
 
     bool isRefreshInjuryHUD = false;
-    public void Hit(BattleUnit attacker)
+    public override void Hit(BattleUnit attacker)
     {
         isRefreshInjuryHUD = true;
         attacker.AttackTarget = null;
@@ -119,12 +120,11 @@ public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
         return result;
     }
 
-    public void Hit(BuildUnit attacker)
+    public override void Hit(BuildUnit attacker)
     {
 
     }
 
-    public bool isDie = false;
     public void Die()
     { 
         isDie = true;
@@ -243,7 +243,7 @@ public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
                     AutoMove();
                 }
 
-                switch (AttackTarget.unityType)
+                switch (AttackTarget.unitType)
                 {
                     case UnitType.Soldier:
                         {
@@ -266,7 +266,7 @@ public class BattleUnit : Unit, IAttack, IMove, IHit,IDie
         {
             if (IsInAttackDis(AttackTarget))
             {
-                switch (AttackTarget.unityType)
+                switch (AttackTarget.unitType)
                 {
                     case UnitType.Soldier:
                         {

@@ -125,7 +125,7 @@ public class HexCell : MonoBehaviour {
         {
 			elevation = value;
             RefreshPosition(value);
-            //label.text = coordinates.X.ToString() + "\n" + coordinates.Y.ToString() + "\n" + coordinates.Z.ToString();
+            label.text = coordinates.X.ToString() + "\n" + coordinates.Y.ToString() + "\n" + coordinates.Z.ToString();
             //Vector3 uiPosition = uiRect.localPosition;
             //uiPosition.z = -position.y;
             //uiRect.localPosition = uiPosition;

@@ -364,4 +364,31 @@ public class HexGrid : Singleton<HexGrid> {
         tmpChunk.AddCell(cellOfChunkZ * width + cellOfChunkX, cell);
         cell.SetParentChunk(tmpChunk);
     }
+
+    public List<HexCell> GetRangeCells(HexCell cell,int range)
+    {
+        List<HexCell> cells = new List<HexCell>();
+        int centerX = cell.coordinates.X;
+        int centerZ = cell.coordinates.Z;
+        for (int l = 0, z = centerZ; z >= centerZ - range + 1; l++, z--)
+        {
+            for (int x = centerX - range + 1 + l; x <= centerX + range - 1; x++)
+            {
+                if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
+                {
+                    cells.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
+                }
+            }
+        }
+
+        for (int l = 1, z = centerZ + 1; z <= centerZ + range - 1; l++, z++)
+        {
+            for (int x = centerX - range + 1; x <= centerX + range - 1 - l; x++)
+            {
+                cells.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
+            }
+        }
+
+        return cells;
+    }
 }

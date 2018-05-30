@@ -480,14 +480,17 @@ public class FindRoad : Singleton<FindRoad> {
         int index = cells.IndexOf(cell);
         for (int i = (int)HexDirection.NE; i <= (int)HexDirection.NW; i++)
         {
-            if (cell.GetNeighbor((HexDirection)i) != null && (cell.GetNeighbor((HexDirection)i).unit == null ||
-                 cell.GetNeighbor((HexDirection)i).unit.power== power))
+            if ((cell.buildUnit!=null&& cell.GetNeighbor((HexDirection)i) != null)
+                || (cell.GetNeighbor((HexDirection)i) != null && (cell.GetNeighbor((HexDirection)i).unit == null ||
+                 cell.GetNeighbor((HexDirection)i).unit.power == power)))
             {
                 int n = cells.IndexOf(cell.GetNeighbor((HexDirection)i));
                 distance[index, n] = CellDistance(cell, (HexDirection)i);
                 distance[n, index] = CellDistance(cell, (HexDirection)i);
             }
         }
+
+
     }
 
     List<HexCell> CanClickList = new List<HexCell>();
