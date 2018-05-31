@@ -50,7 +50,6 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
     public void AttackSoldier(BattleUnit hiter)
     {
-        road.Clear();
         StartCoroutine(WaitForMove(hiter));
         isAttack = true;
     }
@@ -73,12 +72,12 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
         StartCoroutine(LookAt(hiter.transform.position));
         hiter.Hit(this);
+        road.Clear();
 
     }
 
     public void AttackBuilder(BuildUnit hiter)
     {
-        road.Clear();
         StartCoroutine(WaitForMove(hiter));
         isAttack = true;
     }
@@ -120,9 +119,23 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         return result;
     }
 
+    int CalculationOfInjury(BuildUnit attacker)
+    {
+        int result = attacker.property.attack * 2 - battleUnitProperty.defence;
+        if (result < 0) result = 0;
+        return result;
+    }
+
     public override void Hit(BuildUnit attacker)
     {
-
+        isRefreshInjuryHUD = true;
+        int injury = CalculationOfInjury(attacker);
+        hud.data.text = injury.ToString();
+        battleUnitProperty.nowHP -= injury;
+        if (battleUnitProperty.nowHP <= 0)
+        {
+            StartCoroutine(WaitHUDAnimDie());
+        }
     }
 
     public void Die()
@@ -202,13 +215,13 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
                     if (road.Count > 0)
                     {
                         roadInRound.Add(road[0]);
-                        road.RemoveAt(0);
                     }
                     else
                     {
                         break;
                     }
                 }
+                RemoveEndCell(roadInRound);
             }
         }
         else
@@ -220,13 +233,13 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
                 if (road.Count > 0)
                 {
                     roadInRound.Add(road[0]);
-                    road.RemoveAt(0);
                 }
                 else
                 {
                     break;
                 }
             }
+            RemoveEndCell(roadInRound);
         }
 
     }
@@ -388,20 +401,56 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             isMoveComplete = false;
             for (int i = 0; i < canMoveDistance+1; i++)
             {
-                roadInRound.Add(road[0]);
-                road.RemoveAt(0);
+                roadInRound.Add(road[i]);
             }
+
+            //终点处有单位
+            RemoveEndCell(roadInRound);
             Move(roadInRound);
         }
         else
         {
             isMoveComplete = true;
+            for (int i = road.Count - 1; i >= 0; i--)
+            {
+                if (road[i].unit != null || road[i].buildUnit != null)
+                {
+                    road.RemoveAt(i);
+                }
+                else
+                {
+                    break;
+                }
+            }
             Move(road);
+        }
+    }
+    public void RemoveEndCell(List<HexCell> roadCells)
+    {
+        //终点处有单位
+        for (int i = roadCells.Count - 1; i >= 0; i--)
+        {
+            if (roadCells[i].unit != null || roadCells[i].buildUnit != null)
+            {
+                roadCells.RemoveAt(i);
+            }
+            else
+            {
+                break;
+            }
+        }
+        for (int i = 0; i < roadCells.Count; i++)
+        {
+            road.Remove(roadCells[i]);
         }
     }
 
     public void Move(List<HexCell> cells)
     {
+        if(cells.Count<=1)
+        {
+            return;
+        }
         Cell.unit = null;
         cells[cells.Count - 1].unit = this;
         Cell = cells[cells.Count - 1];
@@ -438,7 +487,8 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             }
         }
         isMoveAnimFinish = true;
-        cells.Clear();
+       // cells.Clear();
+
     }
 
     IEnumerator LookAt(Vector3 point)

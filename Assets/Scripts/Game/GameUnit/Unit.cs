@@ -15,7 +15,7 @@ public abstract class Unit : MonoBehaviour, IHit
 
     public bool isDie = false;
 
-
+    public bool isMainBuild = false;
 
     public HUD hud;
 

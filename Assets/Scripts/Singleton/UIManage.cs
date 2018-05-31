@@ -162,14 +162,21 @@ public class UIManage : Singleton<UIManage> {
         }
     }
 
+    GameObject HUDPrefab;
     public GameObject NewHUD()
     {
-        return  GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/UnitHUD") as GameObject);
+        if(HUDPrefab==null)
+        {
+            HUDPrefab = GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/UnitHUD") as GameObject);
+        }
+        return HUDPrefab;
     }
 
 
     public void HideActionWnd()
     {
+        if (actionWnd == null)
+            return;
         actionWnd.HideActionWnd();
         actionWnd.gameObject.SetActive(false);
     }

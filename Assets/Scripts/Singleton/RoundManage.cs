@@ -5,10 +5,14 @@ using UnityEngine;
 public class RoundManage : Singleton<RoundManage> {
 
     public int curPower = 0;
-    
+    public int RoundCount = 1;
 
     public void NewRound(int power)
     {
+        if(power == GameUnitManage.instance.myPower)
+        {
+            RoundCount++;
+        }
         curPower = power;
         List<BattleUnit> unit = GameUnitManage.instance.battleUnitPowerDic[power];
         GameUnitManage.instance.UnBlockRoad(power);
@@ -16,6 +20,12 @@ public class RoundManage : Singleton<RoundManage> {
         {
             unit[i].NewRound();
         }
+    }
+
+    public void Init()
+    {
+        RoundCount = 1;
+        curPower = 0;
     }
 
     void ExitRound()
@@ -36,6 +46,12 @@ public class RoundManage : Singleton<RoundManage> {
             {
                 unit[i].AutoMove();
             }
+        }
+
+        List<BuildUnit> buildUnit = GameUnitManage.instance.buildUnitPowerDic[curPower];
+        for(int i=0;i<buildUnit.Count;i++)
+        {
+            buildUnit[i].AutoAttack();
         }
 
         List<int> powerList = GameUnitManage.instance.powerList;

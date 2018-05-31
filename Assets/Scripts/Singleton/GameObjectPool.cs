@@ -6,6 +6,11 @@ public class GameObjectPool : Singleton<GameObjectPool> {
 
     public Dictionary<string, List<GameObject>> gameObjectPool = new Dictionary<string, List<GameObject>>();
 
+    public void Init()
+    {
+        gameObjectPool.Clear();
+    }
+
     public GameObject GetPoolChild(string name ,GameObject prefab)
     {
         name = name.Replace("(Clone)", "");

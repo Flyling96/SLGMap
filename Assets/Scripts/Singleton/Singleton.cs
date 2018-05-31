@@ -33,3 +33,29 @@ public class Singleton<T>: BaseSingleton where T: BaseSingleton
     }
 
 }
+
+public class SingletonDestory<T> : BaseSingleton where T : BaseSingleton
+{
+
+    private static T _instance;
+    private static object _lock = new object();
+
+    public static T instance
+    {
+        get
+        {
+            lock (_lock)
+            {
+                if (_instance == null)
+                {
+                    GameObject singleton = new GameObject();
+                    _instance = singleton.AddComponent<T>();
+                    singleton.name = "(singleton)" + typeof(T).ToString();
+                }
+            }
+            return _instance;
+
+        }
+    }
+
+}

@@ -28,10 +28,20 @@ public class BuildUnit : Unit, IAttack
     bool isMainBuider = false;
     public BuildUnitProperty property;
 
+    public void AutoAttack()
+    {
+        List<Unit> CanAttackUnitList = GameUnitManage.instance.FindCanAttack(this);
+        for(int i=0;i<CanAttackUnitList.Count;i++)
+        {
+            CanAttackUnitList[i].Hit(this);
+        }
+    }
+
     public void AttackSoldier(BattleUnit hiter)
     {
 
     }
+
 
     public void AttackBuilder(BuildUnit hiter)
     {

@@ -144,6 +144,7 @@ public class BuildUnitInitInfo : BaseInfo
     public string mapName;
     public int unitId;
     public int power;
+    public bool isMainBuild;
     public BuildUnitInfo buildUnitInfo;
     public HexCoordinates coordinates;
 
@@ -164,7 +165,7 @@ public class BuildUnitInitInfo : BaseInfo
                 }
             }
         }
-
+        isMainBuild = int.Parse(table[5]) == 1 ? true : false;
         power = int.Parse(table[5]);
     }
 

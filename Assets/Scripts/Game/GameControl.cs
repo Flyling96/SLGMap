@@ -36,6 +36,11 @@ public class GameControl : MonoBehaviour {
     // Update is called once per frame
     void Update() {
 
+        if(GameTimeFlow.isGameOver)
+        {
+            return;
+        }
+
         isMyRound = GameUnitManage.instance.myPower == RoundManage.instance.curPower;
 
         if (isMyRound)
@@ -58,6 +63,13 @@ public class GameControl : MonoBehaviour {
                     if (UIManage.instance.unitInfoWnd.activeSelf)
                     {
                         UIManage.instance.HideUnitInfoWnd();
+                    }
+                }
+                if(UIManage.instance.actionWnd!=null)
+                {
+                    if (UIManage.instance.actionWnd.gameObject.activeSelf)
+                    {
+                        UIManage.instance.HideActionWnd();
                     }
                 }
                 if (isClickEndCell)
@@ -161,6 +173,7 @@ public class GameControl : MonoBehaviour {
                 }
             }
 
+
             for (int i = 0; i < road.Count; i++)
             {
                 if (canDrawCellList.Contains(road[i]))
@@ -175,12 +188,26 @@ public class GameControl : MonoBehaviour {
                 }
             }
 
+            for(int i=road.Count-1;i>=0;i--)
+            {
+                if(road[i].unit!=null||road[i].buildUnit!=null)
+                {
+                    road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#454545FF");
+                }
+                else
+                {
+                    break;
+                }
+            }
+
             if (!canDrawCellList.Contains(endCell))
             {
                 endCell.label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
                 endCell.label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
                 canDrawCellList.Add(endCell);
             }
+
+            ShowAttackeUnit();
 
         }
     }
@@ -255,6 +282,19 @@ public class GameControl : MonoBehaviour {
                         road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#FF4040FF");
                     }
                     canDrawCellList.Add(road[i]);
+                }
+            }
+
+            //因为有单位而不能到达的用黑色
+            for (int i = moveCount; i > 0; i--)
+            {
+                if (road[i].unit != null || road[i].buildUnit != null)
+                {
+                    road[i].label.transform.Find("Hightlight").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#454545FF");
+                }
+                else
+                {
+                    break;
                 }
             }
         }
@@ -545,10 +585,39 @@ public class GameControl : MonoBehaviour {
                 return;
             }
 
-            if (endCell.unit!=null)
-            {
-                road.Remove(endCell);
-            }
+            //if (endCell.unit!=null)
+            //{
+            //    for (int i = road.Count - 1; i >= 0; i--)
+            //    {
+            //        if (road[i].unit!=null||road[i].buildUnit!=null)
+            //        {
+            //            road.RemoveAt(i);
+            //        }
+            //        else
+            //        {
+            //            break;
+            //        }
+            //    }
+            //}
+            //else if(endCell.buildUnit!=null&& endCell.buildUnit.power!=battleUnit.power)
+            //{
+            //    for(int i=road.Count-1;i>=0;i--)
+            //    {
+            //        if(road[i].buildUnit == endCell.buildUnit)
+            //        {
+            //            road.RemoveAt(i);
+            //        }
+            //        else if(road[i].unit != null || road[i].buildUnit != null)
+            //        {
+            //            road.RemoveAt(i);
+            //        }
+            //        else
+            //        {
+            //            break;
+            //        }
+            //    }
+            //}
+
             move.SetRoad(road);
             move.MoveInRound();
         }
@@ -563,7 +632,7 @@ public class GameControl : MonoBehaviour {
         }
     }
 
-  
+    List<HexCell> MoveList = new List<HexCell>();
     void UnitAttack()
     {
         if(startCell.unit != null)
@@ -576,9 +645,9 @@ public class GameControl : MonoBehaviour {
                 {
                     bool canAttack = attack.CanAttackInRound(endCell.unit);
                     needMoveCount = attack.NeedMoveCount(endCell.unit);
-                    List<HexCell> MoveList = new List<HexCell>();
-                    MoveList.Add(startCell);
-                    for (int i=0;i< needMoveCount; i++)
+                    MoveList.Clear();
+                    //MoveList.Add(startCell);
+                    for (int i=0;i< needMoveCount+1; i++)
                     {
                         MoveList.Add(road[i]);
                     }
@@ -594,13 +663,14 @@ public class GameControl : MonoBehaviour {
                 {
                     bool canAttack = attack.CanAttackInRound(endCell.buildUnit);
                     needMoveCount = attack.NeedMoveCount(endCell.buildUnit);
-                    List<HexCell> MoveList = new List<HexCell>();
-                    MoveList.Add(startCell);
-                    for (int i = 0; i < needMoveCount; i++)
+                    MoveList.Clear();
+                    //MoveList.Add(startCell);
+                    for (int i = 0; i < needMoveCount+1; i++)
                     {
                         MoveList.Add(road[i]);
                     }
                     UnitMove(MoveList);
+                    canAttack = attack.CanAttackInRound(endCell.buildUnit);
                     if (!canAttack)
                     {
                         attack.SetAttackTarget(endCell.buildUnit);
@@ -627,6 +697,8 @@ public class GameControl : MonoBehaviour {
 
     void UnitInfo()
     {
+        if (startCell == null)
+            return;
         if (startCell.unit != null)
         {
             UIManage.instance.ShowUnitInfoWnd(startCell.unit);

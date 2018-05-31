@@ -12,22 +12,25 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     public Dictionary<int, List<BattleUnit>> battleUnitPowerDic = new Dictionary<int, List<BattleUnit>>();
     public Dictionary<int, List<BuildUnit>> buildUnitPowerDic = new Dictionary<int, List<BuildUnit>>();
     public List<int> powerList = new List<int>();
+    public bool isInit = false;
 
     public int myPower = 0;
 
     public void LoadBattleUnitInit(List<BaseInfo> battleUnitInitInfoList)
     {
+        battleUnitPowerDic.Clear();
         for (int i = 0; i < battleUnitInitInfoList.Count; i++)
         {
             BattleUnitInitInfo battleUnitInit = (BattleUnitInitInfo)battleUnitInitInfoList[i];
             string modelName = battleUnitInit.battleUnitInfo.modelName;
             string modelPath = (string)FileManage.instance.CSVHashTable["gameUnitModelTable"][modelName];
             GameObject battleUnitModel = GameObjectPool.instance.GetPoolChild(modelName, modelPath);
+            battleUnitModel.transform.SetParent(GameObject.Find("Units").transform);
             battleUnitModel.AddComponent<BattleUnit>();
             battleUnitModel.GetComponent<BattleUnit>().battleUnitProperty = battleUnitInit.battleUnitInfo.property;
             battleUnitModel.GetComponent<BattleUnit>().Cell = HexGrid.instance.GetCell(battleUnitInit.coordinates);
             battleUnitModel.GetComponent<BattleUnit>().hud = GameObjectPool.instance.GetPoolChild("UnitHUD", UIManage.instance.NewHUD()).GetComponent<HUD>();
-            battleUnitModel.GetComponent<BattleUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform);
+            battleUnitModel.GetComponent<BattleUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform.Find("UnitHUDParent"));
             if(battleUnitInit.power == myPower)
             {
                 battleUnitModel.GetComponent<BattleUnit>().hud.transform.Find("Fill").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00DD269A");
@@ -52,17 +55,20 @@ public class GameUnitManage : Singleton<GameUnitManage> {
 
     public void LoadBuildUnitInit(List<BaseInfo> buildUnitInitInfoList)
     {
+        buildUnitPowerDic.Clear();
         for (int i = 0; i < buildUnitInitInfoList.Count; i++)
         {
             BuildUnitInitInfo buildUnitInit = (BuildUnitInitInfo)buildUnitInitInfoList[i];
             string modelName = buildUnitInit.buildUnitInfo.modelName;
             string modelPath = (string)FileManage.instance.CSVHashTable["gameUnitModelTable"][modelName];
             GameObject buildUnitModel = GameObjectPool.instance.GetPoolChild(modelName, modelPath);
+            buildUnitModel.transform.SetParent(GameObject.Find("Units").transform);
             buildUnitModel.AddComponent<BuildUnit>();
             buildUnitModel.GetComponent<BuildUnit>().property = buildUnitInit.buildUnitInfo.property;
             buildUnitModel.GetComponent<BuildUnit>().Cell = HexGrid.instance.GetCell(buildUnitInit.coordinates);
+            buildUnitModel.GetComponent<BuildUnit>().isMainBuild = buildUnitInit.isMainBuild;
             buildUnitModel.GetComponent<BuildUnit>().hud = GameObjectPool.instance.GetPoolChild("UnitHUD", UIManage.instance.NewHUD()).GetComponent<HUD>();
-            buildUnitModel.GetComponent<BuildUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform);
+            buildUnitModel.GetComponent<BuildUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform.Find("UnitHUDParent"));
             if (buildUnitInit.power == myPower)
             {
                 buildUnitModel.GetComponent<BuildUnit>().hud.transform.Find("Fill").GetComponent<Image>().color = ToolClass.instance.ConvertColor("#00DD269A");
@@ -72,6 +78,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             {
                 cells[j].buildUnit = buildUnitModel.GetComponent<BuildUnit>();
             }
+            BlockRoad(buildUnitModel.GetComponent<BuildUnit>());
             buildUnitModel.GetComponent<BuildUnit>().power = buildUnitInit.power;
             buildUnitModel.transform.position = buildUnitModel.GetComponent<BuildUnit>().Cell.transform.position;
             //buildUnitModel.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
@@ -131,7 +138,6 @@ public class GameUnitManage : Singleton<GameUnitManage> {
         return result;
     }
 
-
     bool CanAttack(BattleUnit attacker,Unit hiter)
     {
         if (attacker.isMove)
@@ -173,6 +179,63 @@ public class GameUnitManage : Singleton<GameUnitManage> {
 
     }
 
+    public List<Unit> FindCanAttack(BuildUnit attacker)
+    {
+        List<Unit> result = new List<Unit>();
+        foreach (KeyValuePair<int, List<BattleUnit>> child in battleUnitPowerDic)
+        {
+            List<BattleUnit> childValues = child.Value;
+            if (child.Key == attacker.power)
+            {
+                continue;
+            }
+            else
+            {
+                for (int i = 0; i < childValues.Count; i++)
+                {
+                    if (CanAttack(attacker, childValues[i]))
+                    {
+                        result.Add(childValues[i]);
+                    }
+                }
+            }
+        }
+
+        foreach (KeyValuePair<int, List<BuildUnit>> child in buildUnitPowerDic)
+        {
+            List<BuildUnit> childValues = child.Value;
+            if (child.Key == attacker.power)
+            {
+                continue;
+            }
+            else
+            {
+                for (int i = 0; i < childValues.Count; i++)
+                {
+                    if (CanAttack(attacker, childValues[i]))
+                    {
+                        result.Add(childValues[i]);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    bool CanAttack(BuildUnit attacker, Unit hiter)
+    {
+        if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
+    < attacker.property.attackDistance)//+ (attacker.Cell.Elevation - hiter.Cell.Elevation))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+
 
 
     public void UnitDie(Unit dieUnit)
@@ -192,7 +255,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             case UnitType.Buide:
                 {
                     buildUnitPowerDic[dieUnit.power].Remove((BuildUnit)dieUnit);
-                    if (battleUnitPowerDic[dieUnit.power].Count == 0)
+                    if (buildUnitPowerDic[dieUnit.power].Count == 0||dieUnit.isMainBuild)
                     {
                         powerList.Remove(dieUnit.power);
                     }
@@ -307,6 +370,10 @@ public class GameUnitManage : Singleton<GameUnitManage> {
 
     private void Update()
     {
+        if(isInit)
+        {
+            return;
+        }
         foreach (KeyValuePair<int, List<BattleUnit>> child in battleUnitPowerDic)
         {
             for (int i = 0; i < child.Value.Count; i++)

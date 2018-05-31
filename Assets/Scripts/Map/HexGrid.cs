@@ -4,7 +4,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Collections;
 
-public class HexGrid : Singleton<HexGrid> {
+public class HexGrid : SingletonDestory<HexGrid> {
 
 	int width = 6;
 	int height = 6;
@@ -94,13 +94,17 @@ public class HexGrid : Singleton<HexGrid> {
             yield return null;
         }
     }
+
     //新建地图
     public void NewMap()
     {
 
+        gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
+        gridCanvas.transform.SetParent(transform);
         cellPrefab = (Instantiate(Resources.Load("Prefabs/Hex Cell") as GameObject)).GetComponent<HexCell>();
-        cellLabelPrefab = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Cell Label") as GameObject)).GetComponent<Text>(); 
-        noiseSource =Resources.Load("Texture/Noise") as Texture2D;
+        cellLabelPrefab = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Cell Label") as GameObject)).GetComponent<Text>();
+        noiseSource = Resources.Load("Texture/Noise") as Texture2D;
+
         StartCoroutine(waitInstantiate());
         //chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
@@ -132,7 +136,6 @@ public class HexGrid : Singleton<HexGrid> {
         oldCountZ = chunkCountZ;
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
-        gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
 
         cells = new HexCell[cellCountWidth * cellCountHeight];
 
@@ -141,6 +144,7 @@ public class HexGrid : Singleton<HexGrid> {
             for (int k = 0; k < chunkCountX; k++)
             {
                 HexGridChunk chunk = chunks[i++] = Instantiate(gridChunkPerfab) as HexGridChunk;
+                //chunk.transform.SetParent(GameObject.Find("Map").transform);
                 chunk.transform.SetParent(transform);
                 chunk.transform.localPosition = new Vector3(chunk.transform.localPosition.x, 0, chunk.transform.localPosition.z);
             }
