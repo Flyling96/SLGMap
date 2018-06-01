@@ -281,6 +281,7 @@ public class FindRoad : Singleton<FindRoad> {
         {
             result.Add(cells[resultInt.Pop()]);
         }
+
         Debug.Log(Time.realtimeSinceStartup - time);
         return result;
     }
@@ -480,13 +481,17 @@ public class FindRoad : Singleton<FindRoad> {
         int index = cells.IndexOf(cell);
         for (int i = (int)HexDirection.NE; i <= (int)HexDirection.NW; i++)
         {
-            if ((cell.buildUnit!=null&& cell.GetNeighbor((HexDirection)i) != null)
+            if ((cell.buildUnit != null && cell.GetNeighbor((HexDirection)i) != null)
                 || (cell.GetNeighbor((HexDirection)i) != null && (cell.GetNeighbor((HexDirection)i).unit == null ||
                  cell.GetNeighbor((HexDirection)i).unit.power == power)))
             {
                 int n = cells.IndexOf(cell.GetNeighbor((HexDirection)i));
                 distance[index, n] = CellDistance(cell, (HexDirection)i);
                 distance[n, index] = CellDistance(cell, (HexDirection)i);
+            }
+            else
+            {
+                Debug.Log(cell.coordinates.X + "," + cell.coordinates.Z);
             }
         }
 

@@ -165,7 +165,7 @@ public class BuildUnitInitInfo : BaseInfo
                 }
             }
         }
-        isMainBuild = int.Parse(table[5]) == 1 ? true : false;
+        isMainBuild = int.Parse(table[6]) == 1 ? true : false;
         power = int.Parse(table[5]);
     }
 

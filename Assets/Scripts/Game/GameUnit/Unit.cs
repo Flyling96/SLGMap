@@ -56,4 +56,14 @@ public abstract class Unit : MonoBehaviour, IHit
 
 
     }
+
+    public virtual int CalculationOfInjury(BattleUnit attacker)
+    {
+        return 0;
+    }
+
+    public virtual int CalculationOfInjury(BuildUnit attacker)
+    {
+        return 0;
+    }
 }

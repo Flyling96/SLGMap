@@ -6,5 +6,7 @@ public interface IDie
 {
 
     void Die();
+
+    bool WillDie(int injury);
 }
 

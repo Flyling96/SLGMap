@@ -13,8 +13,13 @@ public class UIManage : Singleton<UIManage> {
     public DownSelectWnd downSelectWnd = null;
     public GameObject unitInfoWnd = null;
     public ActionWnd actionWnd = null;
-    
+    public Button roundButton = null;
 
+
+    private void Start()
+    {
+        roundButton = UIRoot.transform.Find("RoundButton").GetComponent<Button>();
+    }
 
     public GameObject UIRoot
     {

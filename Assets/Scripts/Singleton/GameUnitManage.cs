@@ -11,6 +11,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     /// </summary>
     public Dictionary<int, List<BattleUnit>> battleUnitPowerDic = new Dictionary<int, List<BattleUnit>>();
     public Dictionary<int, List<BuildUnit>> buildUnitPowerDic = new Dictionary<int, List<BuildUnit>>();
+    public List<BuildUnit> MainBuildList = new List<BuildUnit>();
     public List<int> powerList = new List<int>();
     public bool isInit = false;
 
@@ -67,6 +68,10 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             buildUnitModel.GetComponent<BuildUnit>().property = buildUnitInit.buildUnitInfo.property;
             buildUnitModel.GetComponent<BuildUnit>().Cell = HexGrid.instance.GetCell(buildUnitInit.coordinates);
             buildUnitModel.GetComponent<BuildUnit>().isMainBuild = buildUnitInit.isMainBuild;
+            if(buildUnitInit.isMainBuild)
+            {
+                MainBuildList.Add(buildUnitModel.GetComponent<BuildUnit>());
+            }
             buildUnitModel.GetComponent<BuildUnit>().hud = GameObjectPool.instance.GetPoolChild("UnitHUD", UIManage.instance.NewHUD()).GetComponent<HUD>();
             buildUnitModel.GetComponent<BuildUnit>().hud.transform.SetParent(UIManage.instance.UIRoot.transform.Find("UnitHUDParent"));
             if (buildUnitInit.power == myPower)
@@ -157,9 +162,9 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
                 <=attacker.battleUnitProperty.attackDistance +attacker.battleUnitProperty.actionPower)//+ (attacker.Cell.Elevation - hiter.Cell.Elevation))
             {
-                FindRoad.instance.UnBlockRoad(hiter.Cell, hiter.power);
+                UnBlockRoad(hiter);
                 int realDis = FindRoad.instance.AStar(attacker.Cell, hiter.Cell,HexGrid.instance.AllCellList).Count;
-                FindRoad.instance.BlockRoad(hiter.Cell);
+                BlockRoad(hiter);
 
                 if (attacker.Cell.coordinates.DistanceToOther(hiter.Cell.coordinates)
                 <= attacker.battleUnitProperty.attackDistance + realDis)//+ (attacker.Cell.Elevation - hiter.Cell.Elevation)
@@ -266,6 +271,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     }
 
 
+
     public void UnitAction(int power)
     {
         List<BattleUnit> units = battleUnitPowerDic[power];
@@ -278,6 +284,30 @@ public class GameUnitManage : Singleton<GameUnitManage> {
     public void UnitAction(BattleUnit unit)
     {
         unit.MoveInRound();
+    }
+
+    public void UnBlockRoad(Unit unit)
+    {
+        if (unit.unitType == UnitType.Buide)
+        {
+            GameUnitManage.instance.UnBlockRoad((BuildUnit)unit);
+        }
+        else
+        {
+            FindRoad.instance.UnBlockRoad(unit.cell, unit.power);
+        }
+    }
+
+    public void BlockRoad(Unit unit)
+    {
+        if (unit.unitType == UnitType.Buide)
+        {
+            GameUnitManage.instance.BlockRoad((BuildUnit)unit);
+        }
+        else
+        {
+            FindRoad.instance.BlockRoad(unit.cell);
+        }
     }
 
     public void UnBlockRoad(BuildUnit unit)

@@ -39,11 +39,14 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
     public BattleUnitProperty battleUnitProperty;//属性
 
-
     public void NewRound()
     {
         isMove = false;
         isAttack = false;
+    }
+
+    public void NewRoundRefresh()
+    {
         RefreshAttackRoad();
         RefreshRoadInRound();
     }
@@ -69,9 +72,18 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
                 break;
             }
         }
-
-        StartCoroutine(LookAt(hiter.transform.position));
-        hiter.Hit(this);
+        if (Cell.coordinates.DistanceToOther(hiter.cell.coordinates) > battleUnitProperty.attackDistance)
+        {
+            //UIManage.instance.ShowTipLine("射程不足",0);
+        }
+        else
+        {
+            if (hiter != null)
+            {
+                StartCoroutine(LookAt(hiter.transform.position));
+                hiter.Hit(this);
+            }
+        }
         road.Clear();
 
     }
@@ -113,13 +125,13 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         Die();
     }
 
-    int CalculationOfInjury(BattleUnit attacker)
+    public override int CalculationOfInjury(BattleUnit attacker)
     {
         int result = attacker.battleUnitProperty.attack * 2 - battleUnitProperty.defence;
         return result;
     }
 
-    int CalculationOfInjury(BuildUnit attacker)
+    public override int CalculationOfInjury(BuildUnit attacker)
     {
         int result = attacker.property.attack * 2 - battleUnitProperty.defence;
         if (result < 0) result = 0;
@@ -145,6 +157,14 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         Cell = null;
         GameObjectPool.instance.InsertChild("UnitHUD", hud.gameObject);
         GameUnitManage.instance.UnitDie(this);
+    }
+
+    public bool WillDie(int injury)
+    {
+        if (battleUnitProperty.nowHP <= injury)
+            return true;
+        else
+            return false;
     }
 
     public bool IsInAttackDis(Unit hiter)
@@ -189,15 +209,22 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         {
             isMoveComplete = false;
             //重新计算位置
-            FindRoad.instance.UnBlockRoad(AttackTarget.cell, AttackTarget.power);
+            GameUnitManage.instance.UnBlockRoad(AttackTarget);
             SetRoad(FindRoad.instance.AStar(Cell, AttackTarget.Cell, HexGrid.instance.AllCellList));
-            FindRoad.instance.BlockRoad(AttackTarget.cell);
-        }
-        else
-        {
-            isMoveComplete = true;
+            GameUnitManage.instance.BlockRoad(AttackTarget);
+
+            if (AttackTarget.unitType == UnitType.Buide)
+            {
+                GameUnitManage.instance.BlockRoad((BuildUnit)AttackTarget);
+            }
+            else
+            {
+                FindRoad.instance.BlockRoad(AttackTarget.cell);
+            }
         }
     }
+
+
     void RefreshRoadInRound()
     {
         roadInRound.Clear();
@@ -210,15 +237,19 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             else
             {
                 int need = NeedMoveCount(AttackTarget)+1;
-                for (int i = 0; i < need; i++)
+                int canMoveDistance = (battleUnitProperty.actionPower+1) > road.Count ? road.Count : (battleUnitProperty.actionPower + 1);
+                if (need <= canMoveDistance)
                 {
-                    if (road.Count > 0)
+                    for (int i = 0; i < need; i++)
                     {
-                        roadInRound.Add(road[0]);
+                        roadInRound.Add(road[i]);
                     }
-                    else
+                }
+                else
+                {
+                    for(int i=0;i< canMoveDistance;i++)
                     {
-                        break;
+                        roadInRound.Add(road[i]);
                     }
                 }
                 RemoveEndCell(roadInRound);
@@ -226,18 +257,10 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         }
         else
         {
-            int canMoveDistance = battleUnitProperty.actionPower;
-            roadInRound.Add(Cell);
+            int canMoveDistance = (battleUnitProperty.actionPower + 1) > road.Count ? road.Count : (battleUnitProperty.actionPower + 1);
             for (int i = 0; i < canMoveDistance; i++)
             {
-                if (road.Count > 0)
-                {
-                    roadInRound.Add(road[0]);
-                }
-                else
-                {
-                    break;
-                }
+                roadInRound.Add(road[i]);
             }
             RemoveEndCell(roadInRound);
         }
@@ -245,6 +268,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
     }
     public void AutoAttack()
     {
+
         if (AttackTarget == null||isAttack)
             return;
         if (!isMove)
@@ -376,8 +400,8 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
     void AutoMoveInRound()
     {
+                isMoveAnimFinish = false;
         isMove = true;
-        isMoveAnimFinish = false;
         if (road.Count > 0)
         {
             isMoveComplete = false;
@@ -425,7 +449,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             Move(road);
         }
     }
-    public void RemoveEndCell(List<HexCell> roadCells)
+    void RemoveEndCell(List<HexCell> roadCells)
     {
         //终点处有单位
         for (int i = roadCells.Count - 1; i >= 0; i--)
@@ -444,20 +468,26 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             road.Remove(roadCells[i]);
         }
     }
+    public void RemoveEndCell()
+    {
+        RemoveEndCell(roadInRound);
+    }
 
     public void Move(List<HexCell> cells)
     {
         if(cells.Count<=1)
         {
+            isMoveAnimFinish = true;
             return;
         }
+
         Cell.unit = null;
         cells[cells.Count - 1].unit = this;
         Cell = cells[cells.Count - 1];
         StartCoroutine(MoveAnim(cells));
     }
 
-    bool isMoveAnimFinish = true;
+    public bool isMoveAnimFinish = true;
     IEnumerator MoveAnim(List<HexCell> cells)
     {
         Vector3 a, b, c = cells[0].transform.position;
@@ -487,8 +517,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             }
         }
         isMoveAnimFinish = true;
-       // cells.Clear();
-
+        // cells.Clear();
     }
 
     IEnumerator LookAt(Vector3 point)
@@ -512,7 +541,5 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         Vector3 position = GameControl.mainCamera.WorldToScreenPoint(transform.position);
         hud.RefreshHUD(battleUnitProperty.nowHP, battleUnitProperty.unitHP, position,40,ref isRefreshInjuryHUD);
     }
-
-
 
 }

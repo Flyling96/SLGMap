@@ -18,7 +18,7 @@ public struct BuildUnitProperty
 }
 
 
-public class BuildUnit : Unit, IAttack
+public class BuildUnit : Unit, IAttack,IDie
 {
     void Start()
     {
@@ -62,10 +62,15 @@ public class BuildUnit : Unit, IAttack
         }
     }
 
-    int CalculationOfInjury(BattleUnit attacker)
+    public override int CalculationOfInjury(BattleUnit attacker)
     {
         int result = attacker.battleUnitProperty.attack * 2 - property.defence;
         return result;
+    }
+
+    public override int CalculationOfInjury(BuildUnit attacker)
+    {
+        return base.CalculationOfInjury(attacker);
     }
 
     IEnumerator WaitHUDAnimDie()
@@ -94,6 +99,15 @@ public class BuildUnit : Unit, IAttack
         GameObjectPool.instance.InsertChild("UnitHUD", hud.gameObject);
         GameUnitManage.instance.UnitDie(this);
     }
+
+    public bool WillDie(int injury)
+    {
+        if (property.nowHP <= injury)
+            return true;
+        else
+            return false;
+    }
+
 
     public override void Hit(BuildUnit attacker)
     {

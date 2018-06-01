@@ -633,6 +633,7 @@ public class GameControl : MonoBehaviour {
     }
 
     List<HexCell> MoveList = new List<HexCell>();
+
     void UnitAttack()
     {
         if(startCell.unit != null)

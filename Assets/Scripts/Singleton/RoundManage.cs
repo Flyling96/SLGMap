@@ -7,20 +7,44 @@ public class RoundManage : Singleton<RoundManage> {
     public int curPower = 0;
     public int RoundCount = 1;
 
+
     public void NewRound(int power)
     {
-        if(power == GameUnitManage.instance.myPower)
+        curPower = power;
+        UIManage.instance.roundButton.interactable = false;
+
+        List<BattleUnit> unit = GameUnitManage.instance.battleUnitPowerDic[curPower];
+        if (power == GameUnitManage.instance.myPower)
         {
+            UIManage.instance.roundButton.interactable = true;
+            for (int i = 0; i < unit.Count; i++)
+            {
+                unit[i].NewRound();
+                unit[i].NewRoundRefresh();
+            }
             RoundCount++;
         }
-        curPower = power;
-        List<BattleUnit> unit = GameUnitManage.instance.battleUnitPowerDic[power];
-        GameUnitManage.instance.UnBlockRoad(power);
-        for (int i=0;i<unit.Count;i++)
+        else
         {
-            unit[i].NewRound();
+            GameUnitManage.instance.UnBlockRoad(curPower);
+            for(int i=0;i<unit.Count;i++)
+            {
+                unit[i].NewRound();
+                AIManage.instance.SetTarget(unit[i]);
+                unit[i].NewRoundRefresh();
+            }
+            ChangePower();
         }
+
+
     }
+
+    private void Update()
+    {
+
+    }
+
+
 
     public void Init()
     {
@@ -33,27 +57,34 @@ public class RoundManage : Singleton<RoundManage> {
         GameUnitManage.instance.BlockRoad(curPower);
     }
 
-    public void ChangePower()
+    IEnumerator waitUnitAction()
     {
         List<BattleUnit> unit = GameUnitManage.instance.battleUnitPowerDic[curPower];
-        for(int i=0;i<unit.Count;i++)
+        for (int i = 0; i < unit.Count; i++)
         {
+            unit[i].RemoveEndCell();
             if (unit[i].AttackTarget != null)
             {
                 unit[i].AutoAttack();
+                while(!unit[i].isMoveAnimFinish)
+                {
+                    yield return null;
+                }
             }
             else
             {
                 unit[i].AutoMove();
+                while (!unit[i].isMoveAnimFinish)
+                {
+                    yield return null;
+                }
             }
         }
-
         List<BuildUnit> buildUnit = GameUnitManage.instance.buildUnitPowerDic[curPower];
-        for(int i=0;i<buildUnit.Count;i++)
+        for (int i = 0; i < buildUnit.Count; i++)
         {
             buildUnit[i].AutoAttack();
         }
-
         List<int> powerList = GameUnitManage.instance.powerList;
         ExitRound();
         if (powerList.IndexOf(curPower) < powerList.Count - 1)
@@ -65,6 +96,13 @@ public class RoundManage : Singleton<RoundManage> {
             curPower = powerList[0];
         }
         NewRound(curPower);
+
+    }
+
+    
+    public void ChangePower()
+    {
+        StartCoroutine(waitUnitAction());
     }
 
 }
