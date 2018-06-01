@@ -14,11 +14,17 @@ public class UIManage : Singleton<UIManage> {
     public GameObject unitInfoWnd = null;
     public ActionWnd actionWnd = null;
     public Button roundButton = null;
-
+    public Text roundCount = null;
 
     private void Start()
     {
+        Init();
+    }
+
+    public void Init()
+    {
         roundButton = UIRoot.transform.Find("RoundButton").GetComponent<Button>();
+        roundCount = UIRoot.transform.Find("RoundCount").GetComponent<Text>();
     }
 
     public GameObject UIRoot

@@ -16,6 +16,7 @@ public class RoundManage : Singleton<RoundManage> {
         List<BattleUnit> unit = GameUnitManage.instance.battleUnitPowerDic[curPower];
         if (power == GameUnitManage.instance.myPower)
         {
+            GameUnitManage.instance.UnBlockRoad(curPower);
             UIManage.instance.roundButton.interactable = true;
             for (int i = 0; i < unit.Count; i++)
             {
@@ -23,6 +24,7 @@ public class RoundManage : Singleton<RoundManage> {
                 unit[i].NewRoundRefresh();
             }
             RoundCount++;
+            UIManage.instance.roundCount.text = "第 " + RoundCount + " 回合";
         }
         else
         {

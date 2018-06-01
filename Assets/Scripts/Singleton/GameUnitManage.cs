@@ -39,7 +39,7 @@ public class GameUnitManage : Singleton<GameUnitManage> {
             HexGrid.instance.GetCell(battleUnitInit.coordinates).unit = battleUnitModel.GetComponent<BattleUnit>();
             battleUnitModel.GetComponent<BattleUnit>().power = battleUnitInit.power;
             battleUnitModel.transform.position = battleUnitModel.GetComponent<BattleUnit>().Cell.transform.position;
-            battleUnitModel.transform.localScale = new Vector3(0.02f, 0.02f, 0.02f);
+            battleUnitModel.transform.localScale = new Vector3(3.5f, 3.5f, 3.5f);
             if(!battleUnitPowerDic.ContainsKey(battleUnitInit.power))
             {
                 battleUnitPowerDic.Add(battleUnitInit.power, new List<BattleUnit>());

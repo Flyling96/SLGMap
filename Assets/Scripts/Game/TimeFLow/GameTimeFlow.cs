@@ -16,6 +16,7 @@ public class GameTimeFlow : MonoBehaviour {
     public static bool isGameOver = false;
 	void Start ()
     {
+        UIManage.instance.Init();
         GameObjectPool.instance.Init();
         RoundManage.instance.Init();
         GameOverWnd.SetActive(false);

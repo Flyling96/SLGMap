@@ -239,6 +239,11 @@ public class FindRoad : Singleton<FindRoad> {
                 break;
             }
             resultInt.Push(previousIndex);
+            if(resultInt.Count>200)
+            {
+                isCanArrive = false;
+                break;
+            }
             previousIndex = previous[previousIndex];
         }
         resultInt.Push(previousIndex);
@@ -259,6 +264,10 @@ public class FindRoad : Singleton<FindRoad> {
                         break;
                     }
                     resultInt.Push(previousIndex);
+                    if (resultInt.Count > 200)
+                    {
+                        break;
+                    }
                     previousIndex = previous[previousIndex];
                     if(previous[previousIndex]== startIndex)
                     {

@@ -98,12 +98,12 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
     public override void Hit(BattleUnit attacker)
     {
         isRefreshInjuryHUD = true;
-        attacker.AttackTarget = null;
         int injury = CalculationOfInjury(attacker);
         hud.data.text = injury.ToString();
         battleUnitProperty.nowHP -= injury;
         if(battleUnitProperty.nowHP<=0)
         {
+            attacker.AttackTarget = null;
             StartCoroutine(WaitHUDAnimDie());
         }
     }
@@ -400,7 +400,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
     void AutoMoveInRound()
     {
-                isMoveAnimFinish = false;
+        isMoveAnimFinish = false;
         isMove = true;
         if (road.Count > 0)
         {
