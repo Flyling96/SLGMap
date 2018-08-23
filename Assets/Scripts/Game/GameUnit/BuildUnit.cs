@@ -52,7 +52,7 @@ public class BuildUnit : Unit, IAttack,IDie
     public override void Hit(BattleUnit attacker)
     {
         isRefreshInjuryHUD = true;
-        attacker.AttackTarget = null;
+        attacker.SetAttackTarget(null);
         int injury = CalculationOfInjury(attacker);
         hud.data.text = injury.ToString();
         property.nowHP -= injury;

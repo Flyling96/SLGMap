@@ -484,9 +484,17 @@ public class GameControl : MonoBehaviour {
         canDrawCellList.Clear();
         Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
+        bool isClickSame = false;
         if (Physics.Raycast(inputRay, out hit))
         {
-            startCell = HexGrid.instance.GetCell(hit.point);
+            if (startCell == HexGrid.instance.GetCell(hit.point))
+            {
+                isClickSame = true;
+            }
+            else
+            {
+                startCell = HexGrid.instance.GetCell(hit.point);
+            }
             if(startCell==null)
             {
                 return;
@@ -516,8 +524,11 @@ public class GameControl : MonoBehaviour {
                             distanceInOneRound = startCell.unit.battleUnitProperty.actionPower;
                             canDrawCellList = FindRoad.instance.FindCanGoList
                                 (startCell, HexGrid.instance.AllCellList, distanceInOneRound);
-                            nowCanGoList = FindRoad.instance.FindCanGoList
+                            if (!isClickSame)
+                            {
+                                nowCanGoList = FindRoad.instance.FindCanGoList
                                 (startCell, HexGrid.instance.AllCellList, distanceInOneRound);
+                            }
                             for (int i = 0; i < canDrawCellList.Count; i++)
                             {
                                 canDrawCellList[i].label.transform.Find("Hightlight").GetComponent<Image>().enabled = true;
@@ -526,6 +537,11 @@ public class GameControl : MonoBehaviour {
                         }
                         else
                         {
+                            if (!isClickSame)
+                            {
+                                nowCanGoList = FindRoad.instance.FindCanGoList
+                                   (startCell, HexGrid.instance.AllCellList, distanceInOneRound);
+                            }
                             startCell.unit.ShowRoad(ref canDrawCellList);
                         }
                     }

@@ -49,12 +49,12 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
     {
         RefreshAttackRoad();
         RefreshRoadInRound();
+        //相同势力的先行动者会影响后行动者的路径
     }
 
     public void AttackSoldier(BattleUnit hiter)
     {
         StartCoroutine(WaitForMove(hiter));
-        isAttack = true;
     }
 
     IEnumerator WaitForMove(Unit hiter)
@@ -85,6 +85,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             }
         }
         road.Clear();
+        isAttack = true;
 
     }
 
@@ -103,8 +104,8 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         battleUnitProperty.nowHP -= injury;
         if(battleUnitProperty.nowHP<=0)
         {
-            attacker.AttackTarget = null;
             StartCoroutine(WaitHUDAnimDie());
+            attacker.AttackTarget = null;
         }
     }
     IEnumerator WaitHUDAnimDie()
@@ -212,18 +213,8 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             GameUnitManage.instance.UnBlockRoad(AttackTarget);
             SetRoad(FindRoad.instance.AStar(Cell, AttackTarget.Cell, HexGrid.instance.AllCellList));
             GameUnitManage.instance.BlockRoad(AttackTarget);
-
-            if (AttackTarget.unitType == UnitType.Buide)
-            {
-                GameUnitManage.instance.BlockRoad((BuildUnit)AttackTarget);
-            }
-            else
-            {
-                FindRoad.instance.BlockRoad(AttackTarget.cell);
-            }
         }
     }
-
 
     void RefreshRoadInRound()
     {
@@ -393,6 +384,10 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
     public void AutoMove()
     {
+        if(!roadInRound.Contains(Cell))
+        {
+            roadInRound.Insert(0, cell);
+        }
         if(!isMove&& roadInRound.Count>1)
         {
             AutoMoveInRound();
@@ -416,7 +411,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
 
     public void MoveInRound()
     {
-        AttackTarget = null;
+        SetAttackTarget(null);
         isMove = true;
         isMoveAnimFinish = false;
         roadInRound.Clear();
