@@ -266,6 +266,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
         }
 
     }
+
     public void AutoAttack()
     {
 
@@ -517,7 +518,7 @@ public class BattleUnit : Unit, IAttack, IMove,IDie
             }
         }
         isMoveAnimFinish = true;
-        // cells.Clear();
+        cells.Clear();
     }
 
     IEnumerator LookAt(Vector3 point)
