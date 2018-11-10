@@ -23,7 +23,9 @@ public class UIManage : Singleton<UIManage> {
 
     public void Init()
     {
+        if(UIRoot.transform.Find("RoundButton")!=null)
         roundButton = UIRoot.transform.Find("RoundButton").GetComponent<Button>();
+        if (UIRoot.transform.Find("RoundCount")!=null)
         roundCount = UIRoot.transform.Find("RoundCount").GetComponent<Text>();
     }
 
@@ -43,7 +45,7 @@ public class UIManage : Singleton<UIManage> {
     {
         if(downSelectWnd==null)
         {
-            GameObject temp = GameObject.Instantiate(Resources.Load("Prefabs/UIPrefabs/DownSelectWnd") as GameObject);
+            GameObject temp = Instantiate(Resources.Load("Prefabs/UIPrefabs/DownSelectWnd") as GameObject);
             temp.transform.SetParent(UIRoot.transform);
             temp.GetComponent<RectTransform>().offsetMin = new Vector2(0, 0);
             temp.GetComponent<RectTransform>().offsetMax = new Vector2(0, 0);

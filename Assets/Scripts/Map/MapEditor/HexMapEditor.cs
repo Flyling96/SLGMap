@@ -8,6 +8,7 @@ using System;
 using System.Text.RegularExpressions;
 
 
+//[ExecuteInEditMode]
 public class HexMapEditor : MonoBehaviour {
 
 	//public Color[] colors;

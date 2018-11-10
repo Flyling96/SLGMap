@@ -23,6 +23,7 @@
 		float3 terrain;
 	};
 
+
 	void vert(inout appdata_full v, out Input data) {
 		UNITY_INITIALIZE_OUTPUT(Input, data);
 		data.terrain = v.texcoord2.xyz;
