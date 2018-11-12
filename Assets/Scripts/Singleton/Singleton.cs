@@ -21,14 +21,17 @@ public class Singleton<T>: BaseSingleton where T: BaseSingleton
             {
                 if (_instance == null)
                 {
-                    GameObject singleton = new GameObject();
-                    _instance = singleton.AddComponent<T>();
-                    singleton.name = "(singleton)" + typeof(T).ToString();
-                    DontDestroyOnLoad(singleton);
+                    string singletonName = "(singleton)" + typeof(T).ToString();
+                    if (!GameObject.Find(singletonName))
+                    {
+                        GameObject singleton = new GameObject();
+                        _instance = singleton.AddComponent<T>();
+                        singleton.name = "(singleton)" + typeof(T).ToString();
+                        DontDestroyOnLoad(singleton);
+                    }
                 }
             }
             return _instance;
-
         }
     }
 

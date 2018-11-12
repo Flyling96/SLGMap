@@ -115,6 +115,7 @@ public class HexMapEditor : MonoBehaviour {
         terrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
         sceneObjectBtn = transform.Find("Terrain Panel/SceneObjectBtn").GetComponent<Button>();
         sceneObjectBtn.onClick.AddListener(ShowSceneObjectWnd);
+
     }
 
     void OnEnable()
