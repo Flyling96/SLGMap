@@ -140,9 +140,12 @@ public class HexCell : MonoBehaviour {
         position.y += (HexMetrics.instance.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;//对高度进行微扰;
         transform.localPosition = position;
 
-        Vector3 uiPosition = uiRect.localPosition;
-        uiPosition.z = -position.y;
-        uiRect.localPosition = uiPosition;
+        if (uiRect != null)
+        {
+            Vector3 uiPosition = uiRect.localPosition;
+            uiPosition.z = -position.y;
+            uiRect.localPosition = uiPosition;
+        }
     }
 
     public Vector3 Position

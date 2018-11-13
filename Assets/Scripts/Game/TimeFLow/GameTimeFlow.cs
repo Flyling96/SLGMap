@@ -32,6 +32,7 @@ public class GameTimeFlow : MonoBehaviour {
         {
             LoadMap("map001");
         }
+        HexMetrics.instance.Init();
         GameUnitManage.instance.isInit = true;
         GameUnitManage.instance.LoadBattleUnitInit(FileManage.instance.CSVTable["battleUnitInit"]);
         GameUnitManage.instance.LoadBuildUnitInit(FileManage.instance.CSVTable["buildUnitInit"]);

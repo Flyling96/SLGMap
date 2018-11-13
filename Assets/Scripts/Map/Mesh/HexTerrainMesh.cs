@@ -27,6 +27,8 @@ public class HexTerrainMesh : HexMesh {
 
     public override void TrangulateByMeshClass(HexCell[] cells)
     {
+        base.TrangulateByMeshClass(cells);
+
         Clear();
         if (!isUseMap)
         {

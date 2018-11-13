@@ -28,9 +28,13 @@ public class TerrainEditor : Editor{
 
     TerrainBrush currentBrush;
 
-    private void OnEnable()
+    private void Awake()
     {
-
+        heightBrush = new HeightBrush(HexGrid.instance.HexEditMesh);
+        materialBrush = new MaterialBrush(HexGrid.instance.HexEditMesh);
+        sceneObjBrush = new SceneObjBrush(HexGrid.instance.HexEditMesh);
+        edgeBrush = new EdgeBrush( HexGrid.instance.HexEditMesh);
+        waterBrush = new WaterBrush(HexGrid.instance.HexEditMesh);
     }
 
     public override void OnInspectorGUI()
@@ -50,14 +54,28 @@ public class TerrainEditor : Editor{
                 DrawSceneObjEditorGUI(captions[2]);
                 break;
         }
+        
     }
 
     private void OnSceneGUI()
     {
+        HandleUtility.AddDefaultControl(0);
         switch(editorType)
         {
             case EditorType.HeightEditor:
-                MeshModifier.DoEvent();
+                currentBrush = heightBrush;
+                MeshModifier.instance.m_brush = currentBrush;
+                MeshModifier.instance.DoEvent();
+                break;
+            case EditorType.WaterEditor:
+                currentBrush = waterBrush;
+                MeshModifier.instance.m_brush = currentBrush;
+                MeshModifier.instance.DoEvent();
+                break;
+            case EditorType.EdgeEditor:
+                currentBrush = edgeBrush;
+                MeshModifier.instance.m_brush = currentBrush;
+                MeshModifier.instance.DoEvent();
                 break;
         }
     }

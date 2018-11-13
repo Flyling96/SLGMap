@@ -111,6 +111,7 @@ public class HexMapEditor : MonoBehaviour {
     private void Awake()
     {
         ConfigDateManage.instance.InitData();
+        HexMetrics.instance.Init();
         terrainTextureBtn = transform.Find("Terrain Panel/TerrainTextureBtn").GetComponent<Button>();
         terrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
         sceneObjectBtn = transform.Find("Terrain Panel/SceneObjectBtn").GetComponent<Button>();

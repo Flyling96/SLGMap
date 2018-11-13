@@ -91,7 +91,7 @@ public class HeightBrush:TerrainBrush
     }
 
 
-    public HeightBrush(EditorType type, HexEdgeMesh hexEdgeMesh) : base(type, hexEdgeMesh) { }
+    public HeightBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.HeightEditor, hexEdgeMesh) { }
 
     public override void RefreshBrush(Vector3 pos, HexCell cell)
     {
@@ -119,7 +119,7 @@ public class HeightBrush:TerrainBrush
 //材质笔刷
 public class MaterialBrush:TerrainBrush
 {
-    public MaterialBrush(EditorType type, HexEdgeMesh hexEdgeMesh) : base(type, hexEdgeMesh) { }
+    public MaterialBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.MaterialEditor, hexEdgeMesh) { }
 
     public override void RefreshBrush(Vector3 pos, HexCell cell)
     {
@@ -166,7 +166,7 @@ public class SceneObjBrush:TerrainBrush
         }
     }
 
-    public SceneObjBrush(EditorType type, HexEdgeMesh hexEdgeMesh) : base(type, hexEdgeMesh) { }
+    public SceneObjBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.SceneObjEditor, hexEdgeMesh) { }
 
     public override void RefreshBrush(Vector3 pos, HexCell cell)
     {
@@ -235,7 +235,7 @@ public class WaterBrush:TerrainBrush
         }
     }
 
-    public WaterBrush(EditorType type, HexEdgeMesh hexEdgeMesh) : base(type, hexEdgeMesh) { }
+    public WaterBrush( HexEdgeMesh hexEdgeMesh) : base(EditorType.WaterEditor, hexEdgeMesh) { }
 
     public override void RefreshBrush(Vector3 pos, HexCell cell)
     {
@@ -288,7 +288,7 @@ public class EdgeBrush:TerrainBrush
         }
     }
 
-    public EdgeBrush(EditorType type, HexEdgeMesh hexEdgeMesh, EditorEdgeType edgeType, bool isWholeEditor) : base(type, hexEdgeMesh)
+    public EdgeBrush(HexEdgeMesh hexEdgeMesh, EditorEdgeType edgeType = EditorEdgeType.Slope, bool isWholeEditor = false) : base(EditorType.EdgeEditor, hexEdgeMesh)
     {
         EditEdgeType = edgeType;
         IsWholeEditor = isWholeEditor;
@@ -425,21 +425,25 @@ public class EdgeBrush:TerrainBrush
 
 
 //Mesh调节器(高度、水体、边界相关)
-public class MeshModifier
+public class MeshModifier:SingletonDestory<MeshModifier>
 {
 
-    static TerrainBrush m_brush;
-    static List<HexGridChunk> m_refreshChunkList = new List<HexGridChunk>();//mesh基于chunk刷新
-    static List<HexCell> m_refreshCellList = new List<HexCell>();//sceneObject基于cell刷新,刷新mesh的时候也会刷新sceneObject
+    public TerrainBrush m_brush;
+    List<HexGridChunk> m_refreshChunkList = new List<HexGridChunk>();//mesh基于chunk刷新
+    List<HexCell> m_refreshCellList = new List<HexCell>();//sceneObject基于cell刷新,刷新mesh的时候也会刷新sceneObject
 
 
-    public static void DoEvent()
+    public void DoEvent()
     {
         Event e = Event.current;
         switch(e.type)
         {
             case EventType.MouseDown:
+                if(e.button == 0)//鼠标左键
                 RefreshMesh(e);
+                break;
+            case EventType.MouseMove:
+                RePaint(e);
                 break;
             case EventType.Repaint:
                 RePaint(e);
@@ -447,7 +451,7 @@ public class MeshModifier
         }
     }
 
-    static void RePaint(Event e)
+    void RePaint(Event e)
     {
         Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         RaycastHit hit;
@@ -460,7 +464,7 @@ public class MeshModifier
     }
 
     //刷新地形mesh
-    static void RefreshMesh(Event e)
+    void RefreshMesh(Event e)
     {
         //Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
@@ -515,7 +519,7 @@ public class MeshModifier
         }
     }
 
-    static void EditCell(HexDirection clickDir, HexCell cell,TerrainBrush brush)
+     void EditCell(HexDirection clickDir, HexCell cell,TerrainBrush brush)
     {
 
         if (cell == null)

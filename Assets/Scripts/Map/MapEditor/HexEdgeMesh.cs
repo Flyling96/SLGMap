@@ -10,10 +10,17 @@ public class HexEdgeMesh : MonoBehaviour {
     List<Color> colors;
     List<int> triangles;
 
-
     void OnEnable()
     {
-        GetComponent<MeshFilter>().mesh = hexEdgeMesh = new Mesh();
+        Init();
+    }
+
+    public void Init()
+    {
+        if (hexEdgeMesh == null)
+        {
+            GetComponent<MeshFilter>().mesh = hexEdgeMesh = new Mesh();
+        }
         hexEdgeMesh.name = "Hex Edge Mesh";
         vertices = new List<Vector3>();
         colors = new List<Color>();

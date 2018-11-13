@@ -24,8 +24,24 @@ public class HexGrid : SingletonDestory<HexGrid> {
     public Texture2D noiseSource;
 
     HexGridChunk gridChunkPerfab;
+
+    private HexEdgeMesh hexEdgeMesh;
     public HexCell cellPrefab;
 	public Text cellLabelPrefab;
+
+    public HexEdgeMesh HexEditMesh
+    {
+        get
+        {
+            if(hexEdgeMesh==null)
+            {
+                hexEdgeMesh = (Instantiate(Resources.Load("Prefabs/Hex Edge Mesh") as GameObject)).GetComponent<HexEdgeMesh>();
+                hexEdgeMesh.Init();
+                hexEdgeMesh.name = "Hex Edge Mesh";
+            }
+            return hexEdgeMesh;
+        }
+    }
 
 	public HexCell[] cells;
 
@@ -98,11 +114,16 @@ public class HexGrid : SingletonDestory<HexGrid> {
     //新建地图
     public void NewMap()
     {
+        if (!HexTerrain.isEditor)
+        {
+            gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
+            gridCanvas.transform.SetParent(transform);
+        }
 
-        gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
-        gridCanvas.transform.SetParent(transform);
         cellPrefab = (Instantiate(Resources.Load("Prefabs/Hex Cell") as GameObject)).GetComponent<HexCell>();
+        cellPrefab.name = "Hex Cell";
         cellLabelPrefab = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Cell Label") as GameObject)).GetComponent<Text>();
+        cellLabelPrefab.name = "Hex Cell Label";
         noiseSource = Resources.Load("Texture/Noise") as Texture2D;
 
         StartCoroutine(waitInstantiate());
@@ -344,11 +365,14 @@ public class HexGrid : SingletonDestory<HexGrid> {
 			}
 		}
 
-        Text label = Instantiate<Text>(cellLabelPrefab);
-        label.rectTransform.SetParent(gridCanvas.transform, false);
-        label.rectTransform.anchoredPosition3D = new Vector3(position.x, position.z,cell.transform.position.y);
-        cell.label = label;
-        cell.uiRect = label.rectTransform;
+        if (!HexTerrain.isEditor)
+        {
+            Text label = Instantiate<Text>(cellLabelPrefab);
+            label.rectTransform.SetParent(gridCanvas.transform, false);
+            label.rectTransform.anchoredPosition3D = new Vector3(position.x, position.z, cell.transform.position.y);
+            cell.label = label;
+            cell.uiRect = label.rectTransform;
+        }
 
         cell.isStepDirection = new bool[]{false,false,false,false,false,false};
         CellToChunk(x, z, cell);

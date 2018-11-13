@@ -24,10 +24,19 @@ public class HexMesh : MonoBehaviour {
 
     MeshCollider meshCollider;
 
-	void OnEnable() {
-		GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
-		meshCollider = gameObject.AddComponent<MeshCollider>();
-	}
+
+    bool isInit = false;
+
+	void OnAwake() {
+        Init();
+    }
+
+    public void Init()
+    {
+        GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
+        meshCollider = gameObject.AddComponent<MeshCollider>();
+        isInit = true;
+    }
 
     public void Triangulate(HexCell[] cells)
     {
@@ -42,7 +51,10 @@ public class HexMesh : MonoBehaviour {
     //不同的mesh类对此类进行重写
     public virtual void TrangulateByMeshClass(HexCell[] cells)
     {
-
+        if(!isInit)
+        {
+            Init();
+        }
     }
 
     public void Clear()

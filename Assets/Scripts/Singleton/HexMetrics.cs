@@ -34,7 +34,7 @@ public class HexMetrics: Singleton<HexMetrics>
     Vector3[] corners = null;
 
 
-    private void Awake()
+    public void Init()
     {
         innerRadius = outerRadius * 0.866025404f;
         blendFactor = 1f - solidFactor;
@@ -43,12 +43,12 @@ public class HexMetrics: Singleton<HexMetrics>
         verticalTerraceStepSize = 1f / (terracesPerStep + 1);
         corners = new Vector3[]{
             new Vector3(0f, 0f, outerRadius),
-		    new Vector3(innerRadius, 0f, 0.5f * outerRadius),
-		    new Vector3(innerRadius, 0f, -0.5f * outerRadius),
-		    new Vector3(0f, 0f, -outerRadius),
-		    new Vector3(-innerRadius, 0f, -0.5f * outerRadius),
-		    new Vector3(-innerRadius, 0f, 0.5f * outerRadius),
-		    new Vector3(0f, 0f, outerRadius)
+            new Vector3(innerRadius, 0f, 0.5f * outerRadius),
+            new Vector3(innerRadius, 0f, -0.5f * outerRadius),
+            new Vector3(0f, 0f, -outerRadius),
+            new Vector3(-innerRadius, 0f, -0.5f * outerRadius),
+            new Vector3(-innerRadius, 0f, 0.5f * outerRadius),
+            new Vector3(0f, 0f, outerRadius)
         };
     }
 

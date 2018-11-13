@@ -15,6 +15,8 @@ public class HexWaterMesh : HexMesh {
 
     public override void TrangulateByMeshClass(HexCell[] cells)
     {
+        base.TrangulateByMeshClass(cells);
+
         Clear();
         for (int i = 0; i < cells.Length; i++)
         {
