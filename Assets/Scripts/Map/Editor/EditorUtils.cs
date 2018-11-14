@@ -12,7 +12,7 @@ public class EditorUtils
         GUILayout.Space(5.0f);
         key = key + caption;
         bool open = EditorPrefs.GetBool(key, defaultOpen);
-        if (!open) caption = "\u25BC" + (char)0x200a + caption;
+        if (open) caption = "\u25BC" + (char)0x200a + caption;
         else caption = "\u25BA" + (char)0x200a + caption;
 
         if (!open) GUI.backgroundColor = new Color(0.8f, 0.8f, 0.8f);

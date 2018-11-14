@@ -45,6 +45,11 @@ public class TerrainBrush
 
     }
 
+    public virtual void RefreshTarget(HexCell cell)
+    {
+
+    }
+
     public void RefreshCellList(HexCell cell)
     {
         m_refreshCellList.Clear();
@@ -116,109 +121,8 @@ public class HeightBrush:TerrainBrush
     }
 }
 
-//材质笔刷
-public class MaterialBrush:TerrainBrush
-{
-    public MaterialBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.MaterialEditor, hexEdgeMesh) { }
-
-    public override void RefreshBrush(Vector3 pos, HexCell cell)
-    {
-        base.RefreshBrush(pos, cell);
-
-        if (HexMetrics.instance.isEditorTexture)
-        {
-            m_hexEdgeMesh.Triangulate(m_refreshCellList, new Color(0.18f, 1, 0.18f, 1f));
-        }
-        else
-        {
-            m_hexEdgeMesh.Triangulate(m_refreshCellList, HexMetrics.instance.editorColor);
-        }
-    }
-}
-
-//场景物体笔刷
-public class SceneObjBrush:TerrainBrush
-{
-    bool m_isDeleteSceneObject = false;
-    bool m_isBrushSceneObject = false;
-
-    public bool IsDeleteSceneObject
-    {
-        get
-        {
-            return m_isDeleteSceneObject;
-        }
-        set
-        {
-            m_isDeleteSceneObject = value;
-        }
-    }
-
-    public bool IsBrushSceneObject
-    {
-        get
-        {
-            return m_isBrushSceneObject;
-        }
-        set
-        {
-            m_isBrushSceneObject = value;
-        }
-    }
-
-    public SceneObjBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.SceneObjEditor, hexEdgeMesh) { }
-
-    public override void RefreshBrush(Vector3 pos, HexCell cell)
-    {
-        base.RefreshBrush(pos, cell);
-
-        if (HexMetrics.instance.isEditorTexture)
-        {
-            if (IsDeleteSceneObject && IsBrushSceneObject)
-            {
-                m_hexEdgeMesh.Triangulate(m_refreshCellList, ToolClass.instance.ConvertColor("#FF2020FF"));
-            }
-            else if (HexMetrics.instance.IsEditorSceneObject && !IsDeleteSceneObject && IsBrushSceneObject)
-            {
-                m_hexEdgeMesh.Clear();
-                Vector2 max = new Vector2(pos.x + 8 * brushRange, pos.z + 8 * brushRange);
-                Vector2 min = new Vector2(pos.x - 8 * brushRange, pos.z - 8 * brushRange);
-                m_hexEdgeMesh.AddQuad
-                    (
-                        new Vector3(min.x, pos.y + 2, min.y),
-                        new Vector3(max.x, pos.y + 2, min.y),
-                        new Vector3(min.x, pos.y + 2, max.y),
-                        new Vector3(max.x, pos.y + 2, max.y)
-                    );
-                m_hexEdgeMesh.AddQuadColor
-                    (
-                        new Color(0.18f, 1, 0.18f, 1f),
-                        new Color(0.18f, 1, 0.18f, 1f)
-                    );
-                m_hexEdgeMesh.InputMeshInfo();
-            }
-            else
-            {
-                m_hexEdgeMesh.Triangulate(m_refreshCellList, new Color(0.18f, 1, 0.18f, 1f));
-            }
-        }
-        else
-        {
-            if (IsDeleteSceneObject)
-            {
-                m_hexEdgeMesh.Triangulate(m_refreshCellList, ToolClass.instance.ConvertColor("#FF2020FF"));
-            }
-            else
-            {
-                m_hexEdgeMesh.Triangulate(m_refreshCellList, HexMetrics.instance.editorColor);
-            }
-        }
-
-    }
-}
-
 //水面笔刷
-public class WaterBrush:TerrainBrush
+public class WaterBrush : TerrainBrush
 {
 
     int m_waterLevel = 1;
@@ -235,7 +139,7 @@ public class WaterBrush:TerrainBrush
         }
     }
 
-    public WaterBrush( HexEdgeMesh hexEdgeMesh) : base(EditorType.WaterEditor, hexEdgeMesh) { }
+    public WaterBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.WaterEditor, hexEdgeMesh) { }
 
     public override void RefreshBrush(Vector3 pos, HexCell cell)
     {
@@ -253,7 +157,7 @@ public class WaterBrush:TerrainBrush
 }
 
 //边界笔刷
-public class EdgeBrush:TerrainBrush
+public class EdgeBrush : TerrainBrush
 {
     public enum EditorEdgeType
     {
@@ -262,7 +166,7 @@ public class EdgeBrush:TerrainBrush
     }
 
     EditorEdgeType m_editorEdgeType = EditorEdgeType.Slope;
-    bool m_isWholeEditor = true; 
+    bool m_isWholeEditor = false;
 
     public EditorEdgeType EditEdgeType
     {
@@ -294,7 +198,7 @@ public class EdgeBrush:TerrainBrush
         IsWholeEditor = isWholeEditor;
     }
 
-    public EdgeBrush(EditorType type, HexEdgeMesh hexEdgeMesh):base(type, hexEdgeMesh){ }
+    public EdgeBrush(EditorType type, HexEdgeMesh hexEdgeMesh) : base(type, hexEdgeMesh) { }
 
     //对整个六边形的边进行编辑
     void EditorWholeCell(HexCell cell)
@@ -411,7 +315,7 @@ public class EdgeBrush:TerrainBrush
     public override void RefreshTarget(HexDirection clickDir, HexCell cell)
     {
         base.RefreshTarget(clickDir, cell);
-        if (m_isWholeEditor)
+        if (!m_isWholeEditor)
         {
             EditorEdge(cell, clickDir);
         }
@@ -421,6 +325,191 @@ public class EdgeBrush:TerrainBrush
         }
     }
 }
+
+
+//材质笔刷
+public class MaterialBrush:TerrainBrush
+{
+    public Color m_editColor;
+
+    public TerrainTypes m_terrainTextureIndex = TerrainTypes.Grass;
+
+    public Color EditColor
+    {
+        get
+        {
+            return m_editColor;
+        }
+        set
+        {
+            m_editColor = value;
+        }
+    }
+
+    public TerrainTypes TerrainType
+    {
+        get
+        {
+            return m_terrainTextureIndex;
+        }
+        set
+        {
+            m_terrainTextureIndex = value;
+        }
+    }
+
+    public MaterialBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.MaterialEditor, hexEdgeMesh) { }
+
+    public override void RefreshBrush(Vector3 pos, HexCell cell)
+    {
+        base.RefreshBrush(pos, cell);
+
+        if (HexMetrics.instance.isEditorTexture)
+        {
+            m_hexEdgeMesh.Triangulate(m_refreshCellList, new Color(0.18f, 1, 0.18f, 1f));
+        }
+        else
+        {
+            m_hexEdgeMesh.Triangulate(m_refreshCellList, HexMetrics.instance.editorColor);
+        }
+    }
+
+    public override void RefreshTarget(HexCell cell)
+    {
+        base.RefreshTarget(cell);
+
+        if(HexMetrics.instance.isEditorTexture)
+        {
+            cell.TerrainTypeIndex = TerrainType;
+        }
+        else
+        {
+            cell.color = EditColor;
+        }
+
+    }
+}
+
+//场景物体笔刷
+public class SceneObjBrush:TerrainBrush
+{
+    public enum OperationType
+    {
+        Add,
+        Delete,
+        Refresh,
+    }
+
+    bool m_isDeleteSceneObject = false;
+    bool m_isBrushSceneObject = false;
+    int m_sceneObjectDensity = 1;
+    OperationType m_operationType = OperationType.Add;
+
+    public bool IsDeleteSceneObject
+    {
+        get
+        {
+            return m_isDeleteSceneObject;
+        }
+        set
+        {
+            m_isDeleteSceneObject = value;
+        }
+    }
+
+    public bool IsBrushSceneObject
+    {
+        get
+        {
+            return m_isBrushSceneObject;
+        }
+        set
+        {
+            m_isBrushSceneObject = value;
+        }
+    }
+
+    public int SceneObjectDensity
+    {
+        get
+        {
+            return m_sceneObjectDensity;
+        }
+        set
+        {
+            m_sceneObjectDensity = value;
+        }
+    }
+
+    public OperationType SceneObjOperationType
+    {
+        get
+        {
+            return m_operationType;
+        }
+        set
+        {
+            m_operationType = value;
+        }
+    }
+
+    public SceneObjBrush(HexEdgeMesh hexEdgeMesh) : base(EditorType.SceneObjEditor, hexEdgeMesh) { }
+
+    public override void RefreshBrush(Vector3 pos, HexCell cell)
+    {
+        base.RefreshBrush(pos, cell);
+
+        if (HexMetrics.instance.isEditorTexture)
+        {
+            if (IsDeleteSceneObject && IsBrushSceneObject)
+            {
+                m_hexEdgeMesh.Triangulate(m_refreshCellList, ToolClass.instance.ConvertColor("#FF2020FF"));
+            }
+            else if (HexMetrics.instance.IsEditorSceneObject && !IsDeleteSceneObject && IsBrushSceneObject)
+            {
+                m_hexEdgeMesh.Clear();
+                Vector2 max = new Vector2(pos.x + 8 * brushRange, pos.z + 8 * brushRange);
+                Vector2 min = new Vector2(pos.x - 8 * brushRange, pos.z - 8 * brushRange);
+                m_hexEdgeMesh.AddQuad
+                    (
+                        new Vector3(min.x, pos.y + 2, min.y),
+                        new Vector3(max.x, pos.y + 2, min.y),
+                        new Vector3(min.x, pos.y + 2, max.y),
+                        new Vector3(max.x, pos.y + 2, max.y)
+                    );
+                m_hexEdgeMesh.AddQuadColor
+                    (
+                        new Color(0.18f, 1, 0.18f, 1f),
+                        new Color(0.18f, 1, 0.18f, 1f)
+                    );
+                m_hexEdgeMesh.InputMeshInfo();
+            }
+            else
+            {
+                m_hexEdgeMesh.Triangulate(m_refreshCellList, new Color(0.18f, 1, 0.18f, 1f));
+            }
+        }
+        else
+        {
+            if (IsDeleteSceneObject)
+            {
+                m_hexEdgeMesh.Triangulate(m_refreshCellList, ToolClass.instance.ConvertColor("#FF2020FF"));
+            }
+            else
+            {
+                m_hexEdgeMesh.Triangulate(m_refreshCellList, HexMetrics.instance.editorColor);
+            }
+        }
+
+    }
+
+    public override void RefreshTarget(HexCell cell)
+    {
+        base.RefreshTarget(cell);
+
+    }
+}
+
 #endregion
 
 
@@ -519,7 +608,7 @@ public class MeshModifier:SingletonDestory<MeshModifier>
         }
     }
 
-     void EditCell(HexDirection clickDir, HexCell cell,TerrainBrush brush)
+    void EditCell(HexDirection clickDir, HexCell cell,TerrainBrush brush)
     {
 
         if (cell == null)
@@ -541,5 +630,254 @@ public class MeshModifier:SingletonDestory<MeshModifier>
 
     }
 
+
+}
+
+public class MaterialModifier:SingletonDestory<MaterialModifier>
+{
+    public TerrainBrush m_brush;
+
+    List<HexGridChunk> m_refreshChunkList = new List<HexGridChunk>();//mesh基于chunk刷新
+
+    public void DoEvent()
+    {
+        Event e = Event.current;
+        switch (e.type)
+        {
+            case EventType.MouseDown:
+                if (e.button == 0)//鼠标左键
+                    RefreshMesh(e);
+                break;
+            case EventType.MouseMove:
+                RePaint(e);
+                break;
+            case EventType.Repaint:
+                RePaint(e);
+                break;
+        }
+    }
+
+    void RePaint(Event e)
+    {
+        Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+        RaycastHit hit;
+        HexCell centerCell = null;
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            centerCell = HexGrid.instance.GetCell(hit.point);
+            m_brush.RefreshBrush(hit.point, centerCell);
+        }
+    }
+
+    //刷新地形mesh
+    void RefreshMesh(Event e)
+    {
+        //Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+        Debug.Log(inputRay.direction);
+        RaycastHit hit;
+        HexCell centerCell = null;
+        int centerX = 0;
+        int centerZ = 0;
+
+        m_refreshChunkList.Clear();
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            centerCell = HexGrid.instance.GetCell(hit.point);
+            m_refreshChunkList.Add(centerCell.chunkParent);
+            centerX = centerCell.coordinates.X;
+            centerZ = centerCell.coordinates.Z;
+            Vector3 pos = hit.point;
+            for (int l = 0, z = centerZ; z >= centerZ - m_brush.brushRange + 1; l++, z--)
+            {
+                for (int x = centerX - m_brush.brushRange + 1 + l; x <= centerX + m_brush.brushRange - 1; x++)
+                {
+                    EditCell( HexGrid.instance.GetCell(new HexCoordinates(x, z)), m_brush);
+                }
+            }
+
+            for (int l = 1, z = centerZ + 1; z <= centerZ + m_brush.brushRange - 1; l++, z++)
+            {
+                for (int x = centerX - m_brush.brushRange + 1; x <= centerX + m_brush.brushRange - 1 - l; x++)
+                {
+                    EditCell(HexGrid.instance.GetCell(new HexCoordinates(x, z)), m_brush);
+                }
+            }
+            for (int i = 0; i < m_refreshChunkList.Count; i++)
+            {
+                m_refreshChunkList[i].Refresh();
+            }
+
+        }
+    }
+
+    void EditCell(HexCell cell, TerrainBrush brush)
+    {
+        if (cell == null)
+            return;
+
+        brush.RefreshTarget(cell);
+
+        List<HexGridChunk> neigborChunk = cell.NeighorChunk();
+        if (neigborChunk.Count > 0)
+        {
+            for (int i = 0; i < neigborChunk.Count; i++)
+            {
+                if (!m_refreshChunkList.Contains(neigborChunk[i]))
+                {
+                    m_refreshChunkList.Add(neigborChunk[i]);
+                }
+            }
+        }
+
+    }
+
+
+}
+
+public class SceneObjModifier:SingletonDestory<SceneObjModifier>
+{
+
+    public bool isBrushSceneObject = true;
+
+    public SceneObjBrush m_brush;
+
+    List<HexGridChunk> m_refreshChunkList = new List<HexGridChunk>();//mesh基于chunk刷新
+
+    public void DoEvent()
+    {
+        Event e = Event.current;
+        switch (e.type)
+        {
+            case EventType.MouseDown:
+                if (e.button == 0)//鼠标左键
+                    RefreshSceneObj(e);
+                break;
+            case EventType.MouseMove:
+                RePaint(e);
+                break;
+            case EventType.Repaint:
+                RePaint(e);
+                break;
+        }
+    }
+
+    void RePaint(Event e)
+    {
+        Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+        RaycastHit hit;
+        HexCell centerCell = null;
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            centerCell = HexGrid.instance.GetCell(hit.point);
+            m_brush.RefreshBrush(hit.point, centerCell);
+        }
+    }
+
+    void RefreshSceneObj(Event e)
+    {
+        Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+        RaycastHit hit;
+        HexCell centerCell = null;
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            centerCell = HexGrid.instance.GetCell(hit.point);
+            if (m_brush.SceneObjOperationType == SceneObjBrush.OperationType.Add)
+            {
+                if (m_brush.IsBrushSceneObject)//大量随机
+                {
+                    Vector2 max = new Vector2(hit.point.x + 8 * m_brush.brushRange, hit.point.z + 8 * m_brush.brushRange);
+                    Vector2 min = new Vector2(hit.point.x - 8 * m_brush.brushRange, hit.point.z - 8 * m_brush.brushRange);
+                    float px, pz, py = 0;
+                    for (int i = 0; i < m_brush.SceneObjectDensity * m_brush.brushRange; i++)
+                    {
+                        px = UnityEngine.Random.Range(min.x, max.x);
+                        pz = UnityEngine.Random.Range(min.y, max.y);
+                        if (Physics.Raycast(new Vector3(px, 35, pz), Vector3.down, out hit))
+                        {
+                            if (hit.collider.gameObject.tag != "Mesh")
+                                continue;
+                            py = hit.point.y;
+                        }
+                        Vector3 tPosition = new Vector3(px, py, pz);
+                        centerCell = HexGrid.instance.GetCell(tPosition);
+                        if (centerCell.isUnderWaterLevel || centerCell == null)
+                        {
+                            continue;
+                        }
+                        GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
+                        tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
+                        tSceneObject.transform.position = tPosition;
+                        tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
+                        tSceneObject.SetActive(true);
+                        HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(tPosition.x - centerCell.transform.position.x, tPosition.z - centerCell.transform.position.z));
+                        tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+                        tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
+                        tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                        tSceneObject.AddComponent<BoxCollider>();
+                        tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
+                        tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
+                        tSceneObject.tag = "SceneObject";
+                        centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                    }
+                }
+                else
+                {
+                    if (hit.collider.gameObject.tag == "Mesh")
+                    {
+                        if (!centerCell.isUnderWaterLevel && centerCell != null)
+                        {
+                            GameObject tSceneObject = GameObjectPool.instance.GetPoolChild(HexMetrics.instance.editorSceneObject.name, HexMetrics.instance.editorSceneObject);
+                            tSceneObject.transform.SetParent(centerCell.chunkParent.sceneObjectMgr.transform);
+                            tSceneObject.transform.position = new Vector3(hit.point.x, hit.point.y, hit.point.z);
+                            tSceneObject.transform.rotation = Quaternion.Euler(0f, 360f * UnityEngine.Random.value, 0f);
+                            tSceneObject.SetActive(true);
+                            HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
+                            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+                            tSceneObject.GetComponent<SceneObjectClass>().sceneObjectInfo = HexMetrics.instance.editorSceneObjectInfo;
+                            tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
+                            tSceneObject.AddComponent<BoxCollider>();
+                            tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);
+                            tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
+                            tSceneObject.tag = "SceneObject";
+                            centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                        }
+                    }
+                }
+            }
+            else if (m_brush.SceneObjOperationType == SceneObjBrush.OperationType.Delete)
+            {
+                int centerX = centerCell.coordinates.X;
+                int centerZ = centerCell.coordinates.Z;
+                if (m_brush.IsBrushSceneObject && m_brush.IsDeleteSceneObject)
+                {
+                    for (int l = 0, z = centerZ; z >= centerZ - m_brush.brushRange + 1; l++, z--)
+                    {
+                        for (int x = centerX - m_brush.brushRange + 1 + l; x <= centerX + m_brush.brushRange - 1; x++)
+                        {
+                            HexCell cell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
+                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
+                        }
+                    }
+                    for (int l = 1, z = centerZ + 1; z <= centerZ + m_brush.brushRange - 1; l++, z++)
+                    {
+                        for (int x = centerX - m_brush.brushRange + 1; x <= centerX + m_brush.brushRange - 1 - l; x++)
+                        {
+                            HexCell cell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
+                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
+                        }
+                    }
+
+                }
+                else
+                {
+                    if (hit.collider.gameObject.tag == "SceneObject")
+                    {
+                        hit.collider.gameObject.GetComponent<SceneObjectClass>().cell.chunkParent.sceneObjectMgr.MinusSceneObject(hit.collider.gameObject.GetComponent<SceneObjectClass>());
+                    }
+                }
+            }
+        }
+    }
 
 }
