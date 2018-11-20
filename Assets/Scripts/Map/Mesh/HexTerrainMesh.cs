@@ -363,6 +363,7 @@ public class HexTerrainMesh : HexMesh {
             AddTriangleTerrain(types);
         }
     }
+ 
 
     //left为c，right为s 与上一种情况对称
     void TriangulateCornerCliffTerraces(

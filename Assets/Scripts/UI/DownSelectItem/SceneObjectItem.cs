@@ -16,7 +16,7 @@ public class SceneObjectItem : DownSelectWndItem
             HexMetrics.instance.IsEditorSceneObject = true;
             if (sceneObjectModel == null)
             {
-                sceneObjectModel = GameObject.Instantiate(Resources.Load(sceneObjectInfo.modelPath) as GameObject);
+                sceneObjectModel = Instantiate(Resources.Load(sceneObjectInfo.modelPath) as GameObject);
                 sceneObjectModel.AddComponent<SceneObjectClass>();
                 sceneObjectModel.GetComponent<SceneObjectClass>().sceneObjectInfo = sceneObjectInfo;
                 sceneObjectModel.transform.localScale = new Vector3(0.01f, 0.01f, 0.01f);

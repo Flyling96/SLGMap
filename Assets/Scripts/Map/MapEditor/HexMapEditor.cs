@@ -503,7 +503,7 @@ public class HexMapEditor : MonoBehaviour {
     IEnumerator WaitMesh(HexGridChunk chunk)
     {
         yield return new WaitForSeconds(0.3f);
-        chunk.sceneObjectMgr.Refresh(refreshCellList);
+        chunk.sceneObjectMgr.Refresh();
     }
     
     //对整个六边形的边进行编辑

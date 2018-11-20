@@ -32,6 +32,9 @@ public class TerrainEditor : Editor{
     string[] MATERIAL_TEXTURE_NAMES = { "绿地", "泥地", "雪地", "沙地", "石地" };
     int[] MATERIAL_TEXTURE_VALUES = { 0, 1, 2, 3, 4, 5 };
 
+    string[] SCENEOBJ_OPERATION_NAMES = { "增加", "删除", "修改" };
+    int[] SCENEOBJ_OPERATION_VALUES = { 0, 1, 2 };
+
     public HexEdgeMesh hexEdgeMesh;
 
     public HeightBrush heightBrush;
@@ -39,6 +42,9 @@ public class TerrainEditor : Editor{
     public SceneObjBrush sceneObjBrush;
     public EdgeBrush edgeBrush;
     public WaterBrush waterBrush;
+
+    public static Stack<UndoRedoOperation> undoStack = new Stack<UndoRedoOperation>();
+    public static Stack<UndoRedoOperation> redoStack = new Stack<UndoRedoOperation>();
 
     TerrainBrush currentBrush;
 
@@ -70,7 +76,12 @@ public class TerrainEditor : Editor{
                 DrawSceneObjEditorGUI(captions[2]);
                 break;
         }
-        
+
+        //DrawTerrainMgrUI();
+        DrawOperationMgrUI();
+
+
+
     }
 
     private void OnSceneGUI()
@@ -106,6 +117,116 @@ public class TerrainEditor : Editor{
 
         }
     }
+
+    private void DrawTerrainMgrUI()
+    {
+        if(EditorUtils.DrawHeader("地形管理","TerrainEditor"))
+        {
+            if(GUILayout.Button("新建地形",GUILayout.MaxWidth(100)))
+            {
+                Debug.Log(1);
+            }
+
+            if(GUILayout.Button("保存地形", GUILayout.MaxWidth(100)))
+            {
+                Debug.Log(2);
+            }
+
+            if(GUILayout.Button("加载地形", GUILayout.MaxWidth(100)))
+            {
+                Debug.Log(3);
+            }
+        }
+    }
+
+    private void DrawOperationMgrUI()
+    {
+        if(EditorUtils.DrawHeader("操作管理","TerrainEditor"))
+        {
+            if(GUILayout.Button("Undo"))
+            {
+                if (undoStack.Count > 0)
+                {
+                    UndoRedoOperation undoRedoOperation = undoStack.Pop();
+                    undoRedoOperation.DoIt();
+                }
+            }
+            if(GUILayout.Button("Redo"))
+            {
+
+            }
+        }
+    }
+
+
+    public static void UndoAdd(HexCell centerCell, TerrainBrush brush)
+    {
+        List<HexCell> cellList = new List<HexCell>();
+        int centerX = centerCell.coordinates.X;
+        int centerZ = centerCell.coordinates.Z;
+
+        for (int l = 0, z = centerZ; z >= centerZ - brush.brushRange + 1; l++, z--)
+        {
+            for (int x = centerX - brush.brushRange + 1 + l; x <= centerX + brush.brushRange - 1; x++)
+            {
+                if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
+                    cellList.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
+            }
+        }
+
+        for (int l = 1, z = centerZ + 1; z <= centerZ + brush.brushRange - 1; l++, z++)
+        {
+            for (int x = centerX - brush.brushRange + 1; x <= centerX + brush.brushRange - 1 - l; x++)
+            {
+                if (HexGrid.instance.GetCell(new HexCoordinates(x, z)) != null)
+                    cellList.Add(HexGrid.instance.GetCell(new HexCoordinates(x, z)));
+            }
+        }
+
+
+        List<UndoRedoOperation.UndoRedoInfo> undoRedoInfoList = new List<UndoRedoOperation.UndoRedoInfo>();
+        for (int i = 0; i < cellList.Count; i++)
+        {
+            UndoRedoOperation.UndoRedoInfo undoRedoInfo = new UndoRedoOperation.UndoRedoInfo();
+            undoRedoInfo.hexCell = cellList[i];
+            switch (brush.m_editorType)
+            {
+                case EditorType.HeightEditor:
+                    undoRedoInfo.parma = new object[] { cellList[i].Elevation };
+                    break;
+                case EditorType.WaterEditor:
+                    undoRedoInfo.parma = new object[] { cellList[i].WaterLevel };
+                    break;
+                case EditorType.EdgeEditor:
+                    undoRedoInfo.parma = new object[] { cellList[i].isStepDirection[0], cellList[i].isStepDirection[1], cellList[i].isStepDirection[2],
+         cellList[i].isStepDirection[3], cellList[i].isStepDirection[4], cellList[i].isStepDirection[5]};
+                    break;
+            }
+            undoRedoInfoList.Add(undoRedoInfo);
+        }
+
+        string name = "";
+        MeshOperation.OperationType operationType = MeshOperation.OperationType.HeightEdit;
+        switch (brush.m_editorType)
+        {
+            case EditorType.HeightEditor:
+                name = "高度编辑";
+                operationType = MeshOperation.OperationType.HeightEdit;
+                break;
+            case EditorType.WaterEditor:
+                name = "水平线编辑";
+                operationType = MeshOperation.OperationType.WaterLevelEdit;
+                break;
+            case EditorType.EdgeEditor:
+                name = "边界编辑";
+                operationType = MeshOperation.OperationType.EdgeEdit;
+                break;
+        }
+
+        MeshOperation meshOperation = new MeshOperation(operationType, name, undoRedoInfoList);
+        undoStack.Push(meshOperation);
+    }
+
 
 
     private void DrawTerrainEditorGUI(string caption)
@@ -170,11 +291,26 @@ public class TerrainEditor : Editor{
 
     private void DrawSceneObjEditorGUI(string caption)
     {
-        if (EditorUtils.DrawHeader(caption, "TerrainEditor"))
+        if (EditorUtils.DrawHeader("笔刷编辑", "TerrainEditor"))
         {
             EditorUtils.BeginContents();
+            sceneObjBrush.IsBrushSceneObject = !EditorGUILayout.Toggle("是否单个编辑", !sceneObjBrush.IsBrushSceneObject);
+            sceneObjBrush.brushRange = EditorGUILayout.IntSlider("笔刷范围", sceneObjBrush.brushRange, 1, 5);
+            sceneObjBrush.SceneObjectDensity = EditorGUILayout.IntSlider("物体密度", sceneObjBrush.SceneObjectDensity, 1, 20);
+            sceneObjBrush.SceneObjOperationType = (SceneObjBrush.OperationType)EditorGUILayout.IntPopup("操作", (int)sceneObjBrush.SceneObjOperationType,
+                SCENEOBJ_OPERATION_NAMES, SCENEOBJ_OPERATION_VALUES);
+
             EditorUtils.EndContents();
         }
+
+        if(EditorUtils.DrawHeader("场景物体编辑","TerrainEditor"))
+        {
+            //EditorGUILayout.LabelField("场景物体选择");
+            sceneObjBrush.SceneObj = EditorGUILayout.ObjectField("场景物体选择",sceneObjBrush.SceneObj, typeof(GameObject), false) as GameObject;
+            sceneObjBrush.ObjSize = EditorGUILayout.Slider("物体大小", sceneObjBrush.ObjSize, 0.0f, 10.0f);
+        }
+
+
     }
 
 

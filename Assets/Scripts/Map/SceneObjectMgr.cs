@@ -17,7 +17,7 @@ public class SceneObjectMgr : MonoBehaviour {
         sceneObjectList.Clear();
     }
 
-    public void Refresh(List<HexCell> refreshList)
+    public void Refresh()
     {
         for(int i=0;i< sceneObjectList.Count;i++)
         {
