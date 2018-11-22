@@ -27,7 +27,7 @@ public class UndoRedoOperation {
 
     public virtual void JustDoIt(UndoRedoInfo info)
     {
-        
+
     }
 
     public virtual void DoIt()
@@ -129,6 +129,18 @@ public class MaterialOperation:UndoRedoOperation
         operation = type;
     }
 
+    public override void DoIt()
+    {
+        base.DoIt();
+
+        for (int i = 0; i < refreshChunkList.Count; i++)
+        {
+            refreshChunkList[i].Refresh(MeshClass.terrainMesh);
+            refreshChunkList[i].sceneObjectMgr.Refresh();
+        }
+
+    }
+
     public override void JustDoIt(UndoRedoInfo info)
     {
         base.JustDoIt(info);
@@ -136,6 +148,14 @@ public class MaterialOperation:UndoRedoOperation
         switch(operation)
         {
             case OperationType.WholeCellEdit:
+                if(HexMetrics.instance.isEditorTexture)
+                {
+                    info.hexCell.TerrainTypeIndex = (TerrainTypes)info.parma[0];
+                }
+                else
+                {
+                    info.hexCell.color = (Color)info.parma[0];
+                }
                 break;
         }
 
@@ -158,6 +178,14 @@ public class SceneObjOperation:UndoRedoOperation
         operation = type;
     }
 
+    public override void DoIt()
+    {
+        for (int i = 0; i < undoRedoInfoList.Count; i++)
+        {
+            JustDoIt(undoRedoInfoList[i]);
+        }
+    }
+
     public override void JustDoIt(UndoRedoInfo info)
     {
         base.JustDoIt(info);
@@ -165,8 +193,21 @@ public class SceneObjOperation:UndoRedoOperation
         switch(operation)
         {
             case OperationType.AddSceneObj:
+                for(int i=0;i<info.parma.Length;i++)
+                {
+                    SceneObjectClass sceneObjectClass = info.parma[i] as SceneObjectClass;
+                    GameObjectPool.instance.InsertChild(sceneObjectClass.gameObject.name, sceneObjectClass.gameObject);
+                }
                 break;
             case OperationType.DeleteSceneObj:
+                for(int i=0;i<info.parma.Length;i++)
+                {
+                    SceneObjectClass sceneObjectClass = info.parma[i] as SceneObjectClass;
+                    GameObjectPool.instance.RemoveTarge(sceneObjectClass.gameObject.name,sceneObjectClass.gameObject);
+                    sceneObjectClass.gameObject.SetActive(true);
+                    sceneObjectClass.Refresh(false);
+                    sceneObjectClass.cell.chunkParent.sceneObjectMgr.AddSceneObject(sceneObjectClass);
+                }
                 break;
         }
 

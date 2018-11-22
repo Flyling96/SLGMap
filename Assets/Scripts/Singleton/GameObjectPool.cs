@@ -11,6 +11,18 @@ public class GameObjectPool : Singleton<GameObjectPool> {
         gameObjectPool.Clear();
     }
 
+    public void RemoveTarge(string name ,GameObject target)
+    {
+        name = name.Replace("(Clone)", "");
+        if (gameObjectPool.ContainsKey(name))
+        {
+            if(gameObjectPool[name].Contains(target))
+            {
+                gameObjectPool[name].Remove(target);
+            }
+        }
+    }
+
     public GameObject GetPoolChild(string name ,GameObject prefab)
     {
         name = name.Replace("(Clone)", "");

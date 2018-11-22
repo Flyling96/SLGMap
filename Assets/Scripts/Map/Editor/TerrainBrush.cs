@@ -685,6 +685,7 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+            TerrainEditor.UndoAdd(centerCell, m_brush);
             m_refreshChunkList.Add(centerCell.chunkParent);
             centerX = centerCell.coordinates.X;
             centerZ = centerCell.coordinates.Z;
@@ -784,6 +785,7 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
             m_brush.RefreshTarget(centerCell);
+            List<SceneObjectClass> sceneObjList = new List<SceneObjectClass>();
             if (m_brush.SceneObjOperationType == SceneObjBrush.OperationType.Add)
             {
                 if (m_brush.IsBrushSceneObject)//大量随机
@@ -827,6 +829,7 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                         tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
                         tSceneObject.tag = "SceneObject";
                         centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                        sceneObjList.Add(tSceneObject.GetComponent<SceneObjectClass>());
                     }
                 }
                 else
@@ -854,6 +857,7 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                             tSceneObject.GetComponent<BoxCollider>().center = new Vector3(0, 150, 0);
                             tSceneObject.tag = "SceneObject";
                             centerCell.chunkParent.sceneObjectMgr.AddSceneObject(tSceneObject.GetComponent<SceneObjectClass>());
+                            sceneObjList.Add(tSceneObject.GetComponent<SceneObjectClass>());
                         }
                     }
                 }
@@ -869,7 +873,7 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                         for (int x = centerX - m_brush.brushRange + 1 + l; x <= centerX + m_brush.brushRange - 1; x++)
                         {
                             HexCell cell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
-                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
+                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell, sceneObjList);
                         }
                     }
                     for (int l = 1, z = centerZ + 1; z <= centerZ + m_brush.brushRange - 1; l++, z++)
@@ -877,7 +881,7 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                         for (int x = centerX - m_brush.brushRange + 1; x <= centerX + m_brush.brushRange - 1 - l; x++)
                         {
                             HexCell cell = HexGrid.instance.GetCell(new HexCoordinates(x, z));
-                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell);
+                            cell.chunkParent.sceneObjectMgr.MinusSceneObject(cell, sceneObjList);
                         }
                     }
 
@@ -890,6 +894,7 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                     }
                 }
             }
+            TerrainEditor.UndoAdd(m_brush.SceneObjOperationType, sceneObjList);
         }
     }
 

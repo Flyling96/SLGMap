@@ -158,6 +158,34 @@ public class TerrainEditor : Editor{
         }
     }
 
+    public static void UndoAdd(SceneObjBrush.OperationType brushType,List<SceneObjectClass> sceneObjectClasses)
+    {
+        SceneObjOperation.OperationType operationType = SceneObjOperation.OperationType.AddSceneObj;
+        string name = "";
+        switch(brushType)
+        {
+            case SceneObjBrush.OperationType.Add:
+                operationType = SceneObjOperation.OperationType.AddSceneObj;
+                name = "添加场景物体";
+                break;
+            case SceneObjBrush.OperationType.Delete:
+                operationType = SceneObjOperation.OperationType.DeleteSceneObj;
+                name = "删除场景物体";
+                break;
+        }
+        List<UndoRedoOperation.UndoRedoInfo> undoRedoInfoList = new List<UndoRedoOperation.UndoRedoInfo>();
+        for (int i=0;i<sceneObjectClasses.Count;i++)
+        {
+            UndoRedoOperation.UndoRedoInfo undoRedoInfo = new UndoRedoOperation.UndoRedoInfo();
+            undoRedoInfo.hexCell = null;
+            undoRedoInfo.parma = new object[]{ sceneObjectClasses[i] };
+            undoRedoInfoList.Add(undoRedoInfo);
+        }
+
+        SceneObjOperation sceneObjOperation = new SceneObjOperation(operationType, name, undoRedoInfoList);
+        undoStack.Push(sceneObjOperation);
+
+    }
 
     public static void UndoAdd(HexCell centerCell, TerrainBrush brush)
     {
@@ -201,30 +229,52 @@ public class TerrainEditor : Editor{
                     undoRedoInfo.parma = new object[] { cellList[i].isStepDirection[0], cellList[i].isStepDirection[1], cellList[i].isStepDirection[2],
          cellList[i].isStepDirection[3], cellList[i].isStepDirection[4], cellList[i].isStepDirection[5]};
                     break;
+                case EditorType.MaterialEditor:
+                    if (HexMetrics.instance.isEditorTexture)
+                    {
+                        undoRedoInfo.parma = new object[] {cellList[i].TerrainTypeIndex};
+                    }
+                    else
+                    {
+                        undoRedoInfo.parma = new object[] { cellList[i].color };
+                    }
+                    break;
             }
             undoRedoInfoList.Add(undoRedoInfo);
         }
 
         string name = "";
-        MeshOperation.OperationType operationType = MeshOperation.OperationType.HeightEdit;
-        switch (brush.m_editorType)
+        if (brush.m_editorType == EditorType.HeightEditor ||
+           brush.m_editorType == EditorType.WaterEditor ||
+           brush.m_editorType == EditorType.EdgeEditor)
         {
-            case EditorType.HeightEditor:
-                name = "高度编辑";
-                operationType = MeshOperation.OperationType.HeightEdit;
-                break;
-            case EditorType.WaterEditor:
-                name = "水平线编辑";
-                operationType = MeshOperation.OperationType.WaterLevelEdit;
-                break;
-            case EditorType.EdgeEditor:
-                name = "边界编辑";
-                operationType = MeshOperation.OperationType.EdgeEdit;
-                break;
-        }
+            MeshOperation.OperationType operationType = MeshOperation.OperationType.HeightEdit;
+            switch (brush.m_editorType)
+            {
+                case EditorType.HeightEditor:
+                    name = "高度编辑";
+                    operationType = MeshOperation.OperationType.HeightEdit;
+                    break;
+                case EditorType.WaterEditor:
+                    name = "水平线编辑";
+                    operationType = MeshOperation.OperationType.WaterLevelEdit;
+                    break;
+                case EditorType.EdgeEditor:
+                    name = "边界编辑";
+                    operationType = MeshOperation.OperationType.EdgeEdit;
+                    break;
+            }
 
-        MeshOperation meshOperation = new MeshOperation(operationType, name, undoRedoInfoList);
-        undoStack.Push(meshOperation);
+            MeshOperation meshOperation = new MeshOperation(operationType, name, undoRedoInfoList);
+            undoStack.Push(meshOperation);
+        }
+        else if(brush.m_editorType == EditorType.MaterialEditor)
+        {
+            MaterialOperation.OperationType operationType = MaterialOperation.OperationType.WholeCellEdit;
+            name = "材质编辑";
+            MaterialOperation materialOperation = new MaterialOperation(operationType, name, undoRedoInfoList);
+            undoStack.Push(materialOperation);
+        }
     }
 
 

@@ -58,8 +58,21 @@ public class SceneObjectMgr : MonoBehaviour {
             }
         }
     }
-	// Update is called once per frame
-	void Update () {
+
+    public void MinusSceneObject(HexCell cell,List<SceneObjectClass> undoList)
+    {
+        for (int i = sceneObjectList.Count - 1; i >= 0; i--)
+        {
+            if (ReferenceEquals(sceneObjectList[i].cell, cell))
+            {
+                GameObjectPool.instance.InsertChild(sceneObjectList[i].gameObject.name, sceneObjectList[i].gameObject);
+                undoList.Add(sceneObjectList[i]);
+                sceneObjectList.RemoveAt(i);
+            }
+        }
+    }
+    // Update is called once per frame
+    void Update () {
 		
 	}
 }
