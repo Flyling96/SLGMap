@@ -400,7 +400,6 @@ public class SceneObjBrush:TerrainBrush
     {
         Add,
         Delete,
-        Refresh,
     }
 
     bool m_isBrushSceneObject = false;
@@ -566,6 +565,7 @@ public class MeshModifier:SingletonDestory<MeshModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+            TerrainEditor.redoStack.Clear();
             TerrainEditor.UndoAdd(centerCell, m_brush);
             m_refreshChunkList.Add(centerCell.chunkParent);
             m_refreshCellList.Add(centerCell);
@@ -603,6 +603,9 @@ public class MeshModifier:SingletonDestory<MeshModifier>
                     //StartCoroutine(WaitMesh(m_refreshChunkList[i]));
                 }
             }
+
+            //将修改后的也压入undo栈中，为压入redo栈做准备
+            TerrainEditor.UndoAdd(centerCell, m_brush);
 
 
         }
@@ -685,6 +688,7 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+            TerrainEditor.redoStack.Clear();
             TerrainEditor.UndoAdd(centerCell, m_brush);
             m_refreshChunkList.Add(centerCell.chunkParent);
             centerX = centerCell.coordinates.X;
@@ -709,6 +713,9 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
             {
                 m_refreshChunkList[i].Refresh();
             }
+
+            //将修改后的也压入undo栈中，为压入redo栈做准备
+            TerrainEditor.UndoAdd(centerCell, m_brush);
 
         }
     }
@@ -894,7 +901,9 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                     }
                 }
             }
+            TerrainEditor.redoStack.Clear();
             TerrainEditor.UndoAdd(m_brush.SceneObjOperationType, sceneObjList);
+            TerrainEditor.UndoAdd((SceneObjBrush.OperationType)(1 - (int)m_brush.SceneObjOperationType), sceneObjList);
         }
     }
 

@@ -32,7 +32,7 @@ public class TerrainEditor : Editor{
     string[] MATERIAL_TEXTURE_NAMES = { "绿地", "泥地", "雪地", "沙地", "石地" };
     int[] MATERIAL_TEXTURE_VALUES = { 0, 1, 2, 3, 4, 5 };
 
-    string[] SCENEOBJ_OPERATION_NAMES = { "增加", "删除", "修改" };
+    string[] SCENEOBJ_OPERATION_NAMES = { "增加", "删除"};
     int[] SCENEOBJ_OPERATION_VALUES = { 0, 1, 2 };
 
     public HexEdgeMesh hexEdgeMesh;
@@ -48,6 +48,12 @@ public class TerrainEditor : Editor{
 
     TerrainBrush currentBrush;
 
+    void Init()
+    {
+        undoStack.Clear();
+        redoStack.Clear();
+    }
+
     private void Awake()
     {
         heightBrush = new HeightBrush(HexGrid.instance.HexEditMesh);
@@ -55,6 +61,7 @@ public class TerrainEditor : Editor{
         sceneObjBrush = new SceneObjBrush(HexGrid.instance.HexEditMesh);
         edgeBrush = new EdgeBrush( HexGrid.instance.HexEditMesh);
         waterBrush = new WaterBrush(HexGrid.instance.HexEditMesh);
+        Init();
     }
 
     public override void OnInspectorGUI()
@@ -138,25 +145,38 @@ public class TerrainEditor : Editor{
             }
         }
     }
+    public static bool isUndoTopPop = false;
 
     private void DrawOperationMgrUI()
     {
         if(EditorUtils.DrawHeader("操作管理","TerrainEditor"))
         {
-            if(GUILayout.Button("Undo"))
+            if(GUILayout.Button("Undo" +"( "+ (undoStack.Count > 0 ? undoStack.Peek().name : "无") +" )"))
             {
                 if (undoStack.Count > 0)
                 {
+                    isUndoTopPop = true;
                     UndoRedoOperation undoRedoOperation = undoStack.Pop();
+                    redoStack.Push(undoRedoOperation);
+                    undoRedoOperation = undoStack.Pop();
                     undoRedoOperation.DoIt();
+                    redoStack.Push(undoRedoOperation);
                 }
             }
-            if(GUILayout.Button("Redo"))
+            if(GUILayout.Button("Redo" + "( " + (redoStack.Count > 0?redoStack.Peek().name:"无") + " )"))
             {
-
+                if (redoStack.Count > 0)
+                {
+                    UndoRedoOperation undoRedoOperation = redoStack.Pop();
+                    undoStack.Push(undoRedoOperation);
+                    undoRedoOperation = redoStack.Pop();
+                    undoRedoOperation.DoIt();
+                    undoStack.Push(undoRedoOperation);
+                }
             }
         }
     }
+
 
     public static void UndoAdd(SceneObjBrush.OperationType brushType,List<SceneObjectClass> sceneObjectClasses)
     {
@@ -166,11 +186,11 @@ public class TerrainEditor : Editor{
         {
             case SceneObjBrush.OperationType.Add:
                 operationType = SceneObjOperation.OperationType.AddSceneObj;
-                name = "添加场景物体";
+                name = "删除场景物体";
                 break;
             case SceneObjBrush.OperationType.Delete:
                 operationType = SceneObjOperation.OperationType.DeleteSceneObj;
-                name = "删除场景物体";
+                name = "添加场景物体";
                 break;
         }
         List<UndoRedoOperation.UndoRedoInfo> undoRedoInfoList = new List<UndoRedoOperation.UndoRedoInfo>();
