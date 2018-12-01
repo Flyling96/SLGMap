@@ -16,6 +16,8 @@ public class UIManage : Singleton<UIManage> {
     public Button roundButton = null;
     public Text roundCount = null;
 
+    public bool isEditor = true;
+
     private void Start()
     {
         Init();

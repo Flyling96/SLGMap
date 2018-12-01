@@ -27,7 +27,7 @@ public class Singleton<T>: BaseSingleton where T: BaseSingleton
                         GameObject singleton = new GameObject();
                         _instance = singleton.AddComponent<T>();
                         singleton.name = "(singleton)" + typeof(T).ToString();
-                        if(!HexTerrain.isEditor)
+                        if(!HexMetrics.instance.isEditor)
                         DontDestroyOnLoad(singleton);
                     }
                 }

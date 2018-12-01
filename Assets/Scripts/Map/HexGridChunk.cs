@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class HexGridChunk : MonoBehaviour {
 
     int width = 5;
@@ -137,4 +141,27 @@ public class HexGridChunk : MonoBehaviour {
         }
         return sceneObjectClassList;
     }
+
+    //保存chunk动态建立的对象到指定目录，使这些对象与资源关联起来
+    public void SaveChunkAssets(string path)
+    {
+        SaveMesh(path);
+        SaveMaterial(path);
+    }
+
+    public void SaveMesh(string path)
+    {
+        string fileName = path + gameObject.name;
+        AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName +"_waterMesh.asset");
+        AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
+        AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
+    }
+
+    public void SaveMaterial(string path)
+    {
+        string fileName = path + gameObject.name + "_mat.mat";
+        AssetDatabase.CreateAsset(GetComponent<MeshRenderer>().sharedMaterial, fileName);
+    }
+
+   
 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class HexMetrics: Singleton<HexMetrics>
+public class HexMetrics: SingletonDestory<HexMetrics>
 {
     public int chunkWidth = 5;
     public int chunkHeight = 5;
@@ -33,6 +33,7 @@ public class HexMetrics: Singleton<HexMetrics>
     //偏移中心点的各点的向量
     Vector3[] corners = null;
 
+    public bool isEditor = false;
 
     public void Init()
     {

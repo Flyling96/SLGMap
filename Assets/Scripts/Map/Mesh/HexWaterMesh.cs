@@ -10,6 +10,7 @@ public class HexWaterMesh : HexMesh {
     }
     private void Start()
     {
+        if(hexMesh!=null)
         hexMesh.name = "Hex Water Mesh";
     }
 

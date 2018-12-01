@@ -3,6 +3,9 @@ using UnityEngine.UI;
 using System.IO;
 using System.Collections.Generic;
 using System.Collections;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class HexGrid : SingletonDestory<HexGrid> {
 
@@ -43,6 +46,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
         }
     }
 
+    [HideInInspector]
 	public HexCell[] cells;
 
     List<HexCell> allCellList;
@@ -114,7 +118,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
     //新建地图
     public void NewMap()
     {
-        if (!HexTerrain.isEditor)
+        if (!HexMetrics.instance.isEditor)
         {
             gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
             gridCanvas.transform.SetParent(transform);
@@ -166,6 +170,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
             {
                 HexGridChunk chunk = chunks[i++] = Instantiate(gridChunkPerfab) as HexGridChunk;
                 //chunk.transform.SetParent(GameObject.Find("Map").transform);
+                chunk.name = "HexChunk_" + k.ToString("000") + "_" + j.ToString("000"); 
                 chunk.transform.SetParent(transform);
                 chunk.transform.localPosition = new Vector3(chunk.transform.localPosition.x, 0, chunk.transform.localPosition.z);
             }
@@ -365,7 +370,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
 			}
 		}
 
-        if (!HexTerrain.isEditor)
+        if (!HexMetrics.instance.isEditor)
         {
             Text label = Instantiate<Text>(cellLabelPrefab);
             label.rectTransform.SetParent(gridCanvas.transform, false);
@@ -418,5 +423,52 @@ public class HexGrid : SingletonDestory<HexGrid> {
         }
 
         return cells;
+    }
+
+    public void SaveHexChunkAsset(string mapName)
+    {
+        string path = Application.dataPath + "/MapAssets/" + mapName;
+        if(!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+
+        for(int i=0;i<chunks.Length;i++)
+        {
+            HexGridChunk chunk = chunks[i];
+            string chunkPath = path + "/" + chunk.name;
+            if(!Directory.Exists(chunkPath))
+            {
+                Directory.CreateDirectory(chunkPath);
+            }
+
+            chunk.SaveChunkAssets(chunkPath);
+
+            string info = "保存地形Chunk数据:" + (i + 1) + "/" + (int)chunks.Length;
+            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (int)chunks.Length);
+        }
+        EditorUtility.ClearProgressBar();
+        //刷新资源后新建的资源才能通过AssetDatabase加载
+        AssetDatabase.Refresh();
+
+        for(int i=0;i<chunks.Length;i++)
+        {
+            HexGridChunk chunk = chunks[i];
+            string chunkPath = path + "/" + chunk.name;
+            if (!Directory.Exists(chunkPath))
+            {
+                Directory.CreateDirectory(chunkPath);
+            }
+
+            string chunkPrefabPath = chunkPath + "/" + chunk.name + "_prefab.prefab";
+            PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
+
+            string info = "保存地形Chunk Prefab:" + (i + 1) + "/" + (int)chunks.Length;
+            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (int)chunks.Length);
+        }
+
+        EditorUtility.ClearProgressBar();
+
+
     }
 }

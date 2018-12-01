@@ -11,6 +11,7 @@ public class HexWaterEdgeMesh : HexMesh
     }
     private void Start()
     {
+        if(hexMesh!=null)
         hexMesh.name = "Hex Water Edge Mesh";
     }
 

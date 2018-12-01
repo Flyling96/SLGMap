@@ -56,7 +56,9 @@
 		gridUV.x *= 1 / (4 * 8.66025404);
 		gridUV.y *= 1 / (2 * 15.0);
 		fixed4 grid = tex2D(_GridTex, gridUV);
+
 		o.Albedo = c.rgb * grid * _Color;
+		//o.Albedo = IN.color;
 		o.Metallic = _Metallic;
 		o.Smoothness = _Glossiness;
 		o.Alpha = c.a;

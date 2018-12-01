@@ -8,11 +8,9 @@ using System.IO;
 public class HexTerrain : MonoBehaviour
 {
 
-    public static bool isEditor = true;
-
     void Awake()
     {
-        isEditor = true;
+        HexMetrics.instance.isEditor = true;
         ConfigDateManage.instance.InitData();
         HexMetrics.instance.Init();
         LoadMap("map001");

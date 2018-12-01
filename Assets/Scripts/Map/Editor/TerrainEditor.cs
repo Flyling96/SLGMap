@@ -151,7 +151,9 @@ public class TerrainEditor : Editor{
     {
         if(EditorUtils.DrawHeader("操作管理","TerrainEditor"))
         {
-            if(GUILayout.Button("Undo" +"( "+ (undoStack.Count > 0 ? undoStack.Peek().name : "无") +" )"))
+            limitStackCount = EditorGUILayout.IntSlider("栈数限制", limitStackCount, 5, 100);
+
+            if (GUILayout.Button("Undo" +"( "+ (undoStack.Count > 0 ? undoStack.Peek().name : "无") +" )"))
             {
                 if (undoStack.Count > 0)
                 {
@@ -177,6 +179,29 @@ public class TerrainEditor : Editor{
         }
     }
 
+    static int limitStackCount = 30;
+
+    static void LimitStackCount()
+    {
+        Stack<UndoRedoOperation> tmpStack = new Stack<UndoRedoOperation>();
+        if(undoStack.Count> limitStackCount * 2)
+        {
+            while(undoStack.Count>0)
+            {
+                tmpStack.Push(undoStack.Pop());
+            }
+
+            while(tmpStack.Count> limitStackCount * 2)
+            {
+                tmpStack.Pop();
+            }
+
+            while(tmpStack.Count>0)
+            {
+                undoStack.Push(tmpStack.Pop());
+            }
+        }
+    }
 
     public static void UndoAdd(SceneObjBrush.OperationType brushType,List<SceneObjectClass> sceneObjectClasses)
     {
@@ -204,6 +229,7 @@ public class TerrainEditor : Editor{
 
         SceneObjOperation sceneObjOperation = new SceneObjOperation(operationType, name, undoRedoInfoList);
         undoStack.Push(sceneObjOperation);
+        LimitStackCount();
 
     }
 
@@ -295,6 +321,7 @@ public class TerrainEditor : Editor{
             MaterialOperation materialOperation = new MaterialOperation(operationType, name, undoRedoInfoList);
             undoStack.Push(materialOperation);
         }
+        LimitStackCount();
     }
 
 
