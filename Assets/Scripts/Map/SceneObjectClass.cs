@@ -31,7 +31,7 @@ public class SceneObjectClass : MonoBehaviour {
         cell = centerCell;
         //sceneObjectInfo = 
 
-        Vector3 center = cell.Position;
+        Vector3 center = cell.LocalPosition;
 
         EdgeVertices e1 = new EdgeVertices(
             center + HexMetrics.instance.GetFirstSolidCorner(direction),
@@ -76,7 +76,7 @@ public class SceneObjectClass : MonoBehaviour {
         {
             if (ToolClass.instance.IsInside(point, pointList))
             {
-                position = new Vector3(position.x, cell.Position.y, position.z);
+                position = new Vector3(position.x, cell.LocalPosition.y, position.z);
             }
             else
             {

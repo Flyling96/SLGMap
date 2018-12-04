@@ -33,7 +33,7 @@ public class HexWaterEdgeMesh : HexMesh
 
     void TrangulateWaterEdge(HexCell cell)
     {
-        Vector3 center = cell.Position;
+        Vector3 center = cell.LocalPosition;
         for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             HexCell neighbor = cell.GetNeighbor(d);

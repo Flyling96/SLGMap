@@ -32,7 +32,7 @@ public class HexWaterMesh : HexMesh {
 
     void TrangulateWater(HexCell cell)
     {
-        Vector3 center = cell.Position;
+        Vector3 center = cell.LocalPosition;
         for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             TrangulateWater(d, cell, center);

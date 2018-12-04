@@ -68,7 +68,7 @@ public class HexTerrainMesh : HexMesh {
         {
             return;
         }
-        Vector3 center = cell.Position;
+        Vector3 center = cell.LocalPosition;
         //Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
         //Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
 
@@ -104,7 +104,7 @@ public class HexTerrainMesh : HexMesh {
         }
 
         Vector3 bridge = HexMetrics.instance.GetBridge(direction);
-        bridge.y = neighbor.Position.y - cell.Position.y;
+        bridge.y = neighbor.LocalPosition.y - cell.LocalPosition.y;
         EdgeVertices e2 = new EdgeVertices(e1.v1 + bridge, e1.v4 + bridge);
 
 
@@ -124,7 +124,7 @@ public class HexTerrainMesh : HexMesh {
         if (direction <= HexDirection.E && nextNeighbor != null)
         {
             Vector3 v5 = e1.v4 + HexMetrics.instance.GetBridge(direction.Next());//获取桥对面的点
-            v5.y = nextNeighbor.Position.y;//设置桥对面的点的y
+            v5.y = nextNeighbor.LocalPosition.y;//设置桥对面的点的y
 
             if (cell.Elevation <= neighbor.Elevation)
             {

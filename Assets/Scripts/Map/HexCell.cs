@@ -148,11 +148,19 @@ public class HexCell : MonoBehaviour {
         }
     }
 
-    public Vector3 Position
+    public Vector3 LocalPosition
     {
         get
         {
             return transform.localPosition;
+        }
+    }
+
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
         }
     }
 

@@ -146,12 +146,12 @@ public class HexGridChunk : MonoBehaviour {
     public void SaveChunkAssets(string path)
     {
         SaveMesh(path);
-        SaveMaterial(path);
+        //SaveMaterial(path);
     }
 
     public void SaveMesh(string path)
     {
-        string fileName = path + gameObject.name;
+        string fileName = path +"/"+ gameObject.name;
         AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName +"_waterMesh.asset");
         AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
         AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
@@ -159,8 +159,8 @@ public class HexGridChunk : MonoBehaviour {
 
     public void SaveMaterial(string path)
     {
-        string fileName = path + gameObject.name + "_mat.mat";
-        AssetDatabase.CreateAsset(GetComponent<MeshRenderer>().sharedMaterial, fileName);
+        string fileName = path + "/" + gameObject.name + "_mat.mat";
+        AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshRenderer>().sharedMaterial, fileName);
     }
 
    

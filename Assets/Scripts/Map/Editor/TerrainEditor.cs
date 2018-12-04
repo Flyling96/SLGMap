@@ -84,7 +84,7 @@ public class TerrainEditor : Editor{
                 break;
         }
 
-        //DrawTerrainMgrUI();
+        DrawTerrainMgrUI();
         DrawOperationMgrUI();
 
 
@@ -136,6 +136,7 @@ public class TerrainEditor : Editor{
 
             if(GUILayout.Button("保存地形", GUILayout.MaxWidth(100)))
             {
+                HexGrid.instance.SaveHexChunkAsset("map001");
                 Debug.Log(2);
             }
 

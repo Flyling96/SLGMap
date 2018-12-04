@@ -28,7 +28,7 @@ public class HexRoadMesh : HexMesh {
 
     void TrangulateRoad(HexCell cell)
     {
-        Vector3 center = cell.Position;
+        Vector3 center = cell.LocalPosition;
         for (HexDirection d = HexDirection.NE; d <= HexDirection.NW; d++)
         {
             if(cell.IsDrawPreviousRoadMesh(d))
@@ -69,7 +69,7 @@ public class HexRoadMesh : HexMesh {
         {
             return;
         }
-        Vector3 center = cell.Position;
+        Vector3 center = cell.LocalPosition;
         //Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
         //Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
 

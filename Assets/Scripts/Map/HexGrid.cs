@@ -224,6 +224,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
             {
                 Vector3 itemPosition = chunks[i].transform.TransformPoint(itemClassList[j].position);
                 itemClassList[j].cell = GetCell(itemPosition);
+                if (itemClassList[j].cell == null) continue;
                 itemClassList[j].direction = GetPointDirection(new Vector2(itemPosition.x - itemClassList[j].cell.transform.position.x, itemPosition.z - itemClassList[j].cell.transform.position.z));
                 sceneObject = GameObject.Instantiate(Resources.Load(itemClassList[j].sceneObjectInfo.modelPath) as GameObject);
                 sceneObject.AddComponent<SceneObjectClass>();
@@ -250,6 +251,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
 		position = transform.InverseTransformPoint(position);//坐标转换
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * cellCountWidth + coordinates.Z / 2;
+        if (index<0 || index >= cells.Length) return null;
 		return cells[index];
 	}
 
@@ -394,6 +396,10 @@ public class HexGrid : SingletonDestory<HexGrid> {
 
         int cellOfChunkX = x - x / width * width;
         int cellOfChunkZ = z - z / height * height;
+        if(cellOfChunkZ * width + cellOfChunkX == 0)
+        {
+            tmpChunk.transform.position = cell.transform.position;
+        }
         tmpChunk.AddCell(cellOfChunkZ * width + cellOfChunkX, cell);
         cell.SetParentChunk(tmpChunk);
     }
@@ -427,7 +433,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
 
     public void SaveHexChunkAsset(string mapName)
     {
-        string path = Application.dataPath + "/MapAssets/" + mapName;
+        string path = "Assets/MapAssets/" + mapName;
         if(!Directory.Exists(path))
         {
             Directory.CreateDirectory(path);
@@ -445,7 +451,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
             chunk.SaveChunkAssets(chunkPath);
 
             string info = "保存地形Chunk数据:" + (i + 1) + "/" + (int)chunks.Length;
-            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (int)chunks.Length);
+            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
         }
         EditorUtility.ClearProgressBar();
         //刷新资源后新建的资源才能通过AssetDatabase加载
@@ -464,7 +470,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
             PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
 
             string info = "保存地形Chunk Prefab:" + (i + 1) + "/" + (int)chunks.Length;
-            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (int)chunks.Length);
+            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
         }
 
         EditorUtility.ClearProgressBar();

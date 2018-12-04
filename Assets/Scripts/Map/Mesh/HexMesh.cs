@@ -98,7 +98,7 @@ public class HexMesh : MonoBehaviour {
         {
             return;
         }
-		Vector3 center = cell.Position;
+		Vector3 center = cell.LocalPosition;
         //Vector3 v1 = center + HexMetrics.GetFirstSolidCorner(direction);   //形成面的内六边形顶点
         //Vector3 v2 = center + HexMetrics.GetSecondSolidCorner(direction);
 
@@ -150,7 +150,7 @@ public class HexMesh : MonoBehaviour {
 		}
 
         Vector3 bridge = HexMetrics.instance.GetBridge(direction);
-        bridge.y = neighbor.Position.y - cell.Position.y;
+        bridge.y = neighbor.LocalPosition.y - cell.LocalPosition.y;
         EdgeVertices e2 = new EdgeVertices( e1.v1 + bridge,e1.v4 + bridge);
 
 
@@ -167,7 +167,7 @@ public class HexMesh : MonoBehaviour {
 		HexCell nextNeighbor = cell.GetNeighbor(direction.Next());
 		if (direction <= HexDirection.E && nextNeighbor != null) {
 			Vector3 v5 = e1.v4 + HexMetrics.instance.GetBridge(direction.Next());//获取桥对面的点
-			v5.y = nextNeighbor.Position.y;//设置桥对面的点的y
+			v5.y = nextNeighbor.LocalPosition.y;//设置桥对面的点的y
 
 			if (cell.Elevation <= neighbor.Elevation) {
 				if (cell.Elevation <= nextNeighbor.Elevation) {
@@ -460,9 +460,11 @@ public class HexMesh : MonoBehaviour {
     //对地图进行不规则处理
     public Vector3 Perturb(Vector3 position)
     {
-        Vector4 sample = HexMetrics.instance.SampleNoise(position);
+        //用世界坐标进行取样
+        Vector3 newPostion =  transform.TransformPoint(position);
+        Vector4 sample = HexMetrics.instance.SampleNoise(newPostion);
         position.x += (sample.x * 2f - 1f)* HexMetrics.instance.cellPerturbStrength;
-       // position.y += (sample.y * 2f - 1f) * HexMetrics.cellPerturbStrength;  //不对y坐标进行微扰，改做对阶梯高度进行微扰
+        // position.y += (sample.y * 2f - 1f) * HexMetrics.cellPerturbStrength;  //不对y坐标进行微扰，改做对阶梯高度进行微扰
         position.z += (sample.z * 2f - 1f) * HexMetrics.instance.cellPerturbStrength;
         return position;
     }
