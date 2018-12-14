@@ -7,6 +7,7 @@ public class HexWaterMesh : HexMesh {
     private void Awake()
     {
         meshClass = MeshClass.waterEdgeMesh;
+        Init();
     }
     private void Start()
     {

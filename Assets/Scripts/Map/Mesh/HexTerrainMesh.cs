@@ -14,15 +14,17 @@ public enum TerrainTypes
 
 public class HexTerrainMesh : HexMesh {
 
-
-
     private void Awake()
     {
         meshClass = MeshClass.terrainMesh;
+        Init();
     }
     private void Start()
     {
-        hexMesh.name = "Hex Terrain Mesh";
+        if (hexMesh != null)
+        {
+            hexMesh.name = "Hex Terrain Mesh";
+        }
     }
 
     public override void TrangulateByMeshClass(HexCell[] cells)

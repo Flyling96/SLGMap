@@ -7,6 +7,8 @@ public class SceneObjectClass : MonoBehaviour {
 	
     public SceneObjectInfo sceneObjectInfo;
 
+    string modelName = "";
+
     public Vector3 position;
 
     public Quaternion rotation;
@@ -16,12 +18,32 @@ public class SceneObjectClass : MonoBehaviour {
     public HexCell cell = null;
 
     List<Vector2> pointList = new List<Vector2>(); //不规则六边形的边顶点
-   // List<List<Vector2>> edgePointList = new List<List<Vector2>>();
+                                                   // List<List<Vector2>> edgePointList = new List<List<Vector2>>();
 
-
-
-    public void SetInfo(Vector3 tPosition, Quaternion tRotation, HexDirection dir,HexCell centerCell)
+    public SceneObjectClass Clone()
     {
+        SceneObjectClass temp = new SceneObjectClass();
+        temp.position = position;
+        temp.rotation = rotation;
+        temp.modelName = modelName;
+        return temp;
+    }
+
+    public bool isSame(SceneObjectClass other)
+    {
+        if( modelName == other.modelName &&
+            position == other.position &&
+            rotation == other.rotation)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    public void SetInfo(Vector3 tPosition, Quaternion tRotation, HexDirection dir,HexCell centerCell, string name ="")
+    {
+        modelName = name;
         pointList.Clear();
         //edgePointList.Clear();
 

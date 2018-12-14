@@ -21,16 +21,15 @@ public class HexGrid : SingletonDestory<HexGrid> {
     int cellCountHeight = 0;
     int cellCountWidth = 0;
 
-	public Color defaultColor = Color.white;
-
     //不规则噪声
     public Texture2D noiseSource;
 
+    HexMap mapPrefab;
     HexGridChunk gridChunkPerfab;
+    HexCell cellPrefab;
+    Text cellLabelPrefab;
 
     private HexEdgeMesh hexEdgeMesh;
-    public HexCell cellPrefab;
-	public Text cellLabelPrefab;
 
     public HexEdgeMesh HexEditMesh
     {
@@ -46,6 +45,8 @@ public class HexGrid : SingletonDestory<HexGrid> {
         }
     }
 
+
+    public HexMap[] maps;
     [HideInInspector]
 	public HexCell[] cells;
 
@@ -109,7 +110,8 @@ public class HexGrid : SingletonDestory<HexGrid> {
 
     IEnumerator waitInstantiate()
     {
-        while(cellPrefab==null||cellLabelPrefab==null||noiseSource==null)
+        while(cellPrefab==null||cellLabelPrefab==null||noiseSource==null
+            ||gridChunkPerfab == null || mapPrefab == null)
         {
             yield return null;
         }
@@ -123,14 +125,14 @@ public class HexGrid : SingletonDestory<HexGrid> {
             gridCanvas = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Grid Canvas") as GameObject)).GetComponent<Canvas>();
             gridCanvas.transform.SetParent(transform);
         }
-
+        mapPrefab = (Instantiate(Resources.Load("Prefabs/Hex Map") as GameObject)).GetComponent<HexMap>();
+        mapPrefab.name = "HexMap";
         cellPrefab = (Instantiate(Resources.Load("Prefabs/Hex Cell") as GameObject)).GetComponent<HexCell>();
-        cellPrefab.name = "Hex Cell";
+        cellPrefab.name = "HexCell";
         cellLabelPrefab = (Instantiate(Resources.Load("Prefabs/UIPrefabs/Hex Cell Label") as GameObject)).GetComponent<Text>();
-        cellLabelPrefab.name = "Hex Cell Label";
+        cellLabelPrefab.name = "HexCellLabel";
         noiseSource = Resources.Load("Texture/Noise") as Texture2D;
 
-        StartCoroutine(waitInstantiate());
         //chunks = new HexGridChunk[chunkCountX * chunkCountZ];
 
         if (HexMetrics.instance.isEditorTexture)
@@ -153,8 +155,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
             }
         }
 
-        HexMetrics.noiseSource = noiseSource;
-        chunks = new HexGridChunk[chunkCountX * chunkCountZ];
+        HexMetrics.instance.noiseSource = noiseSource;
         width = HexMetrics.instance.chunkWidth;
         height = HexMetrics.instance.chunkHeight;
         oldCountX = chunkCountX;
@@ -162,30 +163,59 @@ public class HexGrid : SingletonDestory<HexGrid> {
         cellCountWidth = width * chunkCountX;
         cellCountHeight = height * chunkCountZ;
 
-        cells = new HexCell[cellCountWidth * cellCountHeight];
+        maps = new HexMap[1];
+        maps[0] = Instantiate(mapPrefab) as HexMap;
+        maps[0].name = "Hex Map 001";
+        maps[0].transform.localPosition = Vector3.zero;
+        maps[0].transform.localRotation = Quaternion.Euler(0, 0, 0);
+        maps[0].SetMapSize(chunkCountX, chunkCountZ);
+        maps[0].NewMap(cellPrefab, cellLabelPrefab, gridChunkPerfab);
+        cells = maps[0].cells;
+        chunks = maps[0].chunks;
 
-        for (int j = 0, i = 0; j < chunkCountZ; j++)
+        //cells = new HexCell[cellCountWidth * cellCountHeight];
+
+        //for (int j = 0, i = 0; j < chunkCountZ; j++)
+        //{
+        //    for (int k = 0; k < chunkCountX; k++)
+        //    {
+        //        HexGridChunk chunk = chunks[i++] = Instantiate(gridChunkPerfab) as HexGridChunk;
+        //        //chunk.transform.SetParent(GameObject.Find("Map").transform);
+        //        chunk.name = "HexChunk_" + k.ToString("000") + "_" + j.ToString("000"); 
+        //        chunk.transform.SetParent(transform);
+        //        chunk.transform.localPosition = new Vector3(chunk.transform.localPosition.x, 0, chunk.transform.localPosition.z);
+        //    }
+        //}
+
+
+        //for (int j = 0, i = 0; j < cellCountHeight; j++)
+        //{
+        //    for (int k = 0; k < cellCountWidth; k++)
+        //    {
+        //        CreateCell(k, j, i++);
+        //    }
+        //}
+
+        //Refresh();
+    }
+
+    public void MapInit()
+    {
+        if(noiseSource == null)
         {
-            for (int k = 0; k < chunkCountX; k++)
-            {
-                HexGridChunk chunk = chunks[i++] = Instantiate(gridChunkPerfab) as HexGridChunk;
-                //chunk.transform.SetParent(GameObject.Find("Map").transform);
-                chunk.name = "HexChunk_" + k.ToString("000") + "_" + j.ToString("000"); 
-                chunk.transform.SetParent(transform);
-                chunk.transform.localPosition = new Vector3(chunk.transform.localPosition.x, 0, chunk.transform.localPosition.z);
-            }
+            noiseSource = Resources.Load("Texture/Noise") as Texture2D;
+            HexMetrics.instance.noiseSource = noiseSource;
         }
 
-
-        for (int j = 0, i = 0; j < cellCountHeight; j++)
+        if (maps.Length > 0)
         {
-            for (int k = 0; k < cellCountWidth; k++)
-            {
-                CreateCell(k, j, i++);
-            }
+            cells = maps[0].cells;
+            chunks = maps[0].chunks;
+            cellCountHeight = maps[0].cellCountHeight;
+            cellCountWidth = maps[0].cellCountWidth;
+            chunkCountX = maps[0].chunkCountX;
+            chunkCountZ = maps[0].chunkCountZ;
         }
-
-        Refresh();
     }
 
     public void Save(BinaryWriter writer)
@@ -198,7 +228,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
             cells[i].Save(writer);
         }
 
-        for(int i=0;i< chunks.Length;i++)
+        for (int i = 0; i < chunks.Length; i++)
         {
             chunks[i].Save(writer);
         }
@@ -339,7 +369,31 @@ public class HexGrid : SingletonDestory<HexGrid> {
        // hexMesh.Triangulate(cells);
 	}
 
-	void CreateCell (int x, int z, int i) {
+    public void ChunkInit()
+    {
+        for (int j = 0, i = 0; j < chunkCountZ; j++)
+        {
+            for (int k = 0; k < chunkCountX; k++)
+            {
+                chunks[i++].Init();
+            }
+
+        }
+    }
+
+    public void ChunkMeshInit()
+    {
+        for (int j = 0, i = 0; j < chunkCountZ; j++)
+        {
+            for (int k = 0; k < chunkCountX; k++)
+            {
+                chunks[i++].MeshInit();
+            }
+
+        }
+    }
+
+    void CreateCell (int x, int z, int i) {
         Vector3 position;
 		position.x = (x + z * 0.5f - z / 2) * (HexMetrics.instance.innerRadius * 2f);
 		position.y = 0f;
@@ -350,7 +404,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
 		cell.transform.SetParent(transform, false);
 		cell.transform.localPosition = position;
 		cell.coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-		cell.color = defaultColor;
+		cell.color = HexMetrics.instance.defaultColor;
        
 
         //设置邻居
@@ -431,6 +485,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
         return cells;
     }
 
+
     public void SaveHexChunkAsset(string mapName)
     {
         string path = "Assets/MapAssets/" + mapName;
@@ -439,42 +494,71 @@ public class HexGrid : SingletonDestory<HexGrid> {
             Directory.CreateDirectory(path);
         }
 
-        for(int i=0;i<chunks.Length;i++)
+        for (int j = 0; j < maps.Length; j++)
         {
-            HexGridChunk chunk = chunks[i];
-            string chunkPath = path + "/" + chunk.name;
-            if(!Directory.Exists(chunkPath))
+            for (int i = 0; i < maps[j].chunks.Length; i++)
             {
-                Directory.CreateDirectory(chunkPath);
+                HexGridChunk chunk = maps[j].chunks[i];
+                string chunkPath = path + "/" + chunk.name;
+                if (!Directory.Exists(chunkPath))
+                {
+                    Directory.CreateDirectory(chunkPath);
+                }
+
+                chunk.SaveChunkAssets(chunkPath);
+
+                string info = "保存地形Chunk数据:" + (i + 1) + "/" + chunks.Length;
+                EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
+            }
+            EditorUtility.ClearProgressBar();
+            //刷新资源后新建的资源才能通过AssetDatabase加载
+            AssetDatabase.Refresh();
+
+            for (int i = 0; i < maps[j].chunks.Length; i++)
+            {
+                HexGridChunk chunk = maps[j].chunks[i];
+                string chunkPath = path + "/" + chunk.name;
+                if (!Directory.Exists(chunkPath))
+                {
+                    Directory.CreateDirectory(chunkPath);
+                }
+
+                string chunkPrefabPath = chunkPath + "/" + chunk.name + "_prefab.prefab";
+                if(!File.Exists(chunkPrefabPath))
+                {
+                    PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
+                }
+                else
+                {
+                    if (!chunk.sceneObjectMgr.isChange() && !chunk.isMeshChange) continue;
+                    Object prefab = PrefabUtility.GetPrefabParent(chunk.gameObject);
+                    PrefabUtility.ReplacePrefab(chunk.gameObject, prefab, ReplacePrefabOptions.ConnectToPrefab);
+                }
+
+                string info = "保存地形Chunk Prefab:" + (i + 1) + "/" + chunks.Length;
+                EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
             }
 
-            chunk.SaveChunkAssets(chunkPath);
 
-            string info = "保存地形Chunk数据:" + (i + 1) + "/" + (int)chunks.Length;
-            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
-        }
-        EditorUtility.ClearProgressBar();
-        //刷新资源后新建的资源才能通过AssetDatabase加载
-        AssetDatabase.Refresh();
 
-        for(int i=0;i<chunks.Length;i++)
-        {
-            HexGridChunk chunk = chunks[i];
-            string chunkPath = path + "/" + chunk.name;
-            if (!Directory.Exists(chunkPath))
+            string str = "保存地形HexMap Prefab:" + j +"/"+ maps.Length;
+            EditorUtility.DisplayProgressBar("保存地形", str, j/(float)maps.Length);
+            string parentPath = path + "/" + maps[j].name + "_prefab.prefab";
+            if (!File.Exists(parentPath))
             {
-                Directory.CreateDirectory(chunkPath);
+                PrefabUtility.CreatePrefab(parentPath, maps[j].gameObject, ReplacePrefabOptions.ConnectToPrefab);
+            }
+            else
+            {
+                Object prefab = PrefabUtility.GetPrefabParent(maps[j].gameObject);
+                PrefabUtility.ReplacePrefab(maps[j].gameObject, prefab, ReplacePrefabOptions.ConnectToPrefab);
             }
 
-            string chunkPrefabPath = chunkPath + "/" + chunk.name + "_prefab.prefab";
-            PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
-
-            string info = "保存地形Chunk Prefab:" + (i + 1) + "/" + (int)chunks.Length;
-            EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
+            EditorUtility.ClearProgressBar();
         }
-
-        EditorUtility.ClearProgressBar();
 
 
     }
+
+
 }

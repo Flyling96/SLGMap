@@ -13,29 +13,71 @@ public enum MeshClass
 public class HexMesh : MonoBehaviour {
 
     public bool isUseMap = false;//不使用贴图就是指使用颜色
-
+    [SerializeField]
     protected Mesh hexMesh;
+
     public MeshClass meshClass = MeshClass.terrainMesh;
-    static List<Vector3> vertices = new List<Vector3>();
-    static List<Vector3> terrainTypes = new List<Vector3>();
-    static List<Color> colors = new List<Color>();
-    static List<int> triangles = new List<int>();
-    static List<Vector2> uvs = new List<Vector2>();
+    List<Vector3> vertices = new List<Vector3>();
+    List<Vector3> terrainTypes = new List<Vector3>();
+    List<Color> colors = new List<Color>();
+    List<int> triangles = new List<int>();
+    List<Vector2> uvs = new List<Vector2>();
 
     MeshCollider meshCollider;
 
-
-    bool isInit = false;
-
-	void OnAwake() {
+    private void Awake()
+    {
         Init();
     }
+    bool isInit = false;
 
     public void Init()
     {
-        GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
-        meshCollider = gameObject.AddComponent<MeshCollider>();
+        if (hexMesh == null)
+        {
+            GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
+        }
+        //else
+        //{
+        //    if (HexMetrics.instance.isEditor)
+        //    {
+        //        hexMesh = CopyMesh(hexMesh);
+        //        gameObject.GetComponent<MeshFilter>().mesh = hexMesh;
+        //    }
+        //}
+
+        if (meshCollider == null)
+        {
+            if (gameObject.GetComponent<MeshCollider>() == null)
+            {
+                meshCollider = gameObject.AddComponent<MeshCollider>();
+            }
+            else
+            {
+                meshCollider = gameObject.GetComponent<MeshCollider>();
+            }
+        }
+        meshCollider.sharedMesh = hexMesh;
         isInit = true;
+    }
+
+    Mesh CopyMesh(Mesh origin)
+    {
+        Mesh newMesh = new Mesh();
+        newMesh.vertices = origin.vertices;
+        newMesh.triangles = origin.triangles;
+        if (isUseMap)
+        {
+            newMesh.colors = colors.ToArray();
+            newMesh.SetUVs(2, terrainTypes);
+        }
+        else
+        {
+            newMesh.colors = colors.ToArray();
+            newMesh.SetUVs(0, uvs);
+        }
+
+        return newMesh;
     }
 
     public void Triangulate(HexCell[] cells)
@@ -60,7 +102,7 @@ public class HexMesh : MonoBehaviour {
     public void Clear()
     {
         terrainTypes.Clear();
-        hexMesh.Clear();
+        if(hexMesh!=null)hexMesh.Clear();
         vertices.Clear();
         colors.Clear();
         triangles.Clear();
@@ -82,7 +124,8 @@ public class HexMesh : MonoBehaviour {
             hexMesh.SetUVs(0, uvs);
         }
         hexMesh.RecalculateNormals();//mesh重新计算法线
-        meshCollider.sharedMesh = hexMesh;//设置mesh碰撞器
+        hexMesh.RecalculateBounds();
+        gameObject.GetComponent<MeshFilter>().mesh = hexMesh;
     }
 
 

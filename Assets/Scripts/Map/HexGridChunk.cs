@@ -12,7 +12,10 @@ public class HexGridChunk : MonoBehaviour {
     int width = 5;
     int height = 5;
 
-    public HexCell[] cells;
+    public bool isMeshChange = false;
+
+    [SerializeField]
+    HexCell[] cells;
 
     public SceneObjectMgr sceneObjectMgr;
 
@@ -44,8 +47,22 @@ public class HexGridChunk : MonoBehaviour {
         sceneObjectMgr.Clear();
     }
 
+    public void Init()
+    {
+        isMeshChange = false;
+        sceneObjectMgr.remindOriginList();
+    }
+
+    public void MeshInit()
+    {
+        waterMesh.Init();
+        waterEdgeMesh.Init();
+        terrainMesh.Init();
+    }
+
     public void Refresh()
     {
+        isMeshChange = true;
         waterMesh.TrangulateByMeshClass(cells);
         waterEdgeMesh.TrangulateByMeshClass(cells);
         terrainMesh.TrangulateByMeshClass(cells);
@@ -54,6 +71,7 @@ public class HexGridChunk : MonoBehaviour {
     //对mesh进行刷新
     public void Refresh(MeshClass meshClass)
     {
+        isMeshChange = true;
         switch (meshClass)
         {
             case MeshClass.terrainMesh:
@@ -152,10 +170,40 @@ public class HexGridChunk : MonoBehaviour {
     public void SaveMesh(string path)
     {
         string fileName = path +"/"+ gameObject.name;
-        AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName +"_waterMesh.asset");
-        AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
-        AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
+        if (!File.Exists(fileName + "_waterMesh.asset"))
+        {
+            AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterMesh.asset");
+        }
+        else
+        {
+            AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterMesh.asset");
+        }
+        if (!File.Exists(fileName + "_waterEdgeMesh.asset"))
+        {
+            AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
+        }
+        else
+        {
+            AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
+        }
+        if (!File.Exists(fileName + "_terrainMesh.asset"))
+        {
+            AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
+        }
+        else
+        {
+            AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
+        }
     }
+
+    ////将数据加载到内存中
+    //public void LoadMesh(string path)
+    //{
+    //    string fileName = path + "/" + gameObject.name;
+    //    waterMesh.hexMesh = AssetDatabase.LoadAssetAtPath<Mesh>(fileName + "_waterMesh.asset");
+    //    waterEdgeMesh.hexMesh = AssetDatabase.LoadAssetAtPath<Mesh>(fileName + "_waterEdgeMesh.asset");
+    //    terrainMesh.hexMesh =  AssetDatabase.LoadAssetAtPath<Mesh>(fileName + "_terrainMesh.asset");
+    //}
 
     public void SaveMaterial(string path)
     {

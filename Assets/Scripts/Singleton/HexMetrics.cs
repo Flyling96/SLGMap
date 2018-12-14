@@ -5,7 +5,9 @@ public class HexMetrics: SingletonDestory<HexMetrics>
     public int chunkWidth = 5;
     public int chunkHeight = 5;
 
-    public static Texture2D noiseSource;//噪声图片
+    public Color defaultColor = Color.white;
+
+    public Texture2D noiseSource;//噪声图片
 
     public float cellPerturbStrength = 3f;//微扰程度
 

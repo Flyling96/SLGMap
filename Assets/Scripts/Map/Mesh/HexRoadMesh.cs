@@ -7,6 +7,7 @@ public class HexRoadMesh : HexMesh {
     private void Awake()
     {
         meshClass = MeshClass.roadMesh;
+        Init();
     }
     private void Start()
     {

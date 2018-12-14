@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.IO;
 
 public enum EditorType
 {
@@ -35,7 +36,6 @@ public class TerrainEditor : Editor{
     string[] SCENEOBJ_OPERATION_NAMES = { "增加", "删除"};
     int[] SCENEOBJ_OPERATION_VALUES = { 0, 1, 2 };
 
-    public HexEdgeMesh hexEdgeMesh;
 
     public HeightBrush heightBrush;
     public MaterialBrush materialBrush;
@@ -56,11 +56,11 @@ public class TerrainEditor : Editor{
 
     private void Awake()
     {
-        heightBrush = new HeightBrush(HexGrid.instance.HexEditMesh);
-        materialBrush = new MaterialBrush(HexGrid.instance.HexEditMesh);
-        sceneObjBrush = new SceneObjBrush(HexGrid.instance.HexEditMesh);
-        edgeBrush = new EdgeBrush( HexGrid.instance.HexEditMesh);
-        waterBrush = new WaterBrush(HexGrid.instance.HexEditMesh);
+        heightBrush = new HeightBrush(HexEditMesh);
+        materialBrush = new MaterialBrush(HexEditMesh);
+        sceneObjBrush = new SceneObjBrush(HexEditMesh);
+        edgeBrush = new EdgeBrush(HexEditMesh);
+        waterBrush = new WaterBrush(HexEditMesh);
         Init();
     }
 
@@ -142,6 +142,7 @@ public class TerrainEditor : Editor{
 
             if(GUILayout.Button("加载地形", GUILayout.MaxWidth(100)))
             {
+                LoadMapAsset("map001/Hex Map 001_prefab.prefab");
                 Debug.Log(3);
             }
         }
@@ -412,5 +413,50 @@ public class TerrainEditor : Editor{
     }
 
 
+    public static List<string> GetLoadMapName()
+    {
+        List<string> result = new List<string>();
+        string mapPath = Application.dataPath + "/" + EditorConfig.instance.mapFileDirectory;
+        string[] dataDirs = Directory.GetDirectories(mapPath);
+        for(int i=0;i<dataDirs.Length;i++)
+        {
+            string dir = dataDirs[i];
+            string[] names = dir.Split('/', '\\');
+            if (names == null) continue;
+
+            string name = names[names.Length - 1];
+            result.Add(name);
+        }
+
+        return result;
+    }
+
+    public static void LoadMapAsset(string mapPath)
+    {
+        string mapFilePath =  "Assets/" + EditorConfig.instance.mapFileDirectory +"/"+ mapPath;
+        GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(mapFilePath);
+        mapPrefab = Instantiate(mapPrefab);
+        HexGrid.instance.maps = new HexMap[1];
+        HexGrid.instance.maps[0] = mapPrefab.GetComponent<HexMap>();
+        HexGrid.instance.MapInit();
+        HexGrid.instance.ChunkInit();
+        HexGrid.instance.ChunkMeshInit();
+    }
+
+    private static HexEdgeMesh hexEdgeMesh;
+
+    public HexEdgeMesh HexEditMesh
+    {
+        get
+        {
+            if (hexEdgeMesh == null)
+            {
+                hexEdgeMesh = (Instantiate(Resources.Load("Prefabs/Hex Edge Mesh") as GameObject)).GetComponent<HexEdgeMesh>();
+                hexEdgeMesh.Init();
+                hexEdgeMesh.name = "Hex Edge Mesh";
+            }
+            return hexEdgeMesh;
+        }
+    }
 
 }

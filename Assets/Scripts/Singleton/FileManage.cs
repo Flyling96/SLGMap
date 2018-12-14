@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.IO;
 
+
 public enum fileType
 {
     Binary,

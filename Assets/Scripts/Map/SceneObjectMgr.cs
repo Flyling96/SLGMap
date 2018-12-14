@@ -5,7 +5,6 @@ using UnityEngine;
 
 public class SceneObjectMgr : MonoBehaviour {
 
-
     public List<SceneObjectClass> sceneObjectList;
 	// Use this for initialization
 	void OnEnable () {
@@ -25,8 +24,43 @@ public class SceneObjectMgr : MonoBehaviour {
             //{
             //    sceneObjectList[i].Refresh(false);
             //}
-            sceneObjectList[i].Refresh(false);
+            if (sceneObjectList[i] != null)
+            {
+                sceneObjectList[i].Refresh(false);
+            }
         }
+    }
+
+    List<SceneObjectClass> originList = new List<SceneObjectClass>();
+    public void remindOriginList()
+    {
+        originList.Clear();
+        for(int i=0;i< sceneObjectList.Count;i++)
+        {
+            if (sceneObjectList[i] != null)
+            {
+                SceneObjectClass temp = sceneObjectList[i].Clone();
+                originList.Add(temp);
+            }
+        }
+    }
+
+    public bool isChange()
+    {
+        if(originList.Count!=sceneObjectList.Count)
+        {
+            return true;
+        }
+
+        for(int i=0;i<originList.Count;i++)
+        {
+            if(!originList[i].isSame(sceneObjectList[i]))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public void AddSceneObject(SceneObjectClass item)
@@ -36,7 +70,7 @@ public class SceneObjectMgr : MonoBehaviour {
 
     public void MinusSceneObject(SceneObjectClass item)
     {
-        for(int i= sceneObjectList.Count-1; i>=0 ;i--)
+        for (int i= sceneObjectList.Count-1; i>=0 ;i--)
         {
             if(ReferenceEquals(sceneObjectList[i], item))
             {
@@ -71,8 +105,4 @@ public class SceneObjectMgr : MonoBehaviour {
             }
         }
     }
-    // Update is called once per frame
-    void Update () {
-		
-	}
 }

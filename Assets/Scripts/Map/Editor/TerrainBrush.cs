@@ -857,7 +857,8 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
                             tSceneObject.SetActive(true);
                             HexDirection clickDir = HexGrid.instance.GetPointDirection(new Vector2(hit.point.x - centerCell.transform.position.x, hit.point.z - centerCell.transform.position.z));
                             if (tSceneObject.GetComponent<SceneObjectClass>() == null) tSceneObject.AddComponent<SceneObjectClass>();
-                            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell);
+                            tSceneObject.GetComponent<SceneObjectClass>().SetInfo(tSceneObject.transform.localPosition, tSceneObject.transform.localRotation, clickDir, centerCell,
+                                HexMetrics.instance.editorSceneObject.name);
                             tSceneObject.GetComponent<SceneObjectClass>().Refresh(true);
                             tSceneObject.AddComponent<BoxCollider>();
                             tSceneObject.GetComponent<BoxCollider>().size = new Vector3(150, 150, 150);

@@ -13,7 +13,7 @@ public class HexTerrain : MonoBehaviour
         HexMetrics.instance.isEditor = true;
         ConfigDateManage.instance.InitData();
         HexMetrics.instance.Init();
-        LoadMap("map001");
+        //LoadMap("map001");
     }
 
     void LoadMap(string fileName)
@@ -24,6 +24,7 @@ public class HexTerrain : MonoBehaviour
         }
 
         HexGrid.instance.Refresh();
+        HexGrid.instance.ChunkInit();
     }
 }
 
