@@ -174,23 +174,11 @@ public class HexGridChunk : MonoBehaviour {
         {
             AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterMesh.asset");
         }
-        else
-        {
-            AssetDatabase.CreateAsset(waterMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterMesh.asset");
-        }
         if (!File.Exists(fileName + "_waterEdgeMesh.asset"))
         {
             AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
         }
-        else
-        {
-            AssetDatabase.CreateAsset(waterEdgeMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_waterEdgeMesh.asset");
-        }
         if (!File.Exists(fileName + "_terrainMesh.asset"))
-        {
-            AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
-        }
-        else
         {
             AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshFilter>().sharedMesh, fileName + "_terrainMesh.asset");
         }

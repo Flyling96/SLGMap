@@ -46,7 +46,6 @@ public class HexCell : MonoBehaviour {
     }
 
     //道路相关
-    [SerializeField]
     public bool isRoad = false;
     bool[] isThroughRoad = new bool[6];
 
@@ -76,6 +75,7 @@ public class HexCell : MonoBehaviour {
     }
 
     //水相关
+    [SerializeField]
     int waterLevel = 0;
     public int WaterLevel
     {
@@ -165,6 +165,7 @@ public class HexCell : MonoBehaviour {
         }
     }
 
+    [SerializeField]
     int elevation = 0;
 
     [SerializeField]

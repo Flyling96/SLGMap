@@ -17,6 +17,7 @@ public class SceneObjectClass : MonoBehaviour {
 
     public HexCell cell = null;
 
+    [SerializeField]
     List<Vector2> pointList = new List<Vector2>(); //不规则六边形的边顶点
                                                    // List<List<Vector2>> edgePointList = new List<List<Vector2>>();
 

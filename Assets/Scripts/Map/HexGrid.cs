@@ -68,7 +68,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
     }
 
 
-    HexGridChunk[] chunks;
+    public HexGridChunk[] chunks;
     Canvas gridCanvas;
     //HexMesh hexMesh;
 
@@ -484,81 +484,5 @@ public class HexGrid : SingletonDestory<HexGrid> {
 
         return cells;
     }
-
-
-    public void SaveHexChunkAsset(string mapName)
-    {
-        string path = "Assets/MapAssets/" + mapName;
-        if(!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-
-        for (int j = 0; j < maps.Length; j++)
-        {
-            for (int i = 0; i < maps[j].chunks.Length; i++)
-            {
-                HexGridChunk chunk = maps[j].chunks[i];
-                string chunkPath = path + "/" + chunk.name;
-                if (!Directory.Exists(chunkPath))
-                {
-                    Directory.CreateDirectory(chunkPath);
-                }
-
-                chunk.SaveChunkAssets(chunkPath);
-
-                string info = "保存地形Chunk数据:" + (i + 1) + "/" + chunks.Length;
-                EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
-            }
-            EditorUtility.ClearProgressBar();
-            //刷新资源后新建的资源才能通过AssetDatabase加载
-            AssetDatabase.Refresh();
-
-            for (int i = 0; i < maps[j].chunks.Length; i++)
-            {
-                HexGridChunk chunk = maps[j].chunks[i];
-                string chunkPath = path + "/" + chunk.name;
-                if (!Directory.Exists(chunkPath))
-                {
-                    Directory.CreateDirectory(chunkPath);
-                }
-
-                string chunkPrefabPath = chunkPath + "/" + chunk.name + "_prefab.prefab";
-                if(!File.Exists(chunkPrefabPath))
-                {
-                    PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
-                }
-                else
-                {
-                    if (!chunk.sceneObjectMgr.isChange() && !chunk.isMeshChange) continue;
-                    Object prefab = PrefabUtility.GetPrefabParent(chunk.gameObject);
-                    PrefabUtility.ReplacePrefab(chunk.gameObject, prefab, ReplacePrefabOptions.ConnectToPrefab);
-                }
-
-                string info = "保存地形Chunk Prefab:" + (i + 1) + "/" + chunks.Length;
-                EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)chunks.Length);
-            }
-
-
-
-            string str = "保存地形HexMap Prefab:" + j +"/"+ maps.Length;
-            EditorUtility.DisplayProgressBar("保存地形", str, j/(float)maps.Length);
-            string parentPath = path + "/" + maps[j].name + "_prefab.prefab";
-            if (!File.Exists(parentPath))
-            {
-                PrefabUtility.CreatePrefab(parentPath, maps[j].gameObject, ReplacePrefabOptions.ConnectToPrefab);
-            }
-            else
-            {
-                Object prefab = PrefabUtility.GetPrefabParent(maps[j].gameObject);
-                PrefabUtility.ReplacePrefab(maps[j].gameObject, prefab, ReplacePrefabOptions.ConnectToPrefab);
-            }
-
-            EditorUtility.ClearProgressBar();
-        }
-
-
-    }
-
 
 }

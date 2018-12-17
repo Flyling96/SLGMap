@@ -136,7 +136,7 @@ public class TerrainEditor : Editor{
 
             if(GUILayout.Button("保存地形", GUILayout.MaxWidth(100)))
             {
-                HexGrid.instance.SaveHexChunkAsset("map001");
+                SaveHexChunkAsset("map001");
                 Debug.Log(2);
             }
 
@@ -436,11 +436,108 @@ public class TerrainEditor : Editor{
         string mapFilePath =  "Assets/" + EditorConfig.instance.mapFileDirectory +"/"+ mapPath;
         GameObject mapPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(mapFilePath);
         mapPrefab = Instantiate(mapPrefab);
+        mapPrefab.name = mapPrefab.name.Replace("_prefab(Clone)", "");
         HexGrid.instance.maps = new HexMap[1];
         HexGrid.instance.maps[0] = mapPrefab.GetComponent<HexMap>();
         HexGrid.instance.MapInit();
         HexGrid.instance.ChunkInit();
         HexGrid.instance.ChunkMeshInit();
+    }
+
+    public void SaveHexChunkAsset(string mapName)
+    {
+        string path = "Assets/MapAssets/" + mapName;
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+
+        for (int j = 0; j < HexGrid.instance.maps.Length; j++)
+        {
+            for (int i = 0; i < HexGrid.instance.maps[j].chunks.Length; i++)
+            {
+                HexGridChunk chunk = HexGrid.instance.maps[j].chunks[i];
+                string chunkPath = path + "/" + chunk.name;
+                if (!Directory.Exists(chunkPath))
+                {
+                    Directory.CreateDirectory(chunkPath);
+                }
+
+                chunk.SaveChunkAssets(chunkPath);
+
+                string info = "保存地形Chunk数据:" + (i + 1) + "/" + HexGrid.instance.chunks.Length;
+                EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)HexGrid.instance.chunks.Length);
+            }
+            EditorUtility.ClearProgressBar();
+            //刷新资源后新建的资源才能通过AssetDatabase加载
+            AssetDatabase.Refresh();
+
+            bool isChange = false;
+            for (int i = 0; i < HexGrid.instance.maps[j].chunks.Length; i++)
+            {
+                HexGridChunk chunk = HexGrid.instance.maps[j].chunks[i];
+
+                if (chunk.sceneObjectMgr.isChange() || chunk.isMeshChange)
+                {
+                    isChange = true;
+                    break;
+                }
+
+                //string chunkPath = path + "/" + chunk.name;
+                //if (!Directory.Exists(chunkPath))
+                //{
+                //    Directory.CreateDirectory(chunkPath);
+                //}
+
+                //string chunkPrefabPath = chunkPath + "/" + chunk.name + "_prefab.prefab";
+                //if (!File.Exists(chunkPrefabPath))
+                //{
+                //    PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
+                //}
+                //else
+                //{
+                //    if (!chunk.sceneObjectMgr.isChange() && !chunk.isMeshChange) continue;
+                //    Object prefab = PrefabUtility.GetPrefabParent(chunk.gameObject);
+                //    if (prefab != null)
+                //    {
+                //        PrefabUtility.ReplacePrefab(chunk.gameObject, prefab, ReplacePrefabOptions.ConnectToPrefab);
+                //    }
+                //    else
+                //    {
+                //        PrefabUtility.CreatePrefab(chunkPrefabPath, chunk.gameObject, ReplacePrefabOptions.ConnectToPrefab);
+                //    }
+                //}
+
+                //string info = "保存地形Chunk Prefab:" + (i + 1) + "/" + HexGrid.instance.chunks.Length;
+                //EditorUtility.DisplayProgressBar("保存地形", info, (i + 1) / (float)HexGrid.instance.chunks.Length);
+            }
+
+
+
+            string str = "保存地形HexMap Prefab:" + j + "/" + HexGrid.instance.maps.Length;
+            EditorUtility.DisplayProgressBar("保存地形", str, j / (float)HexGrid.instance.maps.Length);
+            string parentPath = path + "/" + HexGrid.instance.maps[j].name + "_prefab.prefab";
+            if (!File.Exists(parentPath))
+            {
+                PrefabUtility.CreatePrefab(parentPath, HexGrid.instance.maps[j].gameObject, ReplacePrefabOptions.ConnectToPrefab);
+            }
+            else
+            {
+                Object prefab = PrefabUtility.GetPrefabParent(HexGrid.instance.maps[j].gameObject);
+                if (prefab != null)
+                {
+                    PrefabUtility.ReplacePrefab(HexGrid.instance.maps[j].gameObject, prefab, ReplacePrefabOptions.ConnectToPrefab);
+                }
+                else
+                {
+                    PrefabUtility.CreatePrefab(parentPath, HexGrid.instance.maps[j].gameObject, ReplacePrefabOptions.ConnectToPrefab);
+                }
+            }
+
+            EditorUtility.ClearProgressBar();
+        }
+
+
     }
 
     private static HexEdgeMesh hexEdgeMesh;
