@@ -136,10 +136,10 @@ public class HexCell : MonoBehaviour {
 
     void RefreshPosition(int value)
     {
-        Vector3 position = transform.localPosition;
+        Vector3 position = transform.position;
         position.y = value * HexMetrics.instance.elevationStep;
         position.y += (HexMetrics.instance.SampleNoise(position).y * 2f - 1f) * HexMetrics.elevationPerturbStrength;//对高度进行微扰;
-        transform.localPosition = position;
+        transform.position = position;
 
         if (uiRect != null)
         {

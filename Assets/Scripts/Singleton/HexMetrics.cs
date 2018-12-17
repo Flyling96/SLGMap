@@ -111,9 +111,9 @@ public class HexMetrics: SingletonDestory<HexMetrics>
 		return HexEdgeType.Cliff;
 	}
 
-    public const float elevationPerturbStrength = 1.5f;//y轴上的微扰
+    public const float elevationPerturbStrength = 2f;//y轴上的微扰
 
-    public const float noiseScale = 0.003f;
+    public const float noiseScale = 0.005f;
     //获取正交化坐标系下像素颜色
     public Vector4 SampleNoise(Vector3 position)
     {

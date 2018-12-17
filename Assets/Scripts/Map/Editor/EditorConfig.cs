@@ -40,6 +40,8 @@ public class EditorConfig : ScriptableObject {
     /// </summary>
     public string mapFileDirectory = "MapAssets";
 
+    public string terrainParentName = "Terrains";
+
 
 #if UNITY_EDITOR
 

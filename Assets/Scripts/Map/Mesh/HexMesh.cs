@@ -29,11 +29,19 @@ public class HexMesh : MonoBehaviour {
     {
         Init();
     }
+
     bool isInit = false;
 
     public void Init()
     {
-        if (hexMesh == null)
+        if (HexGrid.instance.isLoadPrefab)
+        {
+            if (hexMesh == null)
+            {
+                GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
+            }
+        }
+        else
         {
             GetComponent<MeshFilter>().mesh = hexMesh = new Mesh();
         }

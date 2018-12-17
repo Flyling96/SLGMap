@@ -235,15 +235,17 @@ public class EdgeBrush : TerrainBrush
     {
         if (m_editorEdgeType == EditorEdgeType.Step)
         {
+            if (cell.GetNeighbor(clickDir) == null) return;
+            if (Mathf.Abs(cell.Elevation - cell.GetNeighbor(clickDir).Elevation) != 1) return;
             cell.isStepDirection[(int)clickDir] = true;
-            if (cell.GetNeighbor(clickDir) != null)
-                cell.GetNeighbor(clickDir).isStepDirection[(int)clickDir.Opposite()] = true;
+            cell.GetNeighbor(clickDir).isStepDirection[(int)clickDir.Opposite()] = true;
         }
         else if (m_editorEdgeType == EditorEdgeType.Slope)
         {
+            if (cell.GetNeighbor(clickDir) == null) return;
+            if (Mathf.Abs(cell.Elevation - cell.GetNeighbor(clickDir).Elevation) != 1) return;
             cell.isStepDirection[(int)clickDir] = false;
-            if (cell.GetNeighbor(clickDir) != null)
-                cell.GetNeighbor(clickDir).isStepDirection[(int)clickDir.Opposite()] = false;
+            cell.GetNeighbor(clickDir).isStepDirection[(int)clickDir.Opposite()] = false;
         }
     }
 

@@ -7,7 +7,6 @@ using System.IO;
 [ExecuteInEditMode]
 public class HexTerrain : MonoBehaviour
 {
-
     void Awake()
     {
         HexMetrics.instance.isEditor = true;

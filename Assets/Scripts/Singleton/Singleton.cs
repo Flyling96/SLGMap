@@ -52,9 +52,13 @@ public class SingletonDestory<T> : BaseSingleton where T : BaseSingleton
             {
                 if (_instance == null)
                 {
-                    GameObject singleton = new GameObject();
-                    _instance = singleton.AddComponent<T>();
-                    singleton.name = "(singleton)" + typeof(T).ToString();
+                    string singletonName = "(singleton)" + typeof(T).ToString();
+                    if (!GameObject.Find(singletonName))
+                    {
+                        GameObject singleton = new GameObject();
+                        _instance = singleton.AddComponent<T>();
+                        singleton.name = "(singleton)" + typeof(T).ToString();
+                    }
                 }
             }
             return _instance;

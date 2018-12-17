@@ -11,25 +11,40 @@ public class LoadMapWnd : ScriptableWizard {
     protected override bool DrawWizardGUI()
     {
         mapName = TerrainEditor.GetLoadMapName();
-        int index = EditorGUILayout.Popup("地图列表", selectIndex, mapName.ToArray());
-        bool change = selectIndex != index;
+        if (mapName.Count > 0 && selectIndex == -1) selectIndex = 0;
+        int index = EditorGUILayout.Popup("地形列表", selectIndex, mapName.ToArray());
         selectIndex = index;
-        return change;
+        return selectIndex != -1; 
     }
 
     private void OnWizardCreate()
     {
-        Debug.Log(1);
+        if (mapName.Count > selectIndex)
+        {
+            TerrainEditor.ClearUndoRedoStack();
+
+            if (TerrainEditor.TerrainParent.transform != null)
+            {
+                foreach (Transform child in TerrainEditor.TerrainParent.transform)
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+            }
+
+            HexGrid.instance.isLoadPrefab = true;
+            TerrainEditor.LoadMapAsset(mapName[selectIndex]);
+        }
     }
+
 
     private void OnWizardOtherButton()
     {
-        Debug.Log(2);
+        Close();
     }
 
     private void OnWizardUpdate()
     {
-        helpString = "请选择要打开的地图";
+        helpString = "请选择要加载的地形";
         isValid = (selectIndex != -1);
     }
 

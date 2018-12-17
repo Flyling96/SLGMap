@@ -116,6 +116,7 @@ public class HexMapEditor : MonoBehaviour {
         terrainTextureBtn.onClick.AddListener(ShowTerrainTextureWnd);
         sceneObjectBtn = transform.Find("Terrain Panel/SceneObjectBtn").GetComponent<Button>();
         sceneObjectBtn.onClick.AddListener(ShowSceneObjectWnd);
+        HexGrid.instance.isLoadPrefab = false;
 
     }
 
@@ -176,6 +177,7 @@ public class HexMapEditor : MonoBehaviour {
                     //if (!HexMetrics.instance.isEditorTerrain)
                     //    return;
                     centerCell = HexGrid.instance.GetCell(hit.point);
+                    if (centerCell == null) return;
                     centerX = centerCell.coordinates.X;
                     centerZ = centerCell.coordinates.Z;
                     for (int l = 0, z = centerZ; z >= centerZ - brushRange + 1; l++, z--)

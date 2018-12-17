@@ -9,6 +9,8 @@ using UnityEditor;
 
 public class HexGrid : SingletonDestory<HexGrid> {
 
+    public bool isLoadPrefab = false;
+
 	int width = 6;
 	int height = 6;
 
@@ -118,7 +120,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
     }
 
     //新建地图
-    public void NewMap()
+    public void NewMap(string mapName = "Hex Map")
     {
         if (!HexMetrics.instance.isEditor)
         {
@@ -165,13 +167,11 @@ public class HexGrid : SingletonDestory<HexGrid> {
 
         maps = new HexMap[1];
         maps[0] = Instantiate(mapPrefab) as HexMap;
-        maps[0].name = "Hex Map 001";
+        maps[0].name = mapName;
         maps[0].transform.localPosition = Vector3.zero;
         maps[0].transform.localRotation = Quaternion.Euler(0, 0, 0);
         maps[0].SetMapSize(chunkCountX, chunkCountZ);
         maps[0].NewMap(cellPrefab, cellLabelPrefab, gridChunkPerfab);
-        cells = maps[0].cells;
-        chunks = maps[0].chunks;
 
         //cells = new HexCell[cellCountWidth * cellCountHeight];
 
@@ -281,6 +281,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
 		position = transform.InverseTransformPoint(position);//坐标转换
 		HexCoordinates coordinates = HexCoordinates.FromPosition(position);
 		int index = coordinates.X + coordinates.Z * cellCountWidth + coordinates.Z / 2;
+        if (cells == null) return null;
         if (index<0 || index >= cells.Length) return null;
 		return cells[index];
 	}
@@ -484,5 +485,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
 
         return cells;
     }
+
+
 
 }
