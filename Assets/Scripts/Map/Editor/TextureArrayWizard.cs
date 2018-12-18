@@ -12,6 +12,7 @@ public class TextureArrayWizard : ScriptableWizard {
 		);
 	}
 
+
 	void OnWizardCreate () {
 		if (textures.Length == 0) {
 			return;

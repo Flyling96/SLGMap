@@ -40,7 +40,7 @@ public class CreateMapWnd : ScriptableWizard
         HexGrid.instance.ChangeSize(chunkCountX, chunkCountZ);
         HexMetrics.instance.isEditorTexture = isUseTexture;
         HexGrid.instance.isLoadPrefab = false;
-        HexGrid.instance.NewMap(mapName);
+        HexGrid.instance.NewMap(mapName,true);
 
         if (isSaveAfterCreate)
         {

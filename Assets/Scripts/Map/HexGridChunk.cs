@@ -164,7 +164,7 @@ public class HexGridChunk : MonoBehaviour {
     public void SaveChunkAssets(string path)
     {
         SaveMesh(path);
-        //SaveMaterial(path);
+        SaveMaterial(path);
     }
 
     public void SaveMesh(string path)
@@ -196,7 +196,44 @@ public class HexGridChunk : MonoBehaviour {
     public void SaveMaterial(string path)
     {
         string fileName = path + "/" + gameObject.name + "_mat.mat";
-        AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshRenderer>().sharedMaterial, fileName);
+        string textureName = path + "/" + gameObject.name + "_textureArray.asset";
+        if (!File.Exists(fileName))
+        {
+            if(!File.Exists(textureName) && textureArray!=null)
+            {
+                AssetDatabase.CreateAsset(textureArray, textureName);
+            }
+            AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshRenderer>().sharedMaterial, fileName);
+        }
+    }
+
+    Texture2DArray textureArray;
+
+    public void CreateMaterial()
+    {
+        MeshRenderer meshRenderer = terrainMesh.GetComponent<MeshRenderer>();
+        Material mtl = new Material(EditorShaderManager.TerrainShader);
+        CreateTerrainTexutreArray();
+        mtl.SetTexture("_MainTex", textureArray);
+        mtl.SetTexture("_GridTex", EditorShaderManager.TerrainGridTexutre);
+        meshRenderer.sharedMaterial = mtl;
+    }
+
+    public void CreateTerrainTexutreArray()
+    {
+        Texture2D texture = EditorShaderManager.TerrainDefaultTexture;
+        textureArray = new Texture2DArray(
+            texture.width, texture.height, 1, texture.format, texture.mipmapCount > 1
+        );
+        textureArray.anisoLevel = texture.anisoLevel;
+        textureArray.filterMode = texture.filterMode;
+        textureArray.wrapMode = texture.wrapMode;
+
+        for (int m = 0; m < texture.mipmapCount; m++)
+        {
+            Graphics.CopyTexture(texture, 0, m, textureArray, 0, m);
+        }
+
     }
 
    
