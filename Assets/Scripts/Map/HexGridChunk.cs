@@ -196,25 +196,20 @@ public class HexGridChunk : MonoBehaviour {
     public void SaveMaterial(string path)
     {
         string fileName = path + "/" + gameObject.name + "_mat.mat";
-        string textureName = path + "/" + gameObject.name + "_textureArray.asset";
         if (!File.Exists(fileName))
         {
-            if(!File.Exists(textureName) && textureArray!=null)
-            {
-                AssetDatabase.CreateAsset(textureArray, textureName);
-            }
             AssetDatabase.CreateAsset(terrainMesh.GetComponent<MeshRenderer>().sharedMaterial, fileName);
         }
     }
 
     Texture2DArray textureArray;
 
-    public void CreateMaterial()
+    public void CreateMaterial(Texture2D defaultTerrainTex = null)
     {
         MeshRenderer meshRenderer = terrainMesh.GetComponent<MeshRenderer>();
         Material mtl = new Material(EditorShaderManager.TerrainShader);
         CreateTerrainTexutreArray();
-        mtl.SetTexture("_MainTex", textureArray);
+        mtl.SetTexture("_AlbedoMap0", defaultTerrainTex);
         mtl.SetTexture("_GridTex", EditorShaderManager.TerrainGridTexutre);
         meshRenderer.sharedMaterial = mtl;
     }

@@ -29,7 +29,7 @@ public class HexMap : MonoBehaviour {
     }
 
     //新建地图
-    public void NewMap(HexCell cellPrefab,Text cellLabelPrefab, HexGridChunk gridChunkPerfab,bool isNewMaterial = false)
+    public void NewMap(HexCell cellPrefab,Text cellLabelPrefab, HexGridChunk gridChunkPerfab,bool isNewMaterial = false, Texture2D defaultTerrainTex = null)
     {
         if (!HexMetrics.instance.isEditor)
         {
@@ -58,7 +58,7 @@ public class HexMap : MonoBehaviour {
                 chunk.transform.localPosition = new Vector3(chunk.transform.localPosition.x, 0, chunk.transform.localPosition.z);
                 if(isNewMaterial)
                 {
-                    chunk.CreateMaterial();
+                    chunk.CreateMaterial(defaultTerrainTex);
                 }
             }
         }

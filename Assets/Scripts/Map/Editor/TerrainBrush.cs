@@ -52,6 +52,7 @@ public class TerrainBrush
 
     public void RefreshCellList(HexCell cell)
     {
+        if (cell == null) return;
         m_refreshCellList.Clear();
         int centerX = cell.coordinates.X;
         int centerZ = cell.coordinates.Z;
@@ -670,6 +671,7 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+            if(centerCell!=null)
             m_brush.RefreshBrush(hit.point, centerCell);
         }
     }
