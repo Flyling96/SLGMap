@@ -9,7 +9,9 @@ using UnityEditor;
 
 public class HexGridChunk : MonoBehaviour {
 
+    [SerializeField]
     int width = 5;
+    [SerializeField]
     int height = 5;
 
     public bool isMeshChange = false;
@@ -31,11 +33,17 @@ public class HexGridChunk : MonoBehaviour {
         cells = new HexCell[width * height];
     }
 
+    public void CreateCells(int chunkWidth = 5,int chunkHeight = 5)
+    {
+        width = chunkWidth;
+        height = chunkHeight;
+        cells = new HexCell[width * height];
+    }
 
     // Use this for initialization
     void Start()
     {
-        terrainMesh.TrangulateByMeshClass(cells);
+        //terrainMesh.TrangulateByMeshClass(cells);
     }
 
 
@@ -228,6 +236,11 @@ public class HexGridChunk : MonoBehaviour {
         {
             Graphics.CopyTexture(texture, 0, m, textureArray, 0, m);
         }
+
+    }
+
+    public void DrawBorder(Color color)
+    {
 
     }
 

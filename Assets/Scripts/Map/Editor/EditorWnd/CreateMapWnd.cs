@@ -11,6 +11,8 @@ public class CreateMapWnd : ScriptableWizard
     string mapName = "";
     int chunkCountX = 0;
     int chunkCountZ = 0;
+    int chunkWidth = 5;
+    int chunkHeight = 5;
     bool isUseTexture = true;
     bool isSaveAfterCreate = true;
     Texture2D defaultTerrainTex = null;
@@ -18,6 +20,8 @@ public class CreateMapWnd : ScriptableWizard
     protected override bool DrawWizardGUI()
     {
         mapName = EditorGUILayout.TextField("地形名称", mapName);
+        chunkWidth = EditorGUILayout.IntField("地形块宽度", chunkWidth);
+        chunkHeight = EditorGUILayout.IntField("地形块长度", chunkHeight);
         chunkCountX = EditorGUILayout.IntField("地形宽度", chunkCountX);
         chunkCountZ = EditorGUILayout.IntField("地形长度", chunkCountZ);
         isUseTexture = EditorGUILayout.Toggle("地形是否使用纹理", isUseTexture);
@@ -48,7 +52,7 @@ public class CreateMapWnd : ScriptableWizard
         HexGrid.instance.ChangeSize(chunkCountX, chunkCountZ);
         HexMetrics.instance.isEditorTexture = isUseTexture;
         HexGrid.instance.isLoadPrefab = false;
-        HexGrid.instance.NewMap(mapName,true, defaultTerrainTex);
+        HexGrid.instance.NewMap(mapName,true, defaultTerrainTex, chunkWidth, chunkHeight);
 
         if (isSaveAfterCreate)
         {
@@ -67,6 +71,14 @@ public class CreateMapWnd : ScriptableWizard
             isValid = false;
             return;
         }
+
+        if(chunkWidth<1 || chunkWidth>15 || chunkHeight<1 || chunkHeight>15)
+        {
+            errorString = "地形块宽高须是[1,15]范围内的整数";
+            isValid = false;
+            return;
+        }
+
         if (chunkCountX < 1 || chunkCountX > 30 || chunkCountZ < 1 || chunkCountZ > 30)
         {
             errorString = "宽高须是[1,30]范围内的整数";

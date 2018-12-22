@@ -120,7 +120,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
     }
 
     //新建地图
-    public void NewMap(string mapName = "Hex Map", bool isNewMaterial = false, Texture2D defaultTerrainTex = null)
+    public void NewMap(string mapName = "Hex Map", bool isNewMaterial = false, Texture2D defaultTerrainTex = null,int chunkWidth = 0,int chunkHeight = 0)
     {
         if (!HexMetrics.instance.isEditor)
         {
@@ -158,8 +158,17 @@ public class HexGrid : SingletonDestory<HexGrid> {
         }
 
         HexMetrics.instance.noiseSource = noiseSource;
-        width = HexMetrics.instance.chunkWidth;
-        height = HexMetrics.instance.chunkHeight;
+        if (chunkWidth == 0 || chunkHeight == 0)
+        {
+            width = HexMetrics.instance.chunkWidth;
+            height = HexMetrics.instance.chunkHeight;
+        }
+        else
+        {
+            width = chunkWidth;
+            height = chunkHeight;
+        }
+
         oldCountX = chunkCountX;
         oldCountZ = chunkCountZ;
         cellCountWidth = width * chunkCountX;
@@ -171,7 +180,7 @@ public class HexGrid : SingletonDestory<HexGrid> {
         maps[0].transform.localPosition = Vector3.zero;
         maps[0].transform.localRotation = Quaternion.Euler(0, 0, 0);
         maps[0].SetMapSize(chunkCountX, chunkCountZ);
-        maps[0].NewMap(cellPrefab, cellLabelPrefab, gridChunkPerfab, isNewMaterial, defaultTerrainTex);
+        maps[0].NewMap(cellPrefab, cellLabelPrefab, gridChunkPerfab, isNewMaterial, defaultTerrainTex, width, height);
         cells = maps[0].cells;
         chunks = maps[0].chunks;
 

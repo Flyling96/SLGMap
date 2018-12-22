@@ -57,7 +57,7 @@
 		data.terrain = v.texcoord2.xyz;
 	}
 
-	half _Glossiness;
+	half _Glossiness; 
 	half _Metallic;
 	fixed4 _Color;
 	sampler2D _GridTex;

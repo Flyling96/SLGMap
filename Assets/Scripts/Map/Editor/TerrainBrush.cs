@@ -641,6 +641,8 @@ public class MeshModifier:SingletonDestory<MeshModifier>
 
 public class MaterialModifier:SingletonDestory<MaterialModifier>
 {
+    public HexGridChunk lockedChunk = null;
+
     public TerrainBrush m_brush;
 
     List<HexGridChunk> m_refreshChunkList = new List<HexGridChunk>();//mesh基于chunk刷新
@@ -650,6 +652,10 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         Event e = Event.current;
         switch (e.type)
         {
+            case EventType.KeyDown:
+                if(e.keyCode == KeyCode.L)
+                    SetLockedChunk(e);//键盘L锁定所编辑的地形
+                break;
             case EventType.MouseDown:
                 if (e.button == 0)//鼠标左键
                     RefreshMesh(e);
@@ -671,11 +677,30 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
-            if(centerCell!=null)
+            if (lockedChunk == null || centerCell.chunkParent != lockedChunk)
+            {
+                return;
+            }
+            if (centerCell!=null)
             m_brush.RefreshBrush(hit.point, centerCell);
         }
     }
 
+    void SetLockedChunk(Event e)
+    {
+        Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
+        RaycastHit hit;
+        HexCell centerCell = null;
+
+        if (Physics.Raycast(inputRay, out hit))
+        {
+            centerCell = HexGrid.instance.GetCell(hit.point);
+            if (e.keyCode == KeyCode.L)
+            {
+                lockedChunk = centerCell.chunkParent;
+            }
+        }
+    }
 
     //刷新地形mesh
     void RefreshMesh(Event e)
@@ -692,6 +717,11 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+
+            if(lockedChunk==null || centerCell.chunkParent!=lockedChunk)
+            {
+                return;
+            }
             TerrainEditor.redoStack.Clear();
             TerrainEditor.UndoAdd(centerCell, m_brush);
             m_refreshChunkList.Add(centerCell.chunkParent);
