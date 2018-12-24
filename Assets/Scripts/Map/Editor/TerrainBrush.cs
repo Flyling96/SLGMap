@@ -548,6 +548,8 @@ public class MeshModifier:SingletonDestory<MeshModifier>
         if (Physics.Raycast(inputRay,out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+            if (centerCell == null) return;
+            centerCell.chunkParent.DrawBorder(Color.yellow);
             m_brush.RefreshBrush(hit.point, centerCell);
         }
     }
@@ -677,8 +679,19 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
         if (Physics.Raycast(inputRay, out hit))
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
+            if (centerCell == null) return;
+            if (lockedChunk != null)
+            {
+                lockedChunk.DrawBorder(Color.yellow);
+            }
+            else
+            {
+                centerCell.chunkParent.DrawBorder(Color.yellow);
+            }
+
             if (lockedChunk == null || centerCell.chunkParent != lockedChunk)
             {
+                m_brush.RefreshBrush(hit.point, null);
                 return;
             }
             if (centerCell!=null)
@@ -697,7 +710,14 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
             centerCell = HexGrid.instance.GetCell(hit.point);
             if (e.keyCode == KeyCode.L)
             {
-                lockedChunk = centerCell.chunkParent;
+                if (lockedChunk != null)
+                {
+                    lockedChunk = null;
+                }
+                else
+                {
+                    lockedChunk = centerCell.chunkParent;
+                }
             }
         }
     }

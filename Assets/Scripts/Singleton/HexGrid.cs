@@ -153,7 +153,14 @@ public class HexGrid : SingletonDestory<HexGrid> {
             if (chunks[i] != null)
             {
                 chunks[i].Clear();
-                Destroy(chunks[i].gameObject);
+                if (HexMetrics.instance.isEditor)
+                {
+                    DestroyImmediate(chunks[i].gameObject);
+                }
+                else
+                {
+                    Destroy(chunks[i].gameObject);
+                }
             }
         }
 

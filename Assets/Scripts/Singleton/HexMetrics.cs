@@ -71,7 +71,7 @@ public class HexMetrics: SingletonDestory<HexMetrics>
 		return corners[(int)direction + 1] * solidFactor;
 	}
 
-
+    //两向量相加得到桥的方向
 	public Vector3 GetBridge (HexDirection direction) {
 		return (corners[(int)direction] + corners[(int)direction + 1]) *
 			blendFactor;

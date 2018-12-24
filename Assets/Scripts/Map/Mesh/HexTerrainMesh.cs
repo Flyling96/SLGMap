@@ -85,6 +85,10 @@ public class HexTerrainMesh : HexMesh {
         {
             TriangulateConnection(direction, cell, e);
         }
+        else
+        {
+            SetBorderEdge(e);
+        }
     }
 
 
@@ -108,7 +112,7 @@ public class HexTerrainMesh : HexMesh {
         Vector3 bridge = HexMetrics.instance.GetBridge(direction);
         bridge.y = neighbor.LocalPosition.y - cell.LocalPosition.y;
         EdgeVertices e2 = new EdgeVertices(e1.v1 + bridge, e1.v4 + bridge);
-
+        SetBorderEdge(e2);
 
         //绘制阶梯
         if (cell.GetEdgeType(cell.isStepDirection[(int)direction], direction) == HexEdgeType.Step)

@@ -241,7 +241,14 @@ public class HexGridChunk : MonoBehaviour {
 
     public void DrawBorder(Color color)
     {
-
+        List<EdgeVertices> edgeList = terrainMesh.borderList;
+        Handles.color = color;
+        for(int i=0;i<edgeList.Count;i++)
+        {
+            Handles.DrawLines(new Vector3[]{ transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v1)), transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v2)),
+                transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v2)), transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v3)),
+                transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v3)), transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v4)) });
+        }
     }
 
    

@@ -25,6 +25,12 @@ public class HexMesh : MonoBehaviour {
 
     MeshCollider meshCollider;
 
+    List<EdgeVertices> edgeList = new List<EdgeVertices>();
+
+    [SerializeField]
+    public List<EdgeVertices> borderList = new List<EdgeVertices>();
+
+
     private void Awake()
     {
         Init();
@@ -115,6 +121,8 @@ public class HexMesh : MonoBehaviour {
         colors.Clear();
         triangles.Clear();
         uvs.Clear();
+        edgeList.Clear();
+        borderList.Clear();
     }
 
     public void Draw()
@@ -158,6 +166,7 @@ public class HexMesh : MonoBehaviour {
             center + HexMetrics.instance.GetSecondSolidCorner(direction)
         );
 
+
         //为了增强不规则性，添加顶点
         //Vector3 e1 = Vector3.Lerp(v1, v2, 1f / 3f);
         //Vector3 e2 = Vector3.Lerp(v1, v2, 2f / 3f);
@@ -183,6 +192,27 @@ public class HexMesh : MonoBehaviour {
         {
             TriangulateConnection(direction, cell, e);
         }
+        else
+        {
+            SetBorderEdge(e);
+        }
+    }
+
+    public void SetBorderEdge(EdgeVertices e)
+    {
+        if (meshClass == MeshClass.terrainMesh)
+        {
+            if (!edgeList.Find(m => m.isSame(e)).isEmpty())
+            {
+                EdgeVertices edge = borderList.Find(m => m.isSame(e));
+                borderList.Remove(edge);
+            }
+            else
+            {
+                edgeList.Add(e);
+                borderList.Add(e);
+            }
+        }
     }
 
     /// <summary>
@@ -204,6 +234,7 @@ public class HexMesh : MonoBehaviour {
         bridge.y = neighbor.LocalPosition.y - cell.LocalPosition.y;
         EdgeVertices e2 = new EdgeVertices( e1.v1 + bridge,e1.v4 + bridge);
 
+        SetBorderEdge(e2);
 
         //绘制阶梯
         if (cell.GetEdgeType(cell.isStepDirection[(int)direction],direction) == HexEdgeType.Step) {
