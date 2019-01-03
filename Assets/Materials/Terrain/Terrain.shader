@@ -1,7 +1,7 @@
 ﻿Shader "Custom/Terrain" {
 	Properties{
 		_Color("Color", Color) = (1,1,1,1)
-		_MainTex("Terrain Texture Array", 2DArray) = "white" {}
+		//_MainTex("Terrain Texture Array", 2DArray) = "white" {}
 	//地形纹理
 		_AlbedoMap0("Albedo Map 0",2D) = "white"{}
 		_AlbedoMap1("Albedo Map 1",2D) = "white"{}
@@ -55,6 +55,7 @@
 	void vert(inout appdata_full v, out Input data) {
 		UNITY_INITIALIZE_OUTPUT(Input, data);
 		data.terrain = v.texcoord2.xyz;
+		data.worldPos += float3(0.5f, 100, 233.3f);
 	}
 
 	half _Glossiness; 

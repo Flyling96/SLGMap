@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 
 
+
 [ExecuteInEditMode]
 public class HexTerrain : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class HexTerrain : MonoBehaviour
         ConfigDateManage.instance.InitData();
         HexMetrics.instance.Init();
         //LoadMap("map001");
+
     }
 
     void LoadMap(string fileName)
@@ -25,5 +27,6 @@ public class HexTerrain : MonoBehaviour
         HexGrid.instance.Refresh();
         HexGrid.instance.ChunkInit();
     }
+
 }
 

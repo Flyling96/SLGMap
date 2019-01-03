@@ -29,7 +29,7 @@ public class HexMap : MonoBehaviour {
     }
 
     //新建地图
-    public void NewMap(HexCell cellPrefab,Text cellLabelPrefab, HexGridChunk gridChunkPerfab,bool isNewMaterial = false, Texture2D defaultTerrainTex = null, int chunkWidth = 0, int chunkHeight = 0)
+    public void NewMap(HexCell cellPrefab,Text cellLabelPrefab, HexGridChunk gridChunkPerfab,bool isNewMaterial = false, Texture2D[] terrainTexs = null, int chunkWidth = 0, int chunkHeight = 0)
     {
         if (!HexMetrics.instance.isEditor)
         {
@@ -60,14 +60,14 @@ public class HexMap : MonoBehaviour {
             for (int k = 0; k < chunkCountX; k++)
             {
                 HexGridChunk chunk = chunks[i++] = Instantiate(gridChunkPerfab) as HexGridChunk;
-                chunk.CreateCells(chunkWidth, chunkHeight);
+                chunk.Init(chunkWidth, chunkHeight, terrainTexs);
                 //chunk.transform.SetParent(GameObject.Find("Map").transform);
                 chunk.name = "HexChunk_" + k.ToString("000") + "_" + j.ToString("000");
                 chunk.transform.SetParent(transform);
                 chunk.transform.localPosition = new Vector3(chunk.transform.localPosition.x, 0, chunk.transform.localPosition.z);
                 if(isNewMaterial)
                 {
-                    chunk.CreateMaterial(defaultTerrainTex);
+                    chunk.CreateMaterial(terrainTexs);
                 }
             }
         }

@@ -9,6 +9,50 @@ using UnityEditor;
 
 public class HexGridChunk : MonoBehaviour {
 
+    private const int MAX_TERRAIN_TEXTURE_COUNT = 6;
+
+    //地形的基础贴图
+    public class TerrainBaseTexture
+    {
+        //地形类型（草地、雪地）
+        private int terrainIndex;
+
+        public int TerrainIndex
+        {
+            get
+            {
+                return terrainIndex;
+            }
+        }
+
+        private Texture2D albedoMap;
+
+        public Texture2D AlbedoMap
+        {
+            get
+            {
+                return albedoMap;
+            }
+        }
+
+        private Texture2D normalMap;
+
+        public Texture2D NormalMap
+        {
+            get
+            {
+                return normalMap;
+            }
+        }
+
+        public TerrainBaseTexture(int index,Texture2D albedo,Texture2D normal = null)
+        {
+            terrainIndex = index;
+            albedoMap = albedo;
+            normalMap = normal;
+        }
+    }
+
     [SerializeField]
     int width = 5;
     [SerializeField]
@@ -18,6 +62,10 @@ public class HexGridChunk : MonoBehaviour {
 
     [SerializeField]
     HexCell[] cells;
+
+    [SerializeField]
+    TerrainBaseTexture[] terrainBaseTexs;
+
 
     public SceneObjectMgr sceneObjectMgr;
 
@@ -30,14 +78,24 @@ public class HexGridChunk : MonoBehaviour {
             width = HexMetrics.instance.chunkWidth;
             height = HexMetrics.instance.chunkHeight;
         }
-        cells = new HexCell[width * height];
+        Init(width, height);
     }
 
-    public void CreateCells(int chunkWidth = 5,int chunkHeight = 5)
+    public void Init(int chunkWidth = 5,int chunkHeight = 5, Texture2D[] terrainTexs = null)
     {
         width = chunkWidth;
         height = chunkHeight;
         cells = new HexCell[width * height];
+        terrainBaseTexs = new TerrainBaseTexture[MAX_TERRAIN_TEXTURE_COUNT];
+
+        int length = terrainTexs.Length > MAX_TERRAIN_TEXTURE_COUNT ? MAX_TERRAIN_TEXTURE_COUNT : terrainTexs.Length;
+        for (int i=0;i<length;i++)
+        {
+            if (terrainTexs[i] != null)
+            {
+                terrainBaseTexs[i] = new TerrainBaseTexture(i, terrainTexs[i]);
+            }
+        }
     }
 
     // Use this for initialization
@@ -212,12 +270,19 @@ public class HexGridChunk : MonoBehaviour {
 
     Texture2DArray textureArray;
 
-    public void CreateMaterial(Texture2D defaultTerrainTex = null)
+    public void CreateMaterial(Texture2D[] terrainTexs = null)
     {
         MeshRenderer meshRenderer = terrainMesh.GetComponent<MeshRenderer>();
         Material mtl = new Material(EditorShaderManager.TerrainShader);
         CreateTerrainTexutreArray();
-        mtl.SetTexture("_AlbedoMap0", defaultTerrainTex);
+        int length = terrainTexs.Length > MAX_TERRAIN_TEXTURE_COUNT ? MAX_TERRAIN_TEXTURE_COUNT : terrainTexs.Length;
+        for (int i = 0; i < length; i++)
+        {
+            if (terrainTexs[i] != null)
+            {
+                mtl.SetTexture("_AlbedoMap" + i, terrainTexs[i]);
+            }
+        }
         mtl.SetTexture("_GridTex", EditorShaderManager.TerrainGridTexutre);
         meshRenderer.sharedMaterial = mtl;
     }
@@ -250,6 +315,8 @@ public class HexGridChunk : MonoBehaviour {
                 transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v3)), transform.TransformPoint(terrainMesh.Perturb(edgeList[i].v4)) });
         }
     }
+
+
 
    
 }

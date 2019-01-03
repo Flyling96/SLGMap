@@ -36,6 +36,11 @@ public class EditorConfig : ScriptableObject {
     }
 
     /// <summary>
+    /// 是否开启自动保存
+    /// </summary>
+    public bool isAutoSave = false;
+
+    /// <summary>
     /// 地图文件目录，相对于Assets目录
     /// </summary>
     public string mapFileDirectory = "MapAssets";

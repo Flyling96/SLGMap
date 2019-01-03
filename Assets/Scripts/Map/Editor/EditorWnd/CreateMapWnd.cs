@@ -8,6 +8,9 @@ using System.IO;
 public class CreateMapWnd : ScriptableWizard
 {
 
+    private GUIContent CONTENT_ADD_LAYER = new GUIContent("+", "添加新层");
+
+
     string mapName = "";
     int chunkCountX = 0;
     int chunkCountZ = 0;
@@ -15,7 +18,8 @@ public class CreateMapWnd : ScriptableWizard
     int chunkHeight = 5;
     bool isUseTexture = true;
     bool isSaveAfterCreate = true;
-    Texture2D defaultTerrainTex = null;
+    Texture2D[] defaultTerrainTexs = new Texture2D[6];
+    int terrainTexCount = 1;
 
     protected override bool DrawWizardGUI()
     {
@@ -29,9 +33,29 @@ public class CreateMapWnd : ScriptableWizard
         if(EditorUtils.DrawHeader("地形","CreateWorld"))
         {
             EditorUtils.BeginContents();
-            defaultTerrainTex = EditorGUILayout.ObjectField("默认纹理", defaultTerrainTex, typeof(Texture2D), false) as Texture2D;
+            for (int i = 0; i < terrainTexCount; i++)
+            {
+                if (i == 0)
+                {
+                    defaultTerrainTexs[0] = EditorGUILayout.ObjectField("默认纹理", defaultTerrainTexs[0], typeof(Texture2D), false) as Texture2D;
+                }
+                else
+                {
+                    defaultTerrainTexs[i] = EditorGUILayout.ObjectField("纹理 "+(i+1), defaultTerrainTexs[i], typeof(Texture2D), false) as Texture2D;
+                }
+            }
+
+            if (terrainTexCount < 6)
+            {
+                if (GUILayout.Button(CONTENT_ADD_LAYER, GUILayout.MaxWidth(20)))
+                {
+                    terrainTexCount++;
+                }
+            }
+
             EditorUtils.EndContents();
         }
+
 
         return true;
     }
@@ -52,11 +76,19 @@ public class CreateMapWnd : ScriptableWizard
         HexGrid.instance.ChangeSize(chunkCountX, chunkCountZ);
         HexMetrics.instance.isEditorTexture = isUseTexture;
         HexGrid.instance.isLoadPrefab = false;
-        HexGrid.instance.NewMap(mapName,true, defaultTerrainTex, chunkWidth, chunkHeight);
+        HexGrid.instance.NewMap(mapName, true, defaultTerrainTexs, chunkWidth, chunkHeight);
 
-        if (isSaveAfterCreate)
+        if (TerrainEditor.TerrainParent != null)
         {
-            TerrainEditor.SaveHexChunkAsset(mapName);
+            for (int i = 0; i < HexGrid.instance.maps.Length; i++)
+            {
+                HexGrid.instance.maps[i].transform.SetParent(TerrainEditor.TerrainParent.transform);
+            }
+
+            if (isSaveAfterCreate)
+            {
+                TerrainEditor.SaveHexChunkAsset(mapName);
+            }
         }
 
     }
@@ -86,7 +118,7 @@ public class CreateMapWnd : ScriptableWizard
             return;
         }
 
-        if (defaultTerrainTex == null)
+        if (defaultTerrainTexs[0] == null)
         {
             errorString = "默认纹理为空";
             isValid = false;

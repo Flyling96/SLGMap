@@ -514,7 +514,7 @@ public class SceneObjBrush:TerrainBrush
 #endregion
 
 
-//Mesh调节器(高度、水体、边界相关)
+//Mesh控制器(高度、水体、边界相关)
 public class MeshModifier:SingletonDestory<MeshModifier>
 {
 
@@ -542,6 +542,10 @@ public class MeshModifier:SingletonDestory<MeshModifier>
 
     void RePaint(Event e)
     {
+        if (!m_brush.m_hexEdgeMesh.gameObject.activeSelf)
+        {
+            m_brush.m_hexEdgeMesh.gameObject.SetActive(true);
+        }
         Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         RaycastHit hit;
         HexCell centerCell = null;
@@ -549,7 +553,7 @@ public class MeshModifier:SingletonDestory<MeshModifier>
         {
             centerCell = HexGrid.instance.GetCell(hit.point);
             if (centerCell == null) return;
-            centerCell.chunkParent.DrawBorder(Color.yellow);
+            centerCell.chunkParent.DrawBorder(Color.red);
             m_brush.RefreshBrush(hit.point, centerCell);
         }
     }
@@ -641,6 +645,7 @@ public class MeshModifier:SingletonDestory<MeshModifier>
 
 }
 
+//材质控制器
 public class MaterialModifier:SingletonDestory<MaterialModifier>
 {
     public HexGridChunk lockedChunk = null;
@@ -673,6 +678,10 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
 
     void RePaint(Event e)
     {
+        if (!m_brush.m_hexEdgeMesh.gameObject.activeSelf)
+        {
+            m_brush.m_hexEdgeMesh.gameObject.SetActive(true);
+        }
         Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         RaycastHit hit;
         HexCell centerCell = null;
@@ -682,11 +691,11 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
             if (centerCell == null) return;
             if (lockedChunk != null)
             {
-                lockedChunk.DrawBorder(Color.yellow);
+                lockedChunk.DrawBorder(Color.red);
             }
             else
             {
-                centerCell.chunkParent.DrawBorder(Color.yellow);
+                centerCell.chunkParent.DrawBorder(Color.red);
             }
 
             if (lockedChunk == null || centerCell.chunkParent != lockedChunk)
@@ -712,10 +721,12 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
             {
                 if (lockedChunk != null)
                 {
+                    m_brush.m_hexEdgeMesh.gameObject.SetActive(false);
                     lockedChunk = null;
                 }
                 else
                 {
+                    m_brush.m_hexEdgeMesh.gameObject.SetActive(true);
                     lockedChunk = centerCell.chunkParent;
                 }
             }
@@ -798,6 +809,7 @@ public class MaterialModifier:SingletonDestory<MaterialModifier>
 
 }
 
+//场景物体控制器
 public class SceneObjModifier:SingletonDestory<SceneObjModifier>
 {
 
@@ -827,6 +839,10 @@ public class SceneObjModifier:SingletonDestory<SceneObjModifier>
 
     void RePaint(Event e)
     {
+        if (!m_brush.m_hexEdgeMesh.gameObject.activeSelf)
+        {
+            m_brush.m_hexEdgeMesh.gameObject.SetActive(true);
+        }
         Ray inputRay = HandleUtility.GUIPointToWorldRay(e.mousePosition);
         RaycastHit hit;
         HexCell centerCell = null;

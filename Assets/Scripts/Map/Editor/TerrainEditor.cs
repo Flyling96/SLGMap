@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEditor;
 using System;
 using System.IO;
+using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 
 public enum EditorType
 {
@@ -57,6 +59,7 @@ public class TerrainEditor : Editor{
         redoStack.Clear();
     }
 
+    bool isAwake = false;
     private void Awake()
     {
         heightBrush = new HeightBrush(HexEditMesh);
@@ -65,6 +68,24 @@ public class TerrainEditor : Editor{
         edgeBrush = new EdgeBrush(HexEditMesh);
         waterBrush = new WaterBrush(HexEditMesh);
         Init();
+
+        EditorSceneManager.sceneOpening -= CloseScene;
+        EditorSceneManager.sceneOpening += CloseScene;
+    }
+
+    static void CloseScene(string path, OpenSceneMode mode)
+    {
+        EditorSceneManager.sceneOpening -= CloseScene;
+
+        if (!EditorConfig.instance.isAutoSave)
+        {
+            return;
+        }
+
+        if (terrainName!="" && TerrainParent.transform.Find(terrainName)!=null)
+        {
+            SaveHexChunkAsset(terrainName);
+        }
     }
 
     public override void OnInspectorGUI()
@@ -454,7 +475,9 @@ public class TerrainEditor : Editor{
             terrainName = mapName;
             mapPrefab = Instantiate(mapPrefab);
             mapPrefab.name = mapPrefab.name.Replace("_prefab(Clone)", "");
+            if(TerrainParent!=null)
             mapPrefab.transform.parent = TerrainParent.transform;
+            mapPrefab.transform.position = Vector3.zero;
             HexGrid.instance.maps = new HexMap[1];
             HexGrid.instance.maps[0] = mapPrefab.GetComponent<HexMap>();
             HexGrid.instance.MapInit();
