@@ -33,6 +33,7 @@ public class HexCell : MonoBehaviour {
     //纹理相关
     [SerializeField]
     TerrainTypes terrainTypeIndex = TerrainTypes.Grass;
+
     public TerrainTypes TerrainTypeIndex
     {
         get

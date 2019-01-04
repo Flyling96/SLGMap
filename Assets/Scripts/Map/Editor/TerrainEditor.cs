@@ -117,7 +117,7 @@ public class TerrainEditor : Editor{
 
     private void OnSceneGUI()
     {
-        HandleUtility.AddDefaultControl(0);
+        HandleUtility.AddDefaultControl(GUIUtility.GetControlID(FocusType.Keyboard));
         switch(editorType)
         {
             case EditorType.HeightEditor:
@@ -136,9 +136,14 @@ public class TerrainEditor : Editor{
                 MeshModifier.instance.DoEvent();
                 break;
             case EditorType.MaterialEditor:
+                HexGridChunk preLockedChunk = MaterialModifier.instance.lockedChunk;
                 currentBrush = materialBrush;
                 MaterialModifier.instance.m_brush = currentBrush;
                 MaterialModifier.instance.DoEvent();
+                if (MaterialModifier.instance.lockedChunk != preLockedChunk)
+                {
+                    Repaint();
+                }
                 break;
             case EditorType.SceneObjEditor:
                 currentBrush = sceneObjBrush;
@@ -147,6 +152,7 @@ public class TerrainEditor : Editor{
                 break;
 
         }
+        SceneView.currentDrawingSceneView.Repaint();
     }
 
     private void DrawTerrainMgrUI()
@@ -161,7 +167,7 @@ public class TerrainEditor : Editor{
             if(GUILayout.Button("保存地形", GUILayout.MaxWidth(100)))
             {
                 //SaveHexChunkAsset("Hex Map 001");
-                ScriptableWizard.DisplayWizard<SaveMapWnd>("加载地形", "保存", "取消");
+                ScriptableWizard.DisplayWizard<SaveMapWnd>("保存地形", "保存", "取消");
             }
 
             if(GUILayout.Button("加载地形", GUILayout.MaxWidth(100)))
@@ -407,8 +413,19 @@ public class TerrainEditor : Editor{
             EditorUtils.BeginContents();
             if(HexMetrics.instance.isEditorTexture)
             {
-                materialBrush.TerrainType = (TerrainTypes)EditorGUILayout.IntPopup("材质类型", (int)materialBrush.TerrainType, MATERIAL_TEXTURE_NAMES, MATERIAL_TEXTURE_VALUES);
-                materialBrush.EditColor = EditorGUILayout.ColorField(materialBrush.EditColor);
+                //materialBrush.TerrainType = (TerrainTypes)EditorGUILayout.IntPopup("材质类型", (int)materialBrush.TerrainType, MATERIAL_TEXTURE_NAMES, MATERIAL_TEXTURE_VALUES);
+                //materialBrush.EditColor = EditorGUILayout.ColorField(materialBrush.EditColor);
+                if(MaterialModifier.instance.lockedChunk == null)
+                {
+                    Color oldColor = GUI.color;
+                    GUI.color = Color.red;
+                    EditorGUILayout.LabelField("在场景视图中用L键锁定地形块进行编辑！");
+                    GUI.color = oldColor;
+                }
+                else
+                {
+                    DrawDiffuseLayerGUI(MaterialModifier.instance.lockedChunk);
+                }
             }
             else
             {
@@ -416,6 +433,47 @@ public class TerrainEditor : Editor{
             }
 
             EditorUtils.EndContents();
+        }
+    }
+
+    private GUIContent CONTENT_ADD_LAYER = new GUIContent("+", "添加新层");
+
+    private void DrawDiffuseLayerGUI(HexGridChunk chunk)
+    {
+        int count = 0;
+        HexGridChunk.TerrainLayer[] terrainLayers = chunk.terrainLayers;
+        for(int i=0;i<terrainLayers.Length;i++)
+        {
+            HexGridChunk.TerrainLayer curLayer = terrainLayers[i];
+            if (curLayer == null || curLayer.terrainIndex == -1) continue;
+            count++;
+            EditorGUILayout.BeginHorizontal();
+            Texture2D curTex = curLayer.albedoMap;
+            Texture2D newTex = EditorGUILayout.ObjectField(curTex, typeof(Texture2D), false, GUILayout.Width(72), GUILayout.Height(72)) as Texture2D;
+            EditorGUILayout.BeginVertical();
+            EditorGUILayout.LabelField("Layer： " + (i + 1).ToString());
+            EditorGUILayout.BeginHorizontal();
+            if(EditorGUILayout.Toggle(materialBrush.TerrainType == (TerrainTypes)i,GUILayout.Width(18)))
+            {
+                materialBrush.TerrainType = (TerrainTypes)i;
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+            if(newTex!=curTex)
+            {
+                chunk.ReplaceAlbedoMap(i, newTex);
+            }
+        }
+
+        if (terrainLayers.Length < 6 || count < 6)
+        {
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button(CONTENT_ADD_LAYER, GUILayout.MaxWidth(20)))
+            {
+                chunk.AddTerrainLayer(null);
+            }
+            EditorGUILayout.EndHorizontal();
         }
     }
 

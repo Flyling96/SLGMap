@@ -11,45 +11,38 @@ public class HexGridChunk : MonoBehaviour {
 
     private const int MAX_TERRAIN_TEXTURE_COUNT = 6;
 
+    [System.Serializable]
     //地形的基础贴图
-    public class TerrainBaseTexture
+    public class TerrainLayer
     {
-        //地形类型（草地、雪地）
-        private int terrainIndex;
+        /// <summary>
+        /// 地形类型（草地、雪地）
+        /// </summary>
+        public int terrainIndex;
 
-        public int TerrainIndex
-        {
-            get
-            {
-                return terrainIndex;
-            }
-        }
+        /// <summary>
+        /// Albedo纹理
+        /// </summary>
+        public Texture2D albedoMap;
 
-        private Texture2D albedoMap;
+        /// <summary>
+        /// Normal纹理
+        /// </summary>
+        public Texture2D normalMap;
 
-        public Texture2D AlbedoMap
-        {
-            get
-            {
-                return albedoMap;
-            }
-        }
 
-        private Texture2D normalMap;
-
-        public Texture2D NormalMap
-        {
-            get
-            {
-                return normalMap;
-            }
-        }
-
-        public TerrainBaseTexture(int index,Texture2D albedo,Texture2D normal = null)
+        public TerrainLayer(int index,Texture2D albedo,Texture2D normal = null)
         {
             terrainIndex = index;
             albedoMap = albedo;
             normalMap = normal;
+        }
+
+        public TerrainLayer()
+        {
+            terrainIndex = -1;
+            albedoMap = null;
+            normalMap = null;
         }
     }
 
@@ -64,7 +57,7 @@ public class HexGridChunk : MonoBehaviour {
     HexCell[] cells;
 
     [SerializeField]
-    TerrainBaseTexture[] terrainBaseTexs;
+    public TerrainLayer[] terrainLayers;
 
 
     public SceneObjectMgr sceneObjectMgr;
@@ -86,22 +79,47 @@ public class HexGridChunk : MonoBehaviour {
         width = chunkWidth;
         height = chunkHeight;
         cells = new HexCell[width * height];
-        terrainBaseTexs = new TerrainBaseTexture[MAX_TERRAIN_TEXTURE_COUNT];
+        terrainLayers = new TerrainLayer[MAX_TERRAIN_TEXTURE_COUNT];
 
         int length = terrainTexs.Length > MAX_TERRAIN_TEXTURE_COUNT ? MAX_TERRAIN_TEXTURE_COUNT : terrainTexs.Length;
         for (int i=0;i<length;i++)
         {
             if (terrainTexs[i] != null)
             {
-                terrainBaseTexs[i] = new TerrainBaseTexture(i, terrainTexs[i]);
+                terrainLayers[i] = new TerrainLayer(i, terrainTexs[i]);
+            }
+            else
+            {
+                terrainLayers[i] = null;
             }
         }
     }
 
-    // Use this for initialization
-    void Start()
+    public void AddTerrainLayer(Texture2D albedo)
     {
-        //terrainMesh.TrangulateByMeshClass(cells);
+        for(int i=0;i<terrainLayers.Length;i++)
+        {
+            if(terrainLayers[i]==null || terrainLayers[i].terrainIndex == -1)
+            {
+                terrainLayers[i] = new TerrainLayer(i, albedo);
+                Material mtl = terrainMesh.GetComponent<MeshRenderer>().sharedMaterial;
+                mtl.SetTexture("_AlbedoMap" + i, terrainLayers[i].albedoMap);
+                break;
+            }
+        }
+    }
+
+    public void ReplaceAlbedoMap(int index,Texture2D newAlbedo)
+    {
+        if(index>=terrainLayers.Length || terrainLayers[index] == null || terrainMesh.GetComponent<MeshRenderer>() == null)
+        {
+            return;
+        }
+
+        terrainLayers[index].albedoMap = newAlbedo;
+
+        Material mtl = terrainMesh.GetComponent<MeshRenderer>().sharedMaterial;
+        mtl.SetTexture("_AlbedoMap" + index, terrainLayers[index].albedoMap);
     }
 
 

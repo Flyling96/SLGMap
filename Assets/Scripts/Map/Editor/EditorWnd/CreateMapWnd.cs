@@ -53,6 +53,11 @@ public class CreateMapWnd : ScriptableWizard
                 }
             }
 
+            for(int i=terrainTexCount;i< defaultTerrainTexs.Length;i++)
+            {
+                defaultTerrainTexs[i] = null;
+            }
+
             EditorUtils.EndContents();
         }
 

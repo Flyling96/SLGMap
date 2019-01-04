@@ -9,7 +9,8 @@ public enum TerrainTypes
     Mud,
     Snow,
     Sand,
-    Stone
+    Stone,
+    Layer5
 }
 
 public class HexTerrainMesh : HexMesh {
