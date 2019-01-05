@@ -136,11 +136,11 @@ public class TerrainEditor : Editor{
                 MeshModifier.instance.DoEvent();
                 break;
             case EditorType.MaterialEditor:
-                HexGridChunk preLockedChunk = MaterialModifier.instance.lockedChunk;
+                HexGridChunk preLockedChunk = MaterialModifier.instance.m_lockedChunk;
                 currentBrush = materialBrush;
                 MaterialModifier.instance.m_brush = currentBrush;
                 MaterialModifier.instance.DoEvent();
-                if (MaterialModifier.instance.lockedChunk != preLockedChunk)
+                if (MaterialModifier.instance.m_lockedChunk != preLockedChunk)
                 {
                     Repaint();
                 }
@@ -415,7 +415,7 @@ public class TerrainEditor : Editor{
             {
                 //materialBrush.TerrainType = (TerrainTypes)EditorGUILayout.IntPopup("材质类型", (int)materialBrush.TerrainType, MATERIAL_TEXTURE_NAMES, MATERIAL_TEXTURE_VALUES);
                 //materialBrush.EditColor = EditorGUILayout.ColorField(materialBrush.EditColor);
-                if(MaterialModifier.instance.lockedChunk == null)
+                if(MaterialModifier.instance.m_lockedChunk == null)
                 {
                     Color oldColor = GUI.color;
                     GUI.color = Color.red;
@@ -424,7 +424,7 @@ public class TerrainEditor : Editor{
                 }
                 else
                 {
-                    DrawDiffuseLayerGUI(MaterialModifier.instance.lockedChunk);
+                    DrawDiffuseLayerGUI(MaterialModifier.instance.m_lockedChunk);
                 }
             }
             else

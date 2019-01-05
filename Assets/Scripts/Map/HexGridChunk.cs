@@ -30,12 +30,17 @@ public class HexGridChunk : MonoBehaviour {
         /// </summary>
         public Texture2D normalMap;
 
+        /// <summary>
+        /// 该层每个像素的权重值
+        /// </summary>
+        public byte[] weight;
 
         public TerrainLayer(int index,Texture2D albedo,Texture2D normal = null)
         {
             terrainIndex = index;
             albedoMap = albedo;
             normalMap = normal;
+            weight = new byte[HexGrid.instance.ChunkWidth * HexGrid.instance.ChunkHeight];
         }
 
         public TerrainLayer()
@@ -59,20 +64,22 @@ public class HexGridChunk : MonoBehaviour {
     [SerializeField]
     public TerrainLayer[] terrainLayers;
 
+    private Color32[] weightPixels;
+
 
     public SceneObjectMgr sceneObjectMgr;
 
     public HexMesh waterMesh,waterEdgeMesh,terrainMesh;
 
-    void OnEnable()
-    {
-        if (HexMetrics.instance != null)
-        {
-            width = HexMetrics.instance.chunkWidth;
-            height = HexMetrics.instance.chunkHeight;
-        }
-        Init(width, height);
-    }
+    //void OnEnable()
+    //{
+    //    if (HexMetrics.instance != null)
+    //    {
+    //        width = HexMetrics.instance.chunkWidth;
+    //        height = HexMetrics.instance.chunkHeight;
+    //    }
+    //    Init(width, height);
+    //}
 
     public void Init(int chunkWidth = 5,int chunkHeight = 5, Texture2D[] terrainTexs = null)
     {
@@ -80,6 +87,7 @@ public class HexGridChunk : MonoBehaviour {
         height = chunkHeight;
         cells = new HexCell[width * height];
         terrainLayers = new TerrainLayer[MAX_TERRAIN_TEXTURE_COUNT];
+        weightPixels = new Color32[HexGrid.instance.ChunkWidth * HexGrid.instance.ChunkHeight];
 
         int length = terrainTexs.Length > MAX_TERRAIN_TEXTURE_COUNT ? MAX_TERRAIN_TEXTURE_COUNT : terrainTexs.Length;
         for (int i=0;i<length;i++)

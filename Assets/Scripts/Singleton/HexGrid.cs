@@ -20,6 +20,22 @@ public class HexGrid : SingletonDestory<HexGrid> {
     public int chunkCountX = 4;
     public int chunkCountZ = 4;
 
+    public int ChunkHeight
+    {
+        get
+        {
+            return (int)(chunkCountZ * 2 * HexMetrics.instance.outerRadius)+1;   
+        }
+    }
+
+    public int ChunkWidth
+    {
+        get
+        {
+            return (int)((chunkCountX + 0.5f) * 2 * HexMetrics.instance.innerRadius)+1;
+        }
+    }
+
     int cellCountHeight = 0;
     int cellCountWidth = 0;
 
