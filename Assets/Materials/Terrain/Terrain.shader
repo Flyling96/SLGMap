@@ -1,7 +1,7 @@
 ﻿Shader "Custom/Terrain" {
 	Properties{
 		_Color("Color", Color) = (1,1,1,1)
-		//_MainTex("Terrain Texture Array", 2DArray) = "white" {}
+		_MainTex("Terrain Texture Array", 2DArray) = "white" {}
 	//地形纹理
 		_AlbedoMap0("Albedo Map 0",2D) = "white"{}
 		_AlbedoMap1("Albedo Map 1",2D) = "white"{}
@@ -35,107 +35,149 @@
 		Tags{ "RenderType" = "Opaque" }
 		LOD 200
 
+	Pass
+	{
+
 		CGPROGRAM
 
-#pragma surface surf Standard fullforwardshadows 
-#pragma vertex vert
-#pragma target 3.5
+		//#pragma surface surf Standard fullforwardshadows 
+		#pragma vertex vert
+		#pragma fragment frag
+		#pragma target 3.5
 
-#pragma multi_compile TERRAIN_LAYERS_1 TERRAIN_LAYERS_2 TERRAIN_LAYERS_3 TERRAIN_LAYERS_4 TERRAIN_LAYERS_5 TERRAIN_LAYERS_6
+		#include "UnityCG.cginc"
 
+		//#pragma multi_compile TERRAIN_LAYERS_1 TERRAIN_LAYERS_2 TERRAIN_LAYERS_3 TERRAIN_LAYERS_4 TERRAIN_LAYERS_5 TERRAIN_LAYERS_6
+		//
 		UNITY_DECLARE_TEX2DARRAY(_MainTex);
 
-	struct Input {
-		float4 color : COLOR;
-		float3 worldPos;
-		float3 terrain;
-	};
+			//struct Input {
+			//	float4 color : COLOR;
+			//	float3 worldPos;
+			//	float3 terrain;
+			//};
+
+			struct v2f
+			{
+				float4 vertex:SV_POSITION;
+				float3 worldPos:TEXCOORD0;
+				float3 terrainIndex : TEXCOORD1;
+				float3 color:TEXCOORD2;
+			};
+			half _Glossiness;
+			half _Metallic;
+			float4 _Color;
+			sampler2D _GridTex;
+
+			sampler2D _AlbedoMap0;
+			sampler2D _AlbedoMap1;
+			sampler2D _AlbedoMap2;
+			sampler2D _AlbedoMap3;
+			sampler2D _AlbedoMap4;
+			sampler2D _AlbedoMap5;
 
 
-	void vert(inout appdata_full v, out Input data) {
-		UNITY_INITIALIZE_OUTPUT(Input, data);
-		data.terrain = v.texcoord2.xyz;
-		data.worldPos += float3(0.5f, 100, 233.3f);
-	}
 
-	half _Glossiness; 
-	half _Metallic;
-	fixed4 _Color;
-	sampler2D _GridTex;
+			//void vert(inout appdata_full v, out Input data) {
+			//	UNITY_INITIALIZE_OUTPUT(Input, data);
+			//	data.terrain = v.texcoord2.xyz;
+			//	data.worldPos += float3(0.5f, 100, 233.3f);
+			//}
+			float4 GetTerrainColorByArray(v2f IN, int index) {
+				//float BlendWeightsArray[3];
+				//BlendWeightsArray[0] = (int)IN.terrain.x;
+				//BlendWeightsArray[1] = (int)IN.terrain.y;
+				//BlendWeightsArray[2] = (int)IN.terrain.z;
+				//{ IN.terrain.x, IN.terrain.y, IN.terrain.z };//BlendWeightsArray[index]
+				float3 uvw = float3(IN.worldPos.xz * 0.02, IN.terrainIndex[index]);
+				float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, uvw);
+				return c * IN.color[index];
+			}
 
-	sampler2D _AlbedoMap0;
-	sampler2D _AlbedoMap1;
-	sampler2D _AlbedoMap2;
-	sampler2D _AlbedoMap3;
-	sampler2D _AlbedoMap4;
-	sampler2D _AlbedoMap5;
+			float4 GetTerrainColor(float terrainIndex, float color,float2 worldPos) {
+
+				float2 uv = float2(worldPos * 0.02);
+				float4 c = float4(0, 0, 0, 0);
+
+				if (terrainIndex < 0.9)
+				{
+					c = tex2D(_AlbedoMap0, uv);
+				}
+				else if (terrainIndex < 1.9)
+				{
+					c = tex2D(_AlbedoMap1, uv);
+				}
+				else if (terrainIndex < 2.9)
+				{
+					c = tex2D(_AlbedoMap2, uv);
+				}
+				else if (terrainIndex < 3.9)
+				{
+					c = tex2D(_AlbedoMap3, uv);
+				}
+				else if (terrainIndex < 4.9)
+				{
+					c = tex2D(_AlbedoMap4, uv);
+				}
+				else if (terrainIndex < 5.9)
+				{
+					c = tex2D(_AlbedoMap5, uv);
+				}
+
+				return c * color;
+			}
+
+			v2f vert(appdata_full v)
+			{
+				v2f o;
+				o.vertex = UnityObjectToClipPos(v.vertex);
+				o.terrainIndex = v.texcoord2.xyz;
+				o.worldPos = mul((float3x3)unity_ObjectToWorld, v.vertex.xyz);// +float3(0.5f, 100, 233.3f);
+				o.color = v.color;
+
+				return o;
+			}
+
+			float4 frag(v2f i) :SV_Target
+			{
+				//return i.terrainIndex.x;
+				float4 c =
+					GetTerrainColor(i.terrainIndex.x, i.color.x, i.worldPos.xz) +
+					GetTerrainColor(i.terrainIndex.y, i.color.y, i.worldPos.xz) +
+					GetTerrainColor(i.terrainIndex.z, i.color.z, i.worldPos.xz);
+
+				c = normalize(c);
+				float2 gridUV = i.worldPos.xz;
+				gridUV.x *= 1 / (4 * 8.66025404);
+				gridUV.y *= 1 / (2 * 15.0);
+				float4 grid = tex2D(_GridTex, gridUV);
+
+				return c * grid;
+			}
 
 
-	float4 GetTerrainColorByArray(Input IN, int index) {
-		//float BlendWeightsArray[3];
-		//BlendWeightsArray[0] = (int)IN.terrain.x;
-		//BlendWeightsArray[1] = (int)IN.terrain.y;
-		//BlendWeightsArray[2] = (int)IN.terrain.z;
-		//{ IN.terrain.x, IN.terrain.y, IN.terrain.z };//BlendWeightsArray[index]
-		float3 uvw = float3(IN.worldPos.xz * 0.02, IN.terrain[index]);
-		float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, uvw);
-		return c * IN.color[index];
-	}
 
-	half4 GetTerrainColor(Input IN, int index) {
 
-		float2 uv = float2(IN.worldPos.xz * 0.02);
-		half4 c;
-		if (IN.terrain[index] == 0)
-		{
-			c = tex2D(_AlbedoMap0, uv);
-		}
-		else if (IN.terrain[index] == 1)
-		{
-			c = tex2D(_AlbedoMap1, uv);
-		}
-		else if (IN.terrain[index] == 2)
-		{
-			c = tex2D(_AlbedoMap2, uv);
-		}
-		else if (IN.terrain[index] == 3)
-		{
-			c = tex2D(_AlbedoMap3, uv);
-		}
-		else if (IN.terrain[index] == 4)
-		{
-			c = tex2D(_AlbedoMap4, uv);
-		}
-		else if (IN.terrain[index] == 5)
-		{
-			c = tex2D(_AlbedoMap5, uv);
-		}
-		else
-		{
-			c = half4(0, 0, 0, 0);
-		}
+				//void surf(Input IN, inout SurfaceOutputStandard o) {
+				//	float4 c =
+				//		GetTerrainColor(IN, 0) +
+				//		GetTerrainColor(IN, 1) +
+				//		GetTerrainColor(IN, 2);
 
-		return c * IN.color[index];
-	}
 
-	void surf(Input IN, inout SurfaceOutputStandard o) {
-		fixed4 c =
-			GetTerrainColor(IN, 0) +
-			GetTerrainColor(IN, 1) +
-			GetTerrainColor(IN, 2);
+				//	float2 gridUV = IN.worldPos.xz;
+				//	gridUV.x *= 1 / (4 * 8.66025404);
+				//	gridUV.y *= 1 / (2 * 15.0);
+				//	fixed4 grid = tex2D(_GridTex, gridUV);
 
-		float2 gridUV = IN.worldPos.xz;
-		gridUV.x *= 1 / (4 * 8.66025404);
-		gridUV.y *= 1 / (2 * 15.0);
-		fixed4 grid = tex2D(_GridTex, gridUV);
-
-		o.Albedo = c.rgb * grid * _Color;
-		//o.Albedo = IN.color;
-		o.Metallic = _Metallic;
-		o.Smoothness = _Glossiness;
-		o.Alpha = c.a;
-	}
-	ENDCG
+				//	o.Albedo = c.rgb * grid * _Color;
+				//	//o.Albedo = IN.color;
+				//	o.Metallic = _Metallic;
+				//	o.Smoothness = _Glossiness;
+				//	o.Alpha = c.a;
+				//}
+				ENDCG
+					}
 	}
 		FallBack "Diffuse"
 }
